@@ -45,7 +45,7 @@ public class UserService {
     User user = userRepository.findByUsername(dto.getUsername())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // Check password (not hashed or salted yet) MUS BE IMPLEMENTED LATER
+    // Check password (not hashed or salted yet) MUST BE IMPLEMENTED LATER
     if(!user.getPassword().equals(dto.getPassword())) {
         throw new RuntimeException("Invalid password");
     }
