@@ -1,13 +1,17 @@
 package com.example.calendario.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequestDTO {
 
     @NotBlank(message = "Username cannot be empty")
+    @JsonProperty("username")
     private String username;
 
     @NotBlank(message = "Password cannot be empty")
+    @JsonProperty("password")
     private String password;
 
     // Constructors

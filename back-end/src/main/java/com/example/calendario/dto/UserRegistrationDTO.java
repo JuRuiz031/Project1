@@ -1,6 +1,7 @@
 package com.example.calendario.dto;
 
-// Validation imports
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -8,14 +9,17 @@ import jakarta.validation.constraints.Size;
 public class UserRegistrationDTO {
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 25, message = "Username must be between 3 and 25 characters")
+    @JsonProperty("username")
     private String username;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
+    @JsonProperty("email")
     private String email;
 
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 50, message = "Password must be between 8 and 50 characters")
+    @JsonProperty("password")
     private String password;
 
     // Constructors

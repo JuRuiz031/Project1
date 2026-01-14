@@ -1,6 +1,7 @@
 package com.example.calendario.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "users")
@@ -9,8 +10,12 @@ public class User {
     @Id
     private String id; // Mongo generated ID
 
+    @Indexed(unique = true)
     private String username;
+    
+    @Indexed(unique = true)
     private String email;
+    
     private String password;
 
     private Boolean isSuperuser; // Checks if the user has superuser privileges in the mongo document

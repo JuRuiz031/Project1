@@ -1,15 +1,24 @@
 package com.example.calendario.dto;
 
 import com.example.calendario.model.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserResponseDTO {
 
+    @JsonProperty("user_id")
     private String id;
+    @JsonProperty("username")
     private String username;
+    @JsonProperty("email")
     private String email;
+    @JsonProperty("is_superuser")
     private Boolean isSuperuser;
 
+    // FUTURE CALENDARS LIST
+    // @JsonProperty("calendars")
+    // private List<CalendarDTO> calendars;
     // Constructors
+    
     public UserResponseDTO() {}
 
     public UserResponseDTO(User user) {
