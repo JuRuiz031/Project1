@@ -1,3 +1,2 @@
 # Global gitignore to remove anything global (each folder will have specific .gitignore for each section
 .DS_Store
-
