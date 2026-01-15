@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { Login } from './login/login';
-import { CreateAccount } from './create-account/create-account';
+import { Login } from './features/auth/login/login';
+import { CreateAccount } from './features/auth/create-account/create-account';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
