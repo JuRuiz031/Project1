@@ -3,5 +3,5 @@ import { AccountView } from './account-view/account-view';
 
 export const routes: Routes = [
     { path: 'account', component: AccountView },
-    // { path: '', redirectTo: 'account', pathMatch: 'full' },
+    { path: 'account', redirectTo: 'account', pathMatch: 'full' },
 ];
