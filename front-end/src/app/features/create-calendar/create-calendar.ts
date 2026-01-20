@@ -15,7 +15,7 @@ export class CreateCalendar {
   constructor(private http: HttpClient) {}
 
   sendData() {
-    this.http.post<{ reply: string }>('/backend', {
+    this.http.post<{ reply: string }>('/calendar', {
       name: this.name
     }).subscribe({
       next: (res) => {
