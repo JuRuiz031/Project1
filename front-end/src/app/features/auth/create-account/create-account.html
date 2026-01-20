@@ -9,26 +9,68 @@
 
     <h2>Create Account</h2>
 
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" placeholder="Enter username">
-    </div>
+    <form [formGroup]="form" (ngSubmit)="onCreateAccount()">
 
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="Enter email">
-    </div>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter username" formControlName="username">
+        @if (form.get('username')?.touched && form.get('username')?.hasError('required')) {
+          <span class="error-text">Username is required</span>
+        }
+        @if (form.get('username')?.touched && form.get('username')?.hasError('minlength')) {
+          <span class="error-text">Username must be at least 3 characters</span>
+        }
+        @if (form.get('username')?.touched && form.get('username')?.hasError('maxlength')) {
+          <span class="error-text">Username cannot exceed 20 characters</span>
+        }
+      </div>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password (5-25 characters)">
-    </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter email" formControlName="email">
+        @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+          <span class="error-text">Email is required</span>
+        }
+        @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+          <span class="error-text">Please enter a valid email address</span>
+        }
+      </div>
 
-    <div class="button-group">
-      <button class="btn-create-account">Create Account</button>
-      
-      <button class="btn-login" routerLink="/login">Already a User? Log in here</button>
-    </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password (5-25 characters)" formControlName="password">
+        @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+          <span class="error-text">Password is required</span>
+        }
+        @if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
+          <span class="error-text">Password must be at least 5 characters</span>
+        }
+        @if (form.get('password')?.touched && form.get('password')?.hasError('maxlength')) {
+          <span class="error-text">Password cannot exceed 25 characters</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="passwordConfirm">Confirm Password</label>
+        <input type="password" id="passwordConfirm" placeholder="Re-enter password" formControlName="passwordConfirm">
+        @if (form.get('passwordConfirm')?.touched && form.get('passwordConfirm')?.hasError('required')) {
+          <span class="error-text">Please confirm your password</span>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div class="error-message">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <div class="button-group">
+        <button type="submit" class="btn-create-account">Create Account</button>
+        
+        <button type="button" class="btn-login" routerLink="/login">Already a User? Log in here</button>
+      </div>
+
+    </form>
   </div>
 
 </div>

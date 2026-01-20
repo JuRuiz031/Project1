@@ -18,7 +18,7 @@ public class UserRegistrationDTO {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 50, message = "Password must be between 8 and 50 characters")
+    @Size(min = 5, max = 25, message = "Password must be between 5 and 25 characters")
     @JsonProperty("password")
     private String password;
 
