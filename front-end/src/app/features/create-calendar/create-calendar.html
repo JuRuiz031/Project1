@@ -1,6 +1,6 @@
 <h2>Create Calendar</h2>
 
-<form (ngSubmit)="sendData()">
+<form #f="ngForm" (ngSubmit)="sendData(f)">
     <label for="calendar-name">Calendar name:</label>
     <input
     id="calendar-name"
@@ -8,9 +8,11 @@
     [(ngModel)]="name"
     name="calendar-name"
     required
+    minlength="1"
+    maxlength="50"
     />
 
-    <button type="submit">Submit</button>
+    <button type="submit" [disabled]="!f.valid">Submit</button>
 </form>
 
 <p *ngIf="response">

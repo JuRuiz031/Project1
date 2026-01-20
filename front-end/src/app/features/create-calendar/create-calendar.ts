@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-create-calendar',
@@ -14,17 +14,22 @@ export class CreateCalendar {
 
   constructor(private http: HttpClient) {}
 
-  sendData() {
-    this.http.post<{ reply: string }>('/calendar', {
-      name: this.name
-    }).subscribe({
-      next: (res) => {
-        this.response = res.reply;
-      },
-      error: (err) => {
-        console.error(err);
-        this.response = 'Error sending data';
-      }
-    });
+  sendData(form: NgForm) {
+    if (form.valid) {
+        this.http.post<{ reply: string }>('/calendar', {
+        name: this.name
+        }).subscribe({
+        next: (res) => {
+            this.response = res.reply;
+        },
+        error: (err) => {
+            console.error(err);
+            this.response = 'Error sending data';
+        }
+        });
+    }
+    else {
+        return;
+    }
   }
 }
