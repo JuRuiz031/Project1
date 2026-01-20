@@ -26,7 +26,21 @@
     </div>
   </label>
 
+</div>
 
+<div class="container">
+  <button class="save-user-button" (click)="save()" [disabled]="form.invalid || isSaving">
+    {{ isSaving ? 'Saving...' : 'Save Changes' }}
+  </button>
+
+  <button class="delete-user-profile-button" routerLink="/login">
+    Delete User Profile
+  </button>
+</div>
+
+<div class="api-error" *ngIf="apiError">
+  {{ apiError }}
+</div>
 <!-- 
   <div class="username-box">Username: </div>
 
