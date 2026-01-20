@@ -1,35 +1,36 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-create-calendar',
   standalone: true,
-  imports: [FormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './create-calendar.html',
 })
 export class CreateCalendar {
-  name: string = '';
+  form: FormGroup;
   response: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private fb: FormBuilder) {
+    this.form = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]]
+    });
+  }
 
-  sendData(form: NgForm) {
-    if (form.valid) {
-        this.http.post<{ reply: string }>('/calendar', {
-        name: this.name
-        }).subscribe({
+  sendData() {
+    if (this.form.valid) {
+      this.http.post<{ reply: string }>('/calendar', {
+        name: this.form.get('name')?.value
+      }).subscribe({
         next: (res) => {
-            this.response = res.reply;
+          this.response = res.reply;
         },
         error: (err) => {
-            console.error(err);
-            this.response = 'Error sending data';
+          console.error(err);
+          this.response = 'Error sending data';
         }
-        });
-    }
-    else {
-        return;
+      });
     }
   }
 }
