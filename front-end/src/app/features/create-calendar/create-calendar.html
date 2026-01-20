@@ -1,0 +1,20 @@
+<h2>Create Calendar</h2>
+
+<form #f="ngForm" (ngSubmit)="sendData(f)">
+    <label for="calendar-name">Calendar name:</label>
+    <input
+    id="calendar-name"
+    type="text"
+    [(ngModel)]="name"
+    name="calendar-name"
+    required
+    minlength="1"
+    maxlength="50"
+    />
+
+    <button type="submit" [disabled]="!f.valid">Submit</button>
+</form>
+
+<p *ngIf="response">
+    Backend response: {{ response }}
+</p>
