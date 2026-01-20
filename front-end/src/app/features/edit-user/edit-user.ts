@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { UserApiService } from '../services/user-api.service';
+import { UserApiService } from '../../services/user-api.service';
 
 @Component({
   selector: 'app-edit-user',
