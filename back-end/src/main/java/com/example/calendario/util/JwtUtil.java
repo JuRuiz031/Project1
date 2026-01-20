@@ -2,22 +2,24 @@ package com.example.calendario.util;
 
 // Java imports
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Date;
 
-// Spring Framework imports
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-
-// JWT library imports
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
-// Cryptography imports
-import javax.crypto.SecretKey;
 
+@Component
 public class JwtUtil {
-    
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration}")
+    private long jwtExpirationMs;
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
 }
