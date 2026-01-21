@@ -26,6 +26,7 @@ export const routes: Routes = [
   { path: 'create-calendar', component: CreateCalendar },
   { path: 'account', component: AccountView },
   { path: 'account', redirectTo: 'account', pathMatch: 'full' },
+  // Later add { path: 'edit-user/:id', component: EditUser },
   { path: 'edit-user', component: EditUser },
   { path: 'view-calendar-group', component: ViewCalendarGroup },
   { path: 'main-page', component: MainPage },
