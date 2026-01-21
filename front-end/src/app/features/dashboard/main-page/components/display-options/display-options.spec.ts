@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MainPageComponent } from './main-page';
+import { DisplayOptions } from './display-options';
 
-describe('MainPageComponent', () => {
-  let component: MainPageComponent;
-  let fixture: ComponentFixture<MainPageComponent>;
+describe('DisplayOptions', () => {
+  let component: DisplayOptions;
+  let fixture: ComponentFixture<DisplayOptions>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MainPageComponent],
+      imports: [DisplayOptions],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MainPageComponent);
+    fixture = TestBed.createComponent(DisplayOptions);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

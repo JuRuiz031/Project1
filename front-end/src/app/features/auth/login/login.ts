@@ -27,6 +27,8 @@ export class Login {
   }
 
   onLogin() {
+    console.log('onLogin fired');
+    
     if (this.form.invalid) {
       return;
     }
@@ -37,7 +39,9 @@ export class Login {
         // TODO: Store token in localStorage or state management
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
-        this.router.navigate(['/main-page']);
+
+        // ✅ Navigate to dashboard main page
+        this.router.navigate(['/dashboard/main-page']);
       },
       error: (err) => {
         console.error('Login error:', err);

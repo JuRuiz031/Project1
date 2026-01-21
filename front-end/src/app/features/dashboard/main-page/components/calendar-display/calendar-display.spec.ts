@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MainPageComponent } from './main-page';
+import { CalendarDisplay } from './calendar-display';
 
-describe('MainPageComponent', () => {
-  let component: MainPageComponent;
-  let fixture: ComponentFixture<MainPageComponent>;
+describe('CalendarDisplay', () => {
+  let component: CalendarDisplay;
+  let fixture: ComponentFixture<CalendarDisplay>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MainPageComponent],
+      imports: [CalendarDisplay],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MainPageComponent);
+    fixture = TestBed.createComponent(CalendarDisplay);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

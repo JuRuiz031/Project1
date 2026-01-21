@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MainPageComponent } from './main-page';
+import { PollsWindow } from './polls-window';
 
-describe('MainPageComponent', () => {
-  let component: MainPageComponent;
-  let fixture: ComponentFixture<MainPageComponent>;
+describe('PollsWindow', () => {
+  let component: PollsWindow;
+  let fixture: ComponentFixture<PollsWindow>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MainPageComponent],
+      imports: [PollsWindow],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MainPageComponent);
+    fixture = TestBed.createComponent(PollsWindow);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
