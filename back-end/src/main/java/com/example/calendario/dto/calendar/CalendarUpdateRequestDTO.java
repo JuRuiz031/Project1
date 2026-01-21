@@ -10,12 +10,12 @@ public class CalendarUpdateRequestDTO {
     private String name; // Optional
     
     @JsonProperty("admins")
-    private List<Long> admins; // Optional - user IDs to promote to admin
+    private List<String> admins; // Optional - user IDs to promote to admin
     
     // Constructors
     public CalendarUpdateRequestDTO() {}
     
-    public CalendarUpdateRequestDTO(String name, List<Long> admins) {
+    public CalendarUpdateRequestDTO(String name, List<String> admins) {
         this.name = name;
         this.admins = admins;
     }
@@ -24,6 +24,6 @@ public class CalendarUpdateRequestDTO {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     
-    public List<Long> getAdmins() { return admins; }
-    public void setAdmins(List<Long> admins) { this.admins = admins; }
+    public List<String> getAdmins() { return admins; }
+    public void setAdmins(List<String> admins) { this.admins = admins; }
 }

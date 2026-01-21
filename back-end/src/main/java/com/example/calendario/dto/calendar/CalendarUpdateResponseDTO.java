@@ -13,12 +13,12 @@ public class CalendarUpdateResponseDTO {
     private String name;
     
     @JsonProperty("admins")
-    private List<Long> admins;
+    private List<String> admins;
     
     // Constructors
     public CalendarUpdateResponseDTO() {}
     
-    public CalendarUpdateResponseDTO(String calendarId, String name, List<Long> admins) {
+    public CalendarUpdateResponseDTO(String calendarId, String name, List<String> admins) {
         this.calendarId = calendarId;
         this.name = name;
         this.admins = admins;
@@ -31,6 +31,6 @@ public class CalendarUpdateResponseDTO {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     
-    public List<Long> getAdmins() { return admins; }
-    public void setAdmins(List<Long> admins) { this.admins = admins; }
+    public List<String> getAdmins() { return admins; }
+    public void setAdmins(List<String> admins) { this.admins = admins; }
 }

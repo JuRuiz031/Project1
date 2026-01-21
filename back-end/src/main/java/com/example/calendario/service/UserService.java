@@ -90,6 +90,16 @@ public class UserService {
     return userRepository.save(user);
    }
 
+   // Batch save multiple users (more efficient than saving one by one)
+   public Iterable<User> saveAllUsers(Iterable<User> users) {
+    return userRepository.saveAll(users);
+   }
+
+   // Get all users (for cascade delete operations)
+   public Iterable<User> getAllUsers() {
+    return userRepository.findAll();
+   }
+
    // Validate user access - check authorization for viewing user data
    public User validateUserAccess(String requestedUserId, String authenticatedUsername) {
        // Step 1: Find the authenticated user

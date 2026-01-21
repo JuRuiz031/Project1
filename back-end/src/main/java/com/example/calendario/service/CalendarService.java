@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.calendar.CalendarCreateRequestDTO;
@@ -22,6 +23,9 @@ import com.example.calendario.repository.CalendarRepository;
 public class CalendarService {
     private final CalendarRepository calendarRepository;
     private final UserService userService;
+    
+    @Value("${app.calendar.invite.base-url}")
+    private String inviteBaseUrl;
 
     // Constructor
     public CalendarService(CalendarRepository calendarRepository, UserService userService) {
@@ -77,12 +81,37 @@ public class CalendarService {
         // Save updated calendar
         Calendar updatedCalendar = calendarRepository.save(calendar);
 
-        // Note: Admin promotion logic would be added here when managing user calendars
-        // For now, just return updated info
+        // Promote users to admin if specified
+        java.util.List<String> promotedAdmins = new java.util.ArrayList<>();
+        java.util.List<User> usersToUpdate = new java.util.ArrayList<>();
+        
+        if (dto.getAdmins() != null && !dto.getAdmins().isEmpty()) {
+            for (String userId : dto.getAdmins()) {
+                Optional<User> userOpt = userService.findById(userId);
+                if (userOpt.isPresent()) {
+                    User user = userOpt.get();
+                    if (user.isMemberOfCalendar(calendarId)) {
+                        // Find and update their membership to admin
+                        user.getCalendarIds().stream()
+                            .filter(cm -> cm.getCalendarId().equals(calendarId))
+                            .findFirst()
+                            .ifPresent(cm -> cm.setIsAdmin(true));
+                        usersToUpdate.add(user);
+                        promotedAdmins.add(userId);
+                    }
+                }
+            }
+            
+            // Batch save all updated users at once (more efficient)
+            if (!usersToUpdate.isEmpty()) {
+                userService.saveAllUsers(usersToUpdate);
+            }
+        }
+
         return new CalendarUpdateResponseDTO(
                 updatedCalendar.getId(),
                 updatedCalendar.getName(),
-                null // admins list to be implemented
+                promotedAdmins
         );
     }
 
@@ -92,12 +121,26 @@ public class CalendarService {
         User authenticatedUser = userService.findByUsername(authenticatedUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
 
-        // Get calendar
-        Calendar calendar = getCalendarById(calendarId);
+        // Validate calendar exists (throws ResourceNotFoundException if not found)
+        getCalendarById(calendarId);
 
         // Check if authenticated user is admin of this calendar
         if (!isUserAdminOfCalendar(authenticatedUser, calendarId)) {
             throw new ForbiddenException("You do not have permission to delete this calendar");
+        }
+
+        // Cascade delete: Remove calendar from all users' calendarIds
+        java.util.List<User> usersToUpdate = new java.util.ArrayList<>();
+        for (User user : userService.getAllUsers()) {
+            if (user.isMemberOfCalendar(calendarId)) {
+                user.removeCalendarMembership(calendarId);
+                usersToUpdate.add(user);
+            }
+        }
+        
+        // Batch save all users at once (more efficient)
+        if (!usersToUpdate.isEmpty()) {
+            userService.saveAllUsers(usersToUpdate);
         }
 
         // Delete calendar
@@ -129,8 +172,8 @@ public class CalendarService {
         // Save updated calendar
         Calendar updatedCalendar = calendarRepository.save(calendar);
 
-        // Build full invite link
-        String inviteLink = "https://app.example.com/invite/calendars/" + calendarId + "/" + inviteToken;
+        // Build full invite link using configured base URL
+        String inviteLink = inviteBaseUrl + "/" + calendarId + "/" + inviteToken;
 
         return new CalendarInviteResponseDTO(updatedCalendar.getId(), inviteLink);
     }
