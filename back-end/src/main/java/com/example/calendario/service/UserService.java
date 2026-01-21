@@ -10,6 +10,7 @@ import com.example.calendario.dto.LoginRequestDTO;
 import com.example.calendario.dto.LoginSuccessDTO;
 import com.example.calendario.dto.UserRegistrationDTO;
 import com.example.calendario.dto.UserResponseDTO;
+import com.example.calendario.dto.UserUpdateDTO;
 import com.example.calendario.exception.DuplicateEmailException;
 import com.example.calendario.exception.DuplicateUsernameException;
 import com.example.calendario.exception.InvalidCredentialsException;
@@ -75,5 +76,38 @@ public class UserService {
    // Find by user ID
    public Optional<User> findById(String id) {
     return userRepository.findById(id);
+   }
+
+   // Update User details
+   public User updateUser(String id, UserUpdateDTO dto) {
+    User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+    // Update fields if provided
+    if(dto.getUsername() != null && !dto.getUsername().isEmpty()) {
+        // Check for duplicate username
+        userRepository.findByUsername(dto.getUsername()).ifPresent(existingUser -> {
+            if(!existingUser.getId().equals(id)) {
+                throw new DuplicateUsernameException("Username already exists: " + dto.getUsername());
+            }
+        });
+        user.setUsername(dto.getUsername());
+    }
+
+    if(dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+        // Check for duplicate email
+        userRepository.findByEmail(dto.getEmail()).ifPresent(existingUser -> {
+            if(!existingUser.getId().equals(id)) {
+                throw new DuplicateEmailException("Email already exists: " + dto.getEmail());
+            }
+        });
+        user.setEmail(dto.getEmail());
+    }
+
+    if(dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+        user.setPassword(dto.getPassword());
+    }
+
+    return userRepository.save(user);
    }
 }
