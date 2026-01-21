@@ -2,6 +2,7 @@
 	"info": {
 		"_postman_id": "c9b8a7d6-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
 		"name": "Calendario API v1 - Users",
+		"description": "User management endpoints - Register, retrieve user data with JWT authentication and authorization testing",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -96,7 +97,63 @@
 			"response": []
 		},
 		{
-			"name": "4. Get User by ID",
+			"name": "4. Get User by ID - Success (Own User)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/{{user_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Get User - Forbidden (Different User)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/users/different-user-id-999",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"different-user-id-999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Get User - Unauthorized (No Token)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -118,12 +175,18 @@
 			"response": []
 		},
 		{
-			"name": "5. Get User - Not Found",
+			"name": "7. Get User - Unauthorized (Invalid Token)",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer invalid.token.here",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/users/invalid-id-12345",
+					"raw": "http://localhost:8080/api/v1/users/{{user_id}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -133,48 +196,11 @@
 						"api",
 						"v1",
 						"users",
-						"invalid-id-12345"
+						"{{user_id}}"
 					]
 				}
 			},
 			"response": []
-		}
-	],
-			"name": "3. Test Duplicate Username",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"username\": \"alice_v1\",\n  \"email\": \"different@example.com\",\n  \"password\": \"password123\"\n}"
-				},
-				"url": {
-					"raw": "http://localhost:8080/api/v1/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"v1",
-						"users"
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"variable": [
-		{
-			"key": "user_id",
-			"value": "REPLACE_WITH_REAL_ID",
-			"type": "string"
 		}
 	]
 }
