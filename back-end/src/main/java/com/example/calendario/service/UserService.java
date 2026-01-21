@@ -1,7 +1,5 @@
 package com.example.calendario.service;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -14,16 +12,20 @@ import com.example.calendario.exception.DuplicateEmailException;
 import com.example.calendario.exception.DuplicateUsernameException;
 import com.example.calendario.exception.InvalidCredentialsException;
 import com.example.calendario.exception.ResourceNotFoundException;
+import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.model.User;
 import com.example.calendario.repository.UserRepository;
+import com.example.calendario.util.JwtUtil;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     // Constructor
-   public UserService(UserRepository userRepository) {
+   public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
    }
 
    //Register new User
@@ -60,13 +62,14 @@ public class UserService {
         throw new InvalidCredentialsException("Invalid password");
     }
 
-    // Generate a dummy token **MUST ADD JWT LATER**
-    String mockToken = "mock-jwt-token-placeholder";
-    String expiresAt = Instant.now().plus(1, ChronoUnit.HOURS).toString();
+    // Generate JWT token
+    String token = jwtUtil.generateToken(user.getUsername());
+    Date expiration = jwtUtil.extractExpiration(token);
+    String expiresAt = expiration.toInstant().toString();
 
     // Return clean DTO
     return new LoginSuccessDTO(
-            mockToken,
+            token,
             new UserResponseDTO(user),
             expiresAt
     );
@@ -75,5 +78,26 @@ public class UserService {
    // Find by user ID
    public Optional<User> findById(String id) {
     return userRepository.findById(id);
+   }
+
+   // Find by username
+   public Optional<User> findByUsername(String username) {
+    return userRepository.findByUsername(username);
+   }
+
+   // Validate user access - check authorization for viewing user data
+   public User validateUserAccess(String requestedUserId, String authenticatedUsername) {
+       // Step 1: Find the authenticated user
+       User authenticatedUser = findByUsername(authenticatedUsername)
+           .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+       
+       // Step 2: Check authorization - user can only access their own data
+       if (!authenticatedUser.getId().equals(requestedUserId)) {
+           throw new ForbiddenException("You can only access your own user data");
+       }
+       
+       // Step 3: Return the requested user
+       return findById(requestedUserId)
+           .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
    }
 }
