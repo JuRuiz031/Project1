@@ -65,7 +65,11 @@ public class UserController {
     // PATCH User
     @PatchMapping("/users/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable String id, @Valid @RequestBody UserUpdateDTO updateDTO) {
-        User updatedUser = userService.updateUser(id, updateDTO);
+        // Get authenticated username from JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticatedUsername = authentication.getName();
+        
+        User updatedUser = userService.updateUser(id, updateDTO, authenticatedUsername);
         return ResponseEntity.ok(new UserResponseDTO(updatedUser));
     }
 

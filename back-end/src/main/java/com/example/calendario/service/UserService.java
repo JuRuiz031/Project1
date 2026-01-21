@@ -82,9 +82,16 @@ public class UserService {
    }
 
    // Update User details
-   public User updateUser(String id, UserUpdateDTO dto) {
-    User user = userRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+   public User updateUser(String id, UserUpdateDTO dto, String authenticatedUsername) {
+    User authenticatedUser = findByUsername(authenticatedUsername)
+        .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+
+    if (id != authenticatedUser.getId()) {
+        throw new ForbiddenException("Can only update your account");
+    }
+
+    User userToUpdate = findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
     // Update fields if provided
     if(dto.getUsername() != null && !dto.getUsername().isEmpty()) {
@@ -94,7 +101,7 @@ public class UserService {
                 throw new DuplicateUsernameException("Username already exists: " + dto.getUsername());
             }
         });
-        user.setUsername(dto.getUsername());
+        userToUpdate.setUsername(dto.getUsername());
     }
 
     if(dto.getEmail() != null && !dto.getEmail().isEmpty()) {
@@ -104,14 +111,14 @@ public class UserService {
                 throw new DuplicateEmailException("Email already exists: " + dto.getEmail());
             }
         });
-        user.setEmail(dto.getEmail());
+        userToUpdate.setEmail(dto.getEmail());
     }
 
     if(dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-        user.setPassword(dto.getPassword());
+        userToUpdate.setPassword(dto.getPassword());
     }
 
-    return userRepository.save(user);
+    return userRepository.save(userToUpdate);
     }
 
    // Find by username
