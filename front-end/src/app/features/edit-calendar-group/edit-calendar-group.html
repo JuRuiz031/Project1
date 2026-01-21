@@ -1,1 +1,102 @@
-<p>edit-calendar-group works!</p>
+<h1 class="page-header">Edit Calendar Group</h1>
+
+<div class="page-border">
+
+  <!-- Name field -->
+  <div class="name-box">
+    <input
+      class="input"
+      type="text"
+      placeholder="name field"
+      [value]="groupName"
+      (input)="groupName = ($any($event.target).value)"
+    />
+  </div>
+
+  <!-- Inner panel -->
+  <div class="inner-panel">
+
+    <!-- Link field -->
+    <div class="link-box">
+      <input
+        class="input"
+        type="text"
+        placeholder="Link Field"
+        [value]="inviteLink"
+        readonly
+      />
+    </div>
+
+    <!-- Generate link button -->
+    <button class="wide-button" type="button" (click)="generateLink()">
+      Generate Field Button
+    </button>
+
+    <!-- Users list -->
+    <div class="users-box">
+      <div class="users-title">List of users on calendar</div>
+
+      <div class="users-list" *ngIf="users.length > 0; else noUsers">
+        <button
+          type="button"
+          class="user-row"
+          *ngFor="let u of users"
+          [class.selected]="u.id === selectedUserId"
+          (click)="selectUser(u.id)"
+        >
+          <div class="user-left">
+            <div class="user-name">{{ u.username }}</div>
+            <div class="user-email">{{ u.email }}</div>
+          </div>
+
+          <div class="user-right">
+            <span class="badge" [class.admin]="u.isAdmin">{{ u.isAdmin ? 'Admin' : 'Member' }}</span>
+          </div>
+        </button>
+      </div>
+
+      <ng-template #noUsers>
+        <div class="empty">No users yet.</div>
+      </ng-template>
+    </div>
+
+    <!-- Action buttons under list -->
+    <div class="actions-row">
+      <button class="small-button" type="button" (click)="promoteSelectedToAdmin()" [disabled]="!selectedUserId">
+        Promote Selected User to Admin
+      </button>
+
+      <button class="small-button" type="button" (click)="removeSelectedUser()" [disabled]="!selectedUserId">
+        Remove User Button
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Delete calendar group button -->
+<div class="footer">
+  <button class="delete-calendar-button" type="button" (click)="openDeleteConfirm()">
+    Delete Calendar Group
+  </button>
+</div>
+
+<!-- Error display -->
+<div class="api-error" *ngIf="apiError">{{ apiError }}</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="overlay" *ngIf="showDeleteConfirm" (click)="closeDeleteConfirm()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-title">
+      Are you sure you want to delete this Calendar and all related events?
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn" type="button" (click)="closeDeleteConfirm()">Cancel</button>
+      <button class="modal-btn danger" type="button" (click)="confirmDeleteCalendarGroup()">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

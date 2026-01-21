@@ -32,6 +32,7 @@ export const routes: Routes = [
   { path: 'create-calendar-group', component: CreateCalendarGroup },
   { path: 'create-event', component: CreateEvent },
   { path: 'create-poll', component: CreatePoll},
+  // Later add { path: 'edit-calendar-group/:id', component: EditCalendarGroupComponent }
   { path: 'edit-calendar-group', component: EditCalendarGroup},
   { path: 'delete-calendar-group', component: DeleteCalendarGroup},
   { path: 'view-event', component: ViewEvent},
