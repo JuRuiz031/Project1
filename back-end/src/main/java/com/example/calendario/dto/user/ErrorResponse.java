@@ -1,4 +1,4 @@
-package com.example.calendario.dto;
+package com.example.calendario.dto.user;
 
 public class ErrorResponse {
     private String message;

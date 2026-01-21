@@ -6,7 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.example.calendario.dto.ErrorResponse;
+import com.example.calendario.dto.user.ErrorResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
