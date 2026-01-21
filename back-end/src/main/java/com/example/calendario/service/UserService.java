@@ -85,6 +85,11 @@ public class UserService {
     return userRepository.findByUsername(username);
    }
 
+   // Save user
+   public User saveUser(User user) {
+    return userRepository.save(user);
+   }
+
    // Validate user access - check authorization for viewing user data
    public User validateUserAccess(String requestedUserId, String authenticatedUsername) {
        // Step 1: Find the authenticated user
