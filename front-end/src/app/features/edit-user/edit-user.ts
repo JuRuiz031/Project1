@@ -61,4 +61,23 @@ export class EditUser implements OnInit {
       return '';
     }
   }
+
+  showDeleteConfirm = false;
+
+  openDeleteConfirm() {
+    this.showDeleteConfirm = true;
+  }
+
+  closeDeleteConfirm() {
+    this.showDeleteConfirm = false;
+  }
+
+  // später: hier kommt deleteUser() rein
+  confirmDelete() {
+    // TODO: DELETE call + logout + navigate
+    this.showDeleteConfirm = false;
+  }
+
+
+  
 }

@@ -9,7 +9,6 @@ import { MainPage } from './features/dashboard/main-page/main-page';
 import { CreateEvent } from './features/create-event/create-event';
 import { CreatePoll } from './features/create-poll/create-poll';
 import { CreateCalendarGroup } from './features/create-calendar-group/create-calendar-group';
-import { Delete } from './features/delete/delete';
 import { EditCalendarGroup } from './features/edit-calendar-group/edit-calendar-group';
 import { DeleteCalendarGroup } from './features/delete-calendar-group/delete-calendar-group';
 import { ViewEvent } from './features/view-event/view-event';
@@ -33,7 +32,6 @@ export const routes: Routes = [
   { path: 'create-calendar-group', component: CreateCalendarGroup },
   { path: 'create-event', component: CreateEvent },
   { path: 'create-poll', component: CreatePoll},
-  { path: 'delete', component: Delete},
   { path: 'edit-calendar-group', component: EditCalendarGroup},
   { path: 'delete-calendar-group', component: DeleteCalendarGroup},
   { path: 'view-event', component: ViewEvent},
