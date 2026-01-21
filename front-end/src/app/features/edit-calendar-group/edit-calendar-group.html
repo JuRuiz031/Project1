@@ -61,15 +61,35 @@
     </div>
 
     <!-- Action buttons under list -->
-    <div class="actions-row">
-      <button class="small-button" type="button" (click)="promoteSelectedToAdmin()" [disabled]="!selectedUserId">
-        Promote Selected User to Admin
-      </button>
+<div class="actions-row">
+  <button
+    class="small-button"
+    type="button"
+    (click)="promoteSelectedToAdmin()"
+    [disabled]="!selectedUserId || selectedUserIsAdmin"
+  >
+    Promote Selected User to Admin
+  </button>
 
-      <button class="small-button" type="button" (click)="removeSelectedUser()" [disabled]="!selectedUserId">
-        Remove User Button
-      </button>
-    </div>
+  <button
+    class="small-button"
+    type="button"
+    (click)="demoteSelectedToMember()"
+    [disabled]="!selectedUserId || !selectedUserIsAdmin"
+  >
+    Demote Selected User to Member
+  </button>
+
+  <button
+    class="small-button"
+    type="button"
+    (click)="removeSelectedUser()"
+    [disabled]="!selectedUserId"
+  >
+    Remove User Button
+  </button>
+</div>
+
 
   </div>
 

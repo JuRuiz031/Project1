@@ -86,4 +86,21 @@ export class EditCalendarGroup implements OnInit {
     // danach navigate -> z.B. /dashboard oder /calendar-groups
     console.log('Deleting calendar group:', this.groupId);
   }
+
+  get selectedUserIsAdmin(): boolean {
+    if (!this.selectedUserId) return false;
+    return this.users.some(u => u.id === this.selectedUserId && u.isAdmin);
+  }
+
+  demoteSelectedToMember() {
+    this.apiError = '';
+    if (!this.selectedUserId) return;
+
+    // TODO: API call -> calendarGroupApi.demoteUser(groupId, selectedUserId)
+    this.users = this.users.map(u =>
+      u.id === this.selectedUserId ? { ...u, isAdmin: false } : u
+    );
+  }
+
+
 }
