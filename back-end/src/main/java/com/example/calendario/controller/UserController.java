@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.calendario.dto.LoginRequestDTO;
 import com.example.calendario.dto.LoginSuccessDTO;
+import com.example.calendario.dto.UserDeleteResponseDTO;
 import com.example.calendario.dto.UserRegistrationDTO;
 import com.example.calendario.dto.UserResponseDTO;
 import com.example.calendario.model.User;
@@ -62,15 +63,15 @@ public class UserController {
 
     // DELETE User by ID
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable String id) {
+    public ResponseEntity<UserDeleteResponseDTO> deleteUserById(@PathVariable String id) {
         // Get authenticated username from JWT
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String authenticatedUsername = authentication.getName();
 
         // Validate access and delete user (authorization check done in service)
-        userService.validateAndDeleteUser(id, authenticatedUsername);
+        UserDeleteResponseDTO deletedUser = userService.validateAndDeleteUser(id, authenticatedUsername);
         
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(deletedUser);
     }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.LoginRequestDTO;
 import com.example.calendario.dto.LoginSuccessDTO;
+import com.example.calendario.dto.UserDeleteResponseDTO;
 import com.example.calendario.dto.UserRegistrationDTO;
 import com.example.calendario.dto.UserResponseDTO;
 import com.example.calendario.exception.DuplicateEmailException;
@@ -102,20 +103,24 @@ public class UserService {
    }
 
     // Validate and delete user
-    public void validateAndDeleteUser(String requestedUserId, String authenticatedUsername) {
-         // Step 1: Find the authenticated user
-         User authenticatedUser = findByUsername(authenticatedUsername)
-              .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
-         
-         // Step 2: Check authorization - user can only delete their own account
-         if (!authenticatedUser.getId().equals(requestedUserId)) {
-              throw new ForbiddenException("You can only delete your own user account");
-         }
-         
-         // Step 3: Delete the user
-         User userToDelete = findById(requestedUserId)
-              .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
-         
-         userRepository.delete(userToDelete);
+    public UserDeleteResponseDTO validateAndDeleteUser(String requestedUserId, String authenticatedUsername) {
+        // Step 1: Find the authenticated user
+        User authenticatedUser = findByUsername(authenticatedUsername)
+            .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        
+        // Step 2: Check authorization - user can only delete their own account
+        if (!authenticatedUser.getId().equals(requestedUserId)) {
+            throw new ForbiddenException("You can only delete your own user account");
+        }
+        
+        // Step 3: Find the user to be deleted
+        User userToDelete = findById(requestedUserId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
+        
+        // Step 4: Delete the user
+        userRepository.delete(userToDelete);
+        
+        // Step 5: Return response DTO
+        return new UserDeleteResponseDTO(userToDelete, true);
     }
 }
