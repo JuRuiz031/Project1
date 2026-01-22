@@ -100,4 +100,22 @@ public class UserService {
        return findById(requestedUserId)
            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
    }
+
+    // Validate and delete user
+    public void validateAndDeleteUser(String requestedUserId, String authenticatedUsername) {
+         // Step 1: Find the authenticated user
+         User authenticatedUser = findByUsername(authenticatedUsername)
+              .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+         
+         // Step 2: Check authorization - user can only delete their own account
+         if (!authenticatedUser.getId().equals(requestedUserId)) {
+              throw new ForbiddenException("You can only delete your own user account");
+         }
+         
+         // Step 3: Delete the user
+         User userToDelete = findById(requestedUserId)
+              .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
+         
+         userRepository.delete(userToDelete);
+    }
 }
