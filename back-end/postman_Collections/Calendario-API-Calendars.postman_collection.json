@@ -74,6 +74,16 @@
     {
       "name": "2. Create Calendar - Unauthorized (No Token)",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
         "method": "POST",
         "header": [
           {
@@ -83,7 +93,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Unauthorized Calendar\"\n}"
+          "raw": "{\n    \"user_id\": \"{{user_id}}\",\n  \"name\": \"Unauthorized Calendar\"\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/calendar",
