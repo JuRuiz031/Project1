@@ -17,7 +17,7 @@ public class Calendar {
 
     private String name;
 
-    private List<Invite> invites;
+    private List<Invite> invites = new ArrayList<>();
     
     @CreatedDate
     private LocalDateTime createdAt;
@@ -56,9 +56,6 @@ public class Calendar {
 
     // Helper method to add an invite
     public void addInvite(Invite invite) {
-        if(this.invites == null) {
-            this.invites = new ArrayList<>();
-        }
         this.invites.add(invite);
     }
 

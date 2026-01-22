@@ -23,7 +23,7 @@ public class User {
 
     private Boolean isSuperuser; // Checks if the user has superuser privileges in the mongo document
 
-    private List<CalendarMembership> calendarIds; // List of calendars and admin status
+    private List<CalendarMembership> calendarIds = new ArrayList<>(); // List of calendars and admin status
 
 
     // Inner class for calendar membership
@@ -79,10 +79,6 @@ public class User {
 
     // Helper methods for calendar management
     public void addCalendarMembership(String calendarId, Boolean isAdmin) {
-        if (this.calendarIds == null) {
-            this.calendarIds = new ArrayList<>();
-        }
-        
         // Avoid duplicates
         boolean alreadyExists = this.calendarIds.stream()
                 .anyMatch(cm -> cm.getCalendarId().equals(calendarId));
@@ -93,10 +89,6 @@ public class User {
     }
 
     public boolean isAdminOfCalendar(String calendarId) {
-        if (this.calendarIds == null) {
-            return false;
-        }
-        
         return this.calendarIds.stream()
                 .filter(cm -> cm.getCalendarId().equals(calendarId))
                 .findFirst()
@@ -105,17 +97,11 @@ public class User {
     }
 
     public boolean isMemberOfCalendar(String calendarId) {
-        if (this.calendarIds == null) {
-            return false;
-        }
-        
         return this.calendarIds.stream()
                 .anyMatch(cm -> cm.getCalendarId().equals(calendarId));
     }
 
     public void removeCalendarMembership(String calendarId) {
-        if (this.calendarIds != null) {
-            this.calendarIds.removeIf(cm -> cm.getCalendarId().equals(calendarId));
-        }
+        this.calendarIds.removeIf(cm -> cm.getCalendarId().equals(calendarId));
     }
 }
