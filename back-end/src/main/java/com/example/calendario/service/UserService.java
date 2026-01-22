@@ -86,7 +86,7 @@ public class UserService {
     User authenticatedUser = findByUsername(authenticatedUsername)
         .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
 
-    if (id != authenticatedUser.getId()) {
+    if (!id.equals(authenticatedUser.getId())) {
         throw new ForbiddenException("Can only update your account");
     }
 
