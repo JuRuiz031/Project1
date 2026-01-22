@@ -19,6 +19,8 @@ import { ViewPoll } from './features/poll/view-poll/view-poll';
 import { EditPoll } from './features/poll/edit-poll/edit-poll';
 import { DeletePoll } from './features/poll/delete-poll/delete-poll';
 
+import { CalendarDisplay } from './features/dashboard/main-page/components/calendar-display/calendar-display';
+
 export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'create-account', component: CreateAccount },
