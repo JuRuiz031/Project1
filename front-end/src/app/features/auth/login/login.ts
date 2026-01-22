@@ -26,6 +26,22 @@ export class Login {
     });
   }
 
+  /* TEMPORARY LOGIN FUNCTION
+  *  REMOVE ONCE PAGE TRAVERSAL IS CONFIRMED
+  */
+  onLogin(event?: Event) {
+    event?.preventDefault();
+    console.log('DEV login bypass');
+
+    // optional: fake “logged in” state
+    localStorage.setItem('token', 'dev-token');
+    localStorage.setItem('user', JSON.stringify({ username: this.form.value.username }));
+
+    this.router.navigateByUrl('/dashboard/main-page');
+  }
+
+  /* ORIGINAL LOGIN FUNCTION
+  *  RESTORE AFTER CONFIRMING PAGE NAVIGATION
   onLogin() {
     console.log('onLogin fired');
     
@@ -49,4 +65,7 @@ export class Login {
       }
     });
   }
+  */
+ 
 }
+

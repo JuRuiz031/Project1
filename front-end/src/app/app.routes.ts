@@ -8,7 +8,6 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'create-account', component: CreateAccount },
 
-  // ✅ New stable dashboard route (requested target)
   {
     path: 'dashboard',
     children: [
@@ -17,11 +16,9 @@ export const routes: Routes = [
     ],
   },
 
-  // ✅ Backward compatibility: if anything still navigates to /main-page
   { path: 'main-page', redirectTo: '/dashboard/main-page', pathMatch: 'full' },
 
   { path: 'create-calendar', component: CreateCalendar },
 
-  // Default
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
