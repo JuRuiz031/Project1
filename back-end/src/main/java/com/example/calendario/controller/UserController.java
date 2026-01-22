@@ -70,6 +70,7 @@ public class UserController {
         String authenticatedUsername = authentication.getName();
         
         User updatedUser = userService.updateUser(id, updateDTO, authenticatedUsername);
+        
         return ResponseEntity.ok(new UserResponseDTO(updatedUser));
     }
 
