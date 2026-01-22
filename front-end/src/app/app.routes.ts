@@ -10,7 +10,6 @@ import { EditUser } from './features/auth/edit-user/edit-user';
 import { ViewCalendarGroup } from './features/calendar/view-calendar-group/view-calendar-group';
 import { CreateEvent } from './features/event/create-event/create-event';
 import { CreatePoll } from './features/poll/create-poll/create-poll';
-import { CreateCalendarGroup } from './features/calendar/create-calendar-group/create-calendar-group';
 import { EditCalendarGroup } from './features/calendar/edit-calendar-group/edit-calendar-group';
 import { DeleteCalendarGroup } from './features/calendar/delete-calendar-group/delete-calendar-group';
 import { ViewEvent } from './features/event/view-event/view-event';
@@ -39,7 +38,6 @@ export const routes: Routes = [
 
   { path: 'edit-user', component: EditUser },
   { path: 'view-calendar-group', component: ViewCalendarGroup },
-  { path: 'create-calendar-group', component: CreateCalendarGroup },
   { path: 'create-event', component: CreateEvent },
   { path: 'create-poll', component: CreatePoll },
   { path: 'edit-calendar-group', component: EditCalendarGroup },

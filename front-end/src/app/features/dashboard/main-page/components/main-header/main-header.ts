@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { BRAND_CONFIG } from '../../../../../config/brand.config';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-main-header',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './main-header.html',
   styleUrl: './main-header.css',
 })
