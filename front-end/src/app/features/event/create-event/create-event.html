@@ -1,0 +1,79 @@
+<h1 class="page-header">Create Event</h1>
+
+<div class="page-border" [formGroup]="form">
+
+  <!-- Calendar dropdown -->
+  <div class="field-box">
+    <select class="input" formControlName="calendarId">
+      <option value="" disabled>Select calendar (admin only)</option>
+      <option *ngFor="let c of adminCalendars" [value]="c.id">
+        {{ c.name }}
+      </option>
+    </select>
+
+    <div class="error" *ngIf="hasError('calendarId')">
+      Please select an admin calendar.
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="field-box">
+    <input class="input" type="text" placeholder="Event Title" formControlName="title" />
+    <div class="error" *ngIf="hasError('title')">
+      Title is required (min 2 chars).
+    </div>
+  </div>
+
+  <!-- Start date -->
+  <div class="field-box">
+    <input class="input" type="date" formControlName="startDate" />
+    <div class="error" *ngIf="hasError('startDate')">
+      Start date required.
+    </div>
+  </div>
+
+  <!-- Start time -->
+  <div class="field-box">
+    <input class="input" type="time" formControlName="startTime" />
+    <div class="error" *ngIf="hasError('startTime')">
+      Start time required.
+    </div>
+  </div>
+
+  <!-- End date -->
+  <div class="field-box">
+    <input class="input" type="date" formControlName="endDate" />
+    <div class="error" *ngIf="hasError('endDate')">
+      End date required.
+    </div>
+  </div>
+
+  <!-- End time -->
+  <div class="field-box">
+    <input class="input" type="time" formControlName="endTime" />
+    <div class="error" *ngIf="hasError('endTime')">
+      End time required.
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="field-box">
+    <textarea class="textarea" rows="4" placeholder="Description" formControlName="description"></textarea>
+  </div>
+
+  <!-- Notes -->
+  <div class="field-box">
+    <textarea class="textarea" rows="4" placeholder="Notes" formControlName="notes"></textarea>
+  </div>
+
+</div>
+
+<div class="actions">
+  <button class="primary-btn" (click)="submit()" [disabled]="isSubmitting">
+    {{ isSubmitting ? 'Creating...' : 'Create Event' }}
+  </button>
+</div>
+
+<div class="api-error" *ngIf="apiError">
+  {{ apiError }}
+</div>

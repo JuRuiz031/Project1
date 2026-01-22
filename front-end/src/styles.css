@@ -1,3 +1,29 @@
 /* You can add global styles to this file, and also import other style files */
 /* angular-cli file: src/styles.css */
 @import "../node_modules/angular-calendar/css/angular-calendar.css";
+
+/* =====================================================
+   Project 1 – Global Color Palette 01
+   ===================================================== */
+
+:root {
+  /* Base palette */
+  --color-bright-snow: #f7f9f9;
+  --color-ash-grey:   #bed8d4;
+  --color-pearl-aqua: #78d5d7;
+  --color-frozen-lake:#63d2ff;
+  --color-steel-blue: #2081c3;
+
+  /* Semantic usage (recommended) */
+  --color-background-primary: var(--color-bright-snow);
+  --color-background-secondary: var(--color-ash-grey);
+
+  --color-accent-primary: var(--color-steel-blue);
+  --color-accent-secondary: var(--color-frozen-lake);
+  --color-accent-tertiary: var(--color-pearl-aqua);
+
+  --color-text-primary: #1f2933; /* dark neutral */
+  --color-text-secondary: #4b5563;
+
+  --color-border-default: var(--color-ash-grey);
+}
