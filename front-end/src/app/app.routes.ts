@@ -25,7 +25,6 @@ import { ViewPoll } from './features/poll/view-poll/view-poll';
 import { EditPoll } from './features/poll/edit-poll/edit-poll';
 import { DeletePoll } from './features/poll/delete-poll/delete-poll';
 
-
 export const routes: Routes = [
   /**
    * AUTH / PUBLIC ROUTES
