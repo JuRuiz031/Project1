@@ -9,7 +9,7 @@ public class CalendarCreateRequestDTO {
     
     @NotNull(message = "User ID cannot be null")
     @JsonProperty("user_id")
-    private Long userId;
+    private String userId;
     
     @NotBlank(message = "Calendar name cannot be empty")
     @JsonProperty("name")
@@ -18,14 +18,14 @@ public class CalendarCreateRequestDTO {
     // Constructors
     public CalendarCreateRequestDTO() {}
     
-    public CalendarCreateRequestDTO(Long userId, String name) {
+    public CalendarCreateRequestDTO(String userId, String name) {
         this.userId = userId;
         this.name = name;
     }
     
     // Getters and Setters
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
