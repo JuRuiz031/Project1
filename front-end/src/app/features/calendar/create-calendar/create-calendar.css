@@ -1,0 +1,146 @@
+/* Center the whole view like view-calendar-group */
+.create-calendar {
+  display: grid;
+  place-items: start center;
+  padding-top: 8px;
+}
+
+/* Outer frame width similar to the 800px mock */
+.create-calendar__outer {
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Title spacing */
+.create-calendar__header {
+  margin-bottom: 14px;
+}
+
+.create-calendar__title {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--color-text-primary);
+}
+
+/* Inner big panel */
+.create-calendar__panel {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form layout */
+.create-calendar__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 360px;
+}
+
+/* Field block (wireframe-style box) */
+.create-calendar__field {
+  min-height: 120px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.create-calendar__label {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.create-calendar__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 10px;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.create-calendar__input:focus {
+  border-color: var(--color-accent-secondary);
+  box-shadow: 0 0 0 3px rgba(99, 210, 255, 0.25);
+}
+
+.create-calendar__hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+/* Spacer pushes actions to bottom */
+.create-calendar__spacer {
+  flex: 1;
+}
+
+/* Bottom-right action placement (Cancel + Submit) */
+.create-calendar__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Buttons styled using palette (same feel as view-calendar-group) */
+.create-calendar__btn {
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  min-width: 140px;
+}
+
+.create-calendar__btn:hover {
+  filter: brightness(0.98);
+}
+
+.create-calendar__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Primary action (Submit) */
+.create-calendar__btn--primary {
+  background: var(--color-accent-primary);
+  color: var(--color-background-primary);
+  border-color: transparent;
+}
+
+.create-calendar__btn--primary:hover:enabled {
+  filter: brightness(0.96);
+}
+
+/* Reuse same API error styling used on view-calendar-group */
+.api-error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.create-calendar__response-text {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+/* Page-level frame card (same as view-calendar-group) */
+.page-frame {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}

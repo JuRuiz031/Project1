@@ -1,21 +1,62 @@
-<h2>Create Calendar</h2>
+<section class="page" aria-label="Create Calendar Page">
+  <!-- Page frame (matches view-calendar-group) -->
+  <section class="card page-frame" aria-label="Create Calendar Frame">
+    <div class="create-calendar">
+      <section class="card create-calendar__outer" aria-label="Create Calendar">
+        <header class="create-calendar__header">
+          <h1 class="create-calendar__title">Create Calendar</h1>
+        </header>
 
-<form [formGroup]="form" (ngSubmit)="sendData()">
-    <label for="calendar-name">Calendar name:</label>
-    <input
-    id="calendar-name"
-    type="text"
-    formControlName="name"
-    required
-    minlength="1"
-    maxlength="50"
-    />
+        <!-- Inner panel -->
+        <section class="card create-calendar__panel" aria-label="Create Calendar Panel">
+          <form class="create-calendar__form" [formGroup]="form" (ngSubmit)="sendData()">
+            <div class="card create-calendar__field">
+              <label class="create-calendar__label" for="calendar-name">
+                Calendar name:
+              </label>
+              <input
+                id="calendar-name"
+                class="create-calendar__input"
+                type="text"
+                formControlName="name"
+                required
+                minlength="1"
+                maxlength="50"
+                autocomplete="off"
+              />
+              <p class="create-calendar__hint">
+                Choose a short, recognizable name (1–50 characters).
+              </p>
+            </div>
 
-    <button type="submit" [disabled]="!form.valid">Submit</button>
-</form>
+            <div class="create-calendar__spacer"></div>
 
-@if (response) {
-  <p>
-    Backend response: {{ response }}
-  </p>
-}
+            <div class="create-calendar__actions">
+              <button
+                type="button"
+                class="create-calendar__btn"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="create-calendar__btn create-calendar__btn--primary"
+                [disabled]="!form.valid"
+              >
+                Submit
+              </button>
+            </div>
+          </form>
+        </section>
+
+        @if (response) {
+          <div class="api-error" aria-live="polite">
+            Backend response:
+            <span class="create-calendar__response-text">{{ response }}</span>
+          </div>
+        }
+      </section>
+    </div>
+  </section>
+</section>

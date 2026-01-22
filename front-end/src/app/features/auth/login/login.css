@@ -1,12 +1,8 @@
 /* Page background + centering */
 .page-container {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  gap: 22px;
   padding: 32px 16px;
 
-  /* Use global background colors */
   background: radial-gradient(
     circle at top,
     var(--color-background-secondary) 0%,
@@ -16,61 +12,41 @@
   color: var(--color-text-primary);
 }
 
-/* Top title panel */
-.title-box {
-  width: min(520px, 92vw);
+/* Constrain the cards like your wireframe */
+.title-box,
+.login-box {
+  max-width: 520px;
   border: 2px solid var(--color-border-default);
   background: var(--color-background-secondary);
-  padding: 18px 16px;
-  text-align: center;
-  box-shadow: var(--shadow-elevation-2);
 }
 
+/* Title */
 .title-box h1 {
-  margin: 0;
   font-size: 32px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--color-text-primary);
 }
 
-/* Main login panel */
-.login-box {
-  width: min(520px, 92vw);
-  border: 2px solid var(--color-border-default);
-  background: var(--color-background-secondary);
-  padding: 22px 22px 18px;
-  box-shadow: var(--shadow-elevation-2);
-}
-
+/* Headings + helper text */
 .login-box h2 {
-  margin: 10px 0 14px;
-  text-align: center;
   font-size: 20px;
   color: var(--color-text-primary);
 }
 
 .welcome-text {
-  margin: 0 0 10px 0;
-  text-align: center;
   color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 1.35;
 }
 
-/* Form layout */
-.form-group {
-  display: grid;
-  gap: 6px;
-  margin: 14px 0;
-}
-
-label {
+/* Bootstrap form elements themed with your palette */
+.form-label {
   font-size: 13px;
   color: var(--color-text-secondary);
 }
 
-input {
+.form-control {
   height: 34px;
   padding: 6px 10px;
   border-radius: 6px;
@@ -78,22 +54,22 @@ input {
   border: 1px solid var(--color-border-default);
   background: var(--color-background-primary);
   color: var(--color-text-primary);
-
-  outline: none;
 }
 
-input:focus {
+.form-control:focus {
   border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 0.2rem rgba(32, 129, 195, 0.15); /* subtle focus ring */
 }
 
 /* Validation feedback */
 .error-text {
+  display: inline-block;
+  margin-top: 6px;
   color: var(--color-feedback-error);
   font-size: 12px;
 }
 
 .error-message {
-  margin-top: 10px;
   padding: 10px 12px;
 
   border: 1px solid var(--color-feedback-error);
@@ -104,32 +80,35 @@ input:focus {
   color: var(--color-text-primary);
 }
 
-/* Buttons: stacked like wireframe */
-.button-group {
-  display: grid;
-  gap: 12px;
-  margin-top: 18px;
-  justify-items: center;
-}
-
+/* Buttons: keep your wireframe sizing */
 .btn-sign-in,
 .btn-create {
   width: 200px;
   height: 36px;
   border-radius: 8px;
-  cursor: pointer;
+}
 
-  background: transparent;
+/* Make outline buttons match your theme */
+.btn-outline-primary {
   color: var(--color-text-primary);
-  border: 2px solid var(--color-border-default);
+  border-color: var(--color-border-default);
 }
 
-.btn-sign-in:hover,
-.btn-create:hover {
+.btn-outline-primary:hover {
   border-color: var(--color-accent-primary);
+  background: transparent;
 }
 
-.btn-sign-in:active,
-.btn-create:active {
+.btn-outline-secondary {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+}
+
+.btn-outline-secondary:hover {
+  border-color: var(--color-accent-primary);
+  background: transparent;
+}
+
+.btn:active {
   transform: translateY(1px);
 }

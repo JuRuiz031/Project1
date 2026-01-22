@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 /* angular-cli file: src/styles.css */
 @import "../node_modules/angular-calendar/css/angular-calendar.css";
+@import "bootstrap/dist/css/bootstrap.min.css";
 
 /* =====================================================
    Project 1 – Global Color Palette 01
@@ -26,4 +27,15 @@
   --color-text-secondary: #4b5563;
 
   --color-border-default: var(--color-ash-grey);
+
+  /* =====================================================
+     Global feedback colors
+     ===================================================== */
+  --color-feedback-error: #b91c1c;      /* readable error red */
+  --color-feedback-error-bg: #fee2e2;   /* light red background */
+
+  /* =====================================================
+     Global shadows
+     ===================================================== */
+  --shadow-elevation-2: 0 6px 18px rgba(0, 0, 0, 0.10);
 }

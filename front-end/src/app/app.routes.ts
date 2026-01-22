@@ -1,53 +1,81 @@
 import { Routes } from '@angular/router';
-import { AccountView } from './features/auth/account-view/account-view';
+
+import { AuthLayout } from './layouts/auth-layout/auth-layout';
+import { AppLayout } from './layouts/app-layout/app-layout';
+
 import { Login } from './features/auth/login/login';
 import { CreateAccount } from './features/auth/create-account/create-account';
-import { CreateCalendar } from './features/calendar/create-calendar/create-calendar';
+import { AccountView } from './features/auth/account-view/account-view';
+import { EditUser } from './features/auth/edit-user/edit-user';
 
 import { MainPageComponent } from './features/dashboard/main-page/main-page';
 
-import { EditUser } from './features/auth/edit-user/edit-user';
+import { CreateCalendar } from './features/calendar/create-calendar/create-calendar';
 import { ViewCalendarGroup } from './features/calendar/view-calendar-group/view-calendar-group';
-import { CreateEvent } from './features/event/create-event/create-event';
-import { CreatePoll } from './features/poll/create-poll/create-poll';
 import { EditCalendarGroup } from './features/calendar/edit-calendar-group/edit-calendar-group';
 import { DeleteCalendarGroup } from './features/calendar/delete-calendar-group/delete-calendar-group';
+
+import { CreateEvent } from './features/event/create-event/create-event';
 import { ViewEvent } from './features/event/view-event/view-event';
 import { EditEvent } from './features/event/edit-event/edit-event';
 import { DeleteEvent } from './features/event/delete-event/delete-event';
+
+import { CreatePoll } from './features/poll/create-poll/create-poll';
 import { ViewPoll } from './features/poll/view-poll/view-poll';
 import { EditPoll } from './features/poll/edit-poll/edit-poll';
 import { DeletePoll } from './features/poll/delete-poll/delete-poll';
 
-export const routes: Routes = [
-  { path: 'login', component: Login },
-  { path: 'create-account', component: CreateAccount },
 
+export const routes: Routes = [
+  /**
+   * AUTH / PUBLIC ROUTES
+   * Header + footer, NO profile button
+   */
   {
-    path: 'dashboard',
+    path: '',
+    component: AuthLayout,
     children: [
-      { path: 'main-page', component: MainPageComponent },
-      { path: '', pathMatch: 'full', redirectTo: 'main-page' },
+      { path: '', component: Login }, // landing page
+      { path: 'login', component: Login },
+      { path: 'create-account', component: CreateAccount },
     ],
   },
 
-  { path: 'main-page', redirectTo: '/dashboard/main-page', pathMatch: 'full' },
+  /**
+   * APP / AUTHENTICATED ROUTES
+   * Header + footer WITH profile button
+   */
+  {
+    path: '',
+    component: AppLayout,
+    children: [
+      {
+        path: 'dashboard',
+        children: [
+          { path: 'main-page', component: MainPageComponent },
+          { path: '', pathMatch: 'full', redirectTo: 'main-page' },
+        ],
+      },
 
-  { path: 'create-calendar', component: CreateCalendar },
-  { path: 'account', component: AccountView },
+      { path: 'main-page', redirectTo: '/dashboard/main-page', pathMatch: 'full' },
 
-  { path: 'edit-user', component: EditUser },
-  { path: 'view-calendar-group', component: ViewCalendarGroup },
-  { path: 'create-event', component: CreateEvent },
-  { path: 'create-poll', component: CreatePoll },
-  { path: 'edit-calendar-group', component: EditCalendarGroup },
-  { path: 'delete-calendar-group', component: DeleteCalendarGroup },
-  { path: 'view-event', component: ViewEvent },
-  { path: 'edit-event', component: EditEvent },
-  { path: 'delete-event', component: DeleteEvent },
-  { path: 'view-poll', component: ViewPoll },
-  { path: 'edit-poll', component: EditPoll },
-  { path: 'delete-poll', component: DeletePoll },
+      { path: 'create-calendar', component: CreateCalendar },
+      { path: 'account', component: AccountView },
+      { path: 'edit-user', component: EditUser },
 
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+      { path: 'view-calendar-group', component: ViewCalendarGroup },
+      { path: 'edit-calendar-group', component: EditCalendarGroup },
+      { path: 'delete-calendar-group', component: DeleteCalendarGroup },
+
+      { path: 'create-event', component: CreateEvent },
+      { path: 'view-event', component: ViewEvent },
+      { path: 'edit-event', component: EditEvent },
+      { path: 'delete-event', component: DeleteEvent },
+
+      { path: 'create-poll', component: CreatePoll },
+      { path: 'view-poll', component: ViewPoll },
+      { path: 'edit-poll', component: EditPoll },
+      { path: 'delete-poll', component: DeletePoll },
+    ],
+  },
 ];

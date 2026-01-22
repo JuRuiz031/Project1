@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BRAND_CONFIG } from '../../../../../config/brand.config';
+import { BRAND_CONFIG } from '../../../config/brand.config';
 
 @Component({
   selector: 'app-main-footer',

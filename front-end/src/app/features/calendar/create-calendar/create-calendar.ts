@@ -7,6 +7,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './create-calendar.html',
+  styleUrl: './create-calendar.css',
 })
 export class CreateCalendar {
   form: FormGroup;

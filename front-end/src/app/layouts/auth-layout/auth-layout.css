@@ -1,0 +1,5 @@
+.auth-layout__content {
+  min-height: calc(100vh - 120px);
+  display: block;
+  padding: 20px;
+}

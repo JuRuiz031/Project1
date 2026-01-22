@@ -1,27 +1,52 @@
-<h1 class="page-header">View Calendar Group</h1>
+<section class="page" aria-label="View Calendar Group Page">
+  <!-- NEW: page frame -->
+  <section class="card page-frame" aria-label="View Calendar Frame">
+    <div class="view-calendar">
+      <section class="card view-calendar__outer" aria-label="View Calendar Group">
+        <header class="view-calendar__header">
+          <h1 class="view-calendar__title">View Calendar Group</h1>
+        </header>
 
-<div class="name-box">
-  Calendar Name: {{ groupName }}
-</div>
+        <!-- Name field -->
+        <div class="card view-calendar__name-box">
+          <span class="view-calendar__name-text">
+            {{ groupName }}
+          </span>
+        </div>
 
-<div class="page-border">
+        <!-- Inner panel -->
+        <section class="card view-calendar__panel">
+          <div class="card view-calendar__field">
+            <span class="view-calendar__field-text">
+              {{ inviteLink || '—' }}
+            </span>
+          </div>
 
-  <div class="link-box">
-    Link: {{ inviteLink || '—' }}
-  </div>
+          <button
+            class="view-calendar__btn view-calendar__btn--full"
+            type="button"
+            (click)="generateLink()"
+          >
+            Generate Link
+          </button>
 
-  <button class="generate-link-button" type="button" (click)="generateLink()">
-    Generate Link
-  </button>
+          <div class="view-calendar__spacer"></div>
 
-    <!-- Later add [routerLink]="['/edit-calendar-group', groupId]" -->
-  <button class="edit-calendar-button" type="button"
-            routerLink="/edit-calendar-group">
-    Edit Calendar
-  </button>
+          <div class="view-calendar__footer">
+            <button
+              class="view-calendar__btn view-calendar__btn--primary"
+              type="button"
+              routerLink="/edit-calendar-group"
+            >
+              Edit Calendar
+            </button>
+          </div>
+        </section>
 
-</div>
-
-<div class="api-error" *ngIf="apiError">
-  {{ apiError }}
-</div>
+        <div class="api-error" *ngIf="apiError" aria-live="polite">
+          {{ apiError }}
+        </div>
+      </section>
+    </div>
+  </section>
+</section>
