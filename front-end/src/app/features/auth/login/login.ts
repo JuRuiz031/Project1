@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../../shared/services/user.service';
+import { BRAND_CONFIG } from '../../../config/brand.config';
 import { LoginRequestDTO } from '../../../shared/models/auth/login-request.dto';
 
 @Component({
@@ -14,6 +15,7 @@ import { LoginRequestDTO } from '../../../shared/models/auth/login-request.dto';
 export class Login {
   form: FormGroup;
   errorMessage: string = '';
+  readonly siteName = BRAND_CONFIG.siteName;
 
   constructor(
     private userService: UserService,

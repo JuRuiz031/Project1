@@ -1,21 +1,39 @@
-<h1 class="page-header">View User Details</h1>
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">Profile</h1>
 
-<div class ="page-border">
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Name</label>
+          <input class="form-control app-input" [value]="user.name" disabled />
+        </div>
 
-  <div class="username-box">Username: </div>
+        <div class="col-12">
+          <label class="form-label">Email</label>
+          <input class="form-control app-input" [value]="user.email" disabled />
+        </div>
+      </div>
 
-  <div class="email-box">Email: </div>
+      <div *ngIf="apiError" class="alert alert-danger mt-3 mb-0">
+        {{ apiError }}
+      </div>
+    </div>
 
-</div>
+    <div class="card-footer d-flex justify-content-end gap-4">
+      <button class="btn btn-outline-secondary" type="button" (click)="goToDashboard()">
+        Back
+      </button>
 
+      <button class="btn btn-primary" type="button" (click)="goToEditUser()">
+        Edit Profile
+      </button>
+    </div>
 
-
-<div class="container">
-  <div></div>
-
-  <!-- Later go back and add [routerLink]="['/edit-user', userId]" -->
-  <button
-    class="edit-user-profile-button"
-    routerLink="/edit-user"
-  >Edit user Profile</button>
+    <div class="card-footer d-flex justify-content-start gap-4">
+      <button class="btn btn-outline-danger" type="button" (click)="logOut()">
+        Log Out
+      </button>
+    </div>
+  </div>
 </div>

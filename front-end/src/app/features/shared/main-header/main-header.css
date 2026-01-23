@@ -1,9 +1,7 @@
-/* Keep component CSS minimal; Bootstrap handles structure/layout */
 :host {
   display: block;
 }
 
-/* Optional: if you want slightly larger brand text than default */
 .app-navbar .navbar-brand {
   font-size: 20px;
 }

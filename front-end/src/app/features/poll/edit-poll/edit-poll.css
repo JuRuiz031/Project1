@@ -1,0 +1,10 @@
+/* Same idea as edit-event: constrain width + center */
+.card {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Make Bootstrap active state fit your dark theme a bit better */
+.list-group-item.active {
+  border-color: rgba(255, 255, 255, 0.35);
+}
