@@ -25,9 +25,15 @@
         {{ isDeleting ? 'Deleting...' : 'Confirm' }}
       </button>
 
-      <a class="btn btn-outline-light" routerLink="/edit-user">
+      <button
+        type="button"
+        class="btn btn-outline-light"
+        (click)="cancelDelete()"
+        [disabled]="isDeleting"
+      >
         Cancel
-      </a>
+      </button>
+
     </div>
   </div>
 </div>
