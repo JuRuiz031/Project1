@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.calendar.CalendarCreateRequestDTO;
+import com.example.calendario.dto.calendar.CalendarDeleteResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteAcceptResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteResponseDTO;
 import com.example.calendario.dto.calendar.CalendarResponseDTO;
@@ -123,7 +124,7 @@ public class CalendarService {
     }
 
     // Delete calendar
-    public void deleteCalendar(String calendarId, String authenticatedUsername) {
+    public CalendarDeleteResponseDTO deleteCalendar(String calendarId, String authenticatedUsername) {
         // Get authenticated user
         User authenticatedUser = userService.findByUsername(authenticatedUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
@@ -152,6 +153,8 @@ public class CalendarService {
 
         // Delete calendar
         calendarRepository.deleteById(calendarId);
+
+        return new CalendarDeleteResponseDTO(calendarId, true);
     }
 
     // Generate invite link
