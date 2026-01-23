@@ -17,6 +17,8 @@ public interface EventRepository extends MongoRepository<Event, String> {
     // Find all events across multiple calendars
     List<Event> findByCalendarIdIn(List<String> calendarIds);
 
+    // Find events that contain at least one of the specified tags
+    List<Event> findByTagsIn(List<String> tags);
     
     // Find event by guest link token
     Optional<Event> findByGuestLinksToken(String token);

@@ -1,5 +1,7 @@
 package com.example.calendario.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.event.EventCreateRequestDTO;
@@ -36,7 +38,7 @@ public class EventService {
         Calendar calendar = calendarService.getCalendarById(dto.getCalendarId());
 
         // Check if authenticated user is admin of this calendar
-        if (!authenticatedUser.isAdminOfCalendar(dto.getCalendarId())) {
+        if (!authenticatedUser.isAdminOfCalendar(dto.getCalendarId()) && !authenticatedUser.isSuperuser()) {
             throw new ForbiddenException("You do not have permission to create events in this calendar");
         }
 
@@ -81,7 +83,7 @@ public class EventService {
         Event event = getEventById(eventId);
 
         // Check if authenticated user is admin of the calendar this event belongs to
-        if (!authenticatedUser.isAdminOfCalendar(event.getCalendarId())) {
+        if (!authenticatedUser.isAdminOfCalendar(event.getCalendarId()) && !authenticatedUser.isSuperuser()) {
             throw new ForbiddenException("You do not have permission to update this event");
         }
 
@@ -130,7 +132,7 @@ public class EventService {
         Event event = getEventById(eventId);
 
         // Check if authenticated user is admin of the calendar this event belongs to
-        if (!authenticatedUser.isAdminOfCalendar(event.getCalendarId())) {
+        if (!authenticatedUser.isAdminOfCalendar(event.getCalendarId()) && !authenticatedUser.isSuperuser()) {
             throw new ForbiddenException("You do not have permission to delete this event");
         }
 
@@ -138,5 +140,70 @@ public class EventService {
         eventRepository.deleteById(eventId);
 
         return new EventDeleteResponseDTO(event.getId(), event.getCalendarId(), true);
+    }
+
+    // Get events by IDs (for calendar filtering endpoint)
+    public List<Event> getEventsByIds(List<String> eventIds) {
+        return eventRepository.findAllById(eventIds);
+    }
+
+    // Get events by calendar IDs (for calendar filtering endpoint)
+    public List<Event> getEventsByCalendarIds(List<String> calendarIds) {
+        return eventRepository.findByCalendarIdIn(calendarIds);
+    }
+
+    // Generate guest invite link for an event
+    public com.example.calendario.dto.invite.EventInviteResponseDTO generateEventGuestLink(
+            String eventId, String guestName, String authenticatedUsername) {
+        // Get authenticated user
+        User authenticatedUser = userService.findByUsername(authenticatedUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+
+        // Get event
+        Event event = getEventById(eventId);
+
+        // Check if user has permission (admin of calendar or superuser)
+        if (!authenticatedUser.isAdminOfCalendar(event.getCalendarId()) && !authenticatedUser.isSuperuser()) {
+            throw new ForbiddenException("You do not have permission to create guest links for this event");
+        }
+
+        // Generate unique token
+        String token = java.util.UUID.randomUUID().toString();
+
+        // Add guest link to event
+        event.addGuestLink(token, guestName, java.time.LocalDateTime.now());
+        eventRepository.save(event);
+
+        // Build invite link (you can configure base URL via application.properties)
+        String inviteLink = "http://localhost:3000/events/guest/" + token; // Frontend URL
+
+        return new com.example.calendario.dto.invite.EventInviteResponseDTO(eventId, inviteLink, guestName);
+    }
+
+    // Get event by guest token with guest name verification
+    public com.example.calendario.dto.event.EventResponseDTO getEventByGuestToken(String token, String guestName) {
+        // Find event by guest token
+        Event event = eventRepository.findByGuestLinksToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid or expired invite link"));
+
+        // Verify guest name matches
+        boolean nameMatches = event.getGuestLinks().stream()
+                .anyMatch(link -> link.getToken().equals(token) && link.getGuestName().equalsIgnoreCase(guestName));
+
+        if (!nameMatches) {
+            throw new ForbiddenException("Guest name does not match the invite");
+        }
+
+        // Return event details
+        return new com.example.calendario.dto.event.EventResponseDTO(
+                event.getId(),
+                event.getCalendarId(),
+                event.getTitle(),
+                event.getStartTime(),
+                event.getEndTime(),
+                event.getDescription(),
+                event.getNotes(),
+                event.getTags()
+        );
     }
 }

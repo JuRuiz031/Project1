@@ -104,4 +104,9 @@ public class User {
     public void removeCalendarMembership(String calendarId) {
         this.calendarIds.removeIf(cm -> cm.getCalendarId().equals(calendarId));
     }
+
+    // Helper method for superuser check (handles null values)
+    public boolean isSuperuser() {
+        return this.isSuperuser != null && this.isSuperuser;
+    }
 }
