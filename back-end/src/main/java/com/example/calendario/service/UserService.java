@@ -1,18 +1,21 @@
 package com.example.calendario.service;
 import java.util.Date;
 import java.util.Optional;
+import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.example.calendario.dto.LoginRequestDTO;
-import com.example.calendario.dto.LoginSuccessDTO;
-import com.example.calendario.dto.UserRegistrationDTO;
-import com.example.calendario.dto.UserResponseDTO;
+import com.example.calendario.dto.user.LoginRequestDTO;
+import com.example.calendario.dto.user.LoginSuccessDTO;
+import com.example.calendario.dto.user.UserRegistrationDTO;
+import com.example.calendario.dto.user.UserResponseDTO;
 import com.example.calendario.exception.DuplicateEmailException;
 import com.example.calendario.exception.DuplicateUsernameException;
+import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.exception.InvalidCredentialsException;
 import com.example.calendario.exception.ResourceNotFoundException;
-import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.model.User;
 import com.example.calendario.repository.UserRepository;
 import com.example.calendario.util.JwtUtil;
@@ -85,6 +88,21 @@ public class UserService {
     return userRepository.findByUsername(username);
    }
 
+   // Save user
+   public User saveUser(User user) {
+    return userRepository.save(user);
+   }
+
+   // Batch save multiple users (more efficient than saving one by one)
+   public Iterable<User> saveAllUsers(Iterable<User> users) {
+    return userRepository.saveAll(users);
+   }
+
+   // Get all users (for cascade delete operations)
+   public Iterable<User> getAllUsers() {
+    return userRepository.findAll();
+   }
+
    // Validate user access - check authorization for viewing user data
    public User validateUserAccess(String requestedUserId, String authenticatedUsername) {
        // Step 1: Find the authenticated user
@@ -99,5 +117,18 @@ public class UserService {
        // Step 3: Return the requested user
        return findById(requestedUserId)
            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
+   }
+
+   // Get all calendar IDs that belong to a user
+   public List<String> getCalendarIdsForUser(String userId, String authenticatedUsername) {
+       User user = validateUserAccess(userId, authenticatedUsername);
+
+       if (user.getCalendarIds() == null) {
+           return Collections.emptyList();
+       }
+
+       return user.getCalendarIds().stream()
+               .map(User.CalendarMembership::getCalendarId)
+               .collect(Collectors.toList());
    }
 }

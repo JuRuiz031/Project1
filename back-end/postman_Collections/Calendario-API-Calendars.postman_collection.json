@@ -1,0 +1,520 @@
+{
+  "info": {
+    "_postman_id": "7983422c-ef9e-4e46-bcdb-cca4e6b2949f",
+    "name": "Calendario API v1 - Calendars",
+    "description": "Calendar management endpoints - Create, update, delete calendars and manage invites with JWT authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51732412",
+    "_collection_link": "https://go.postman.co/collection/51732412-7983422c-ef9e-4e46-bcdb-cca4e6b2949f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Create Calendar - Success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    const responseData = pm.response.json();",
+              "    pm.environment.set('calendar_id', responseData.calendar_id);",
+              "    console.log('Calendar created with ID: ' + responseData.calendar_id);",
+              "    console.log('Calendar name: ' + responseData.name);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"user_id\": \"{{user_id}}\",\n    \"name\": \"My Test Calendar\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Create Calendar - Unauthorized (No Token)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"user_id\": \"{{user_id}}\",\n  \"name\": \"Unauthorized Calendar\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Update Calendar Name - Success",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Calendar Name\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar/{{calendar_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar",
+            "{{calendar_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Update Calendar - Promote Admins",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Calendar\",\n  \"admins\": [\"user_id_to_promote_1\", \"user_id_to_promote_2\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar/{{calendar_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar",
+            "{{calendar_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Update Calendar - Forbidden (Not Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{different_user_jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Should Fail\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar/{{calendar_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar",
+            "{{calendar_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Generate Invite Link - Success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const responseData = pm.response.json();",
+              "    const inviteLink = responseData.invite_link;",
+              "    // Extract token from invite link",
+              "    const token = inviteLink.split('/').pop();",
+              "    pm.environment.set('invite_token', token);",
+              "    console.log('Invite link generated: ' + inviteLink);",
+              "    console.log('Invite token: ' + token);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendars/{{calendar_id}}/invite",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendars",
+            "{{calendar_id}}",
+            "invite"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Generate Invite Link - Forbidden (Not Admin)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "notadmintoken",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{different_user_jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendars/{{calendar_id}}/invite",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendars",
+            "{{calendar_id}}",
+            "invite"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8. Accept Invite - Success (Different User)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{different_user_jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"invite_token\": \"{{invite_token}}\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendars/invite/accept",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendars",
+            "invite",
+            "accept"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "9. Accept Invite - Invalid Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"invite_token\": \"invalid-token-12345\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendars/invite/accept",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendars",
+            "invite",
+            "accept"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10. Accept Invite - Unauthorized (No Token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"invite_token\": \"{{invite_token}}\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendars/invite/accept",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendars",
+            "invite",
+            "accept"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11. Delete Calendar - Success",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar/{{calendar_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar",
+            "{{calendar_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12. Delete Calendar - Forbidden (Not Admin)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "notadmintoken",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{different_user_jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar/{{calendar_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar",
+            "{{calendar_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13. Delete Calendar - Not Found",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar/nonexistent123",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar",
+            "nonexistent123"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
