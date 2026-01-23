@@ -7,6 +7,7 @@ import { Login } from './features/auth/login/login';
 import { CreateAccount } from './features/auth/create-account/create-account';
 import { AccountView } from './features/auth/account-view/account-view';
 import { EditUser } from './features/auth/edit-user/edit-user';
+import { DeleteUser } from './features/auth/delete-user/delete-user';
 
 import { MainPageComponent } from './features/dashboard/main-page/main-page';
 
@@ -61,6 +62,7 @@ export const routes: Routes = [
       { path: 'create-calendar', component: CreateCalendar },
       { path: 'account', component: AccountView },
       { path: 'edit-user', component: EditUser },
+      { path: 'delete-user', component: DeleteUser },
 
       { path: 'view-calendar-group', component: ViewCalendarGroup },
       { path: 'edit-calendar-group', component: EditCalendarGroup },
