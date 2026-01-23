@@ -404,14 +404,14 @@
       "response": []
     },
     {
-      "name": "13. Delete Use - Forbidden",
+      "name": "13. Delete User - Forbidden",
       "request": {
         "auth": {
           "type": "bearer",
           "bearer": [
             {
               "key": "token",
-              "value": "",
+              "value": "{{jwt_token}}",
               "type": "string"
             }
           ]
@@ -419,7 +419,7 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/v1/users/{{user_id}}",
+          "raw": "http://localhost:8080/api/v1/users/notmyuserid",
           "protocol": "http",
           "host": [
             "localhost"
@@ -429,7 +429,7 @@
             "api",
             "v1",
             "users",
-            "{{user_id}}"
+            "notmyuserid"
           ]
         }
       },

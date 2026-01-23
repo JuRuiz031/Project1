@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.example.calendario.dto.UserUpdateDTO;
+import com.example.calendario.dto.user.UserDeleteResponseDTO;
+import com.example.calendario.dto.user.UserUpdateDTO;
 import com.example.calendario.dto.user.LoginRequestDTO;
 import com.example.calendario.dto.user.LoginSuccessDTO;
 import com.example.calendario.dto.user.UserRegistrationDTO;
@@ -159,6 +160,28 @@ public class UserService {
        return findById(requestedUserId)
            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
    }
+
+    // Validate and delete user
+    public UserDeleteResponseDTO validateAndDeleteUser(String requestedUserId, String authenticatedUsername) {
+        // Step 1: Find the authenticated user
+        User authenticatedUser = findByUsername(authenticatedUsername)
+            .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        
+        // Step 2: Check authorization - user can only delete their own account
+        if (!authenticatedUser.getId().equals(requestedUserId)) {
+            throw new ForbiddenException("You can only delete your own user account");
+        }
+        
+        // Step 3: Find the user to be deleted
+        User userToDelete = findById(requestedUserId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
+        
+        // Step 4: Delete the user
+        userRepository.delete(userToDelete);
+        
+        // Step 5: Return response DTO
+        return new UserDeleteResponseDTO(userToDelete, true);
+    }
 
    // Get all calendar IDs that belong to a user
    public List<String> getCalendarIdsForUser(String userId, String authenticatedUsername) {

@@ -1,4 +1,4 @@
-package com.example.calendario.dto;
+package com.example.calendario.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
