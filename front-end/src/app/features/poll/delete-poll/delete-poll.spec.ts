@@ -8,9 +8,8 @@ describe('DeletePoll', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeletePoll]
-    })
-    .compileComponents();
+      imports: [DeletePoll],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DeletePoll);
     component = fixture.componentInstance;

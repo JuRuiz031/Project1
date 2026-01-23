@@ -14,11 +14,6 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
   styleUrls: ['./edit-poll.css'],
 })
 export class EditPoll implements OnInit {
-
-  showDeleteConfirm = false;
-  deleteInProgress = false;
-
-
   // Mock calendars (replace with API later)
   calendars: CalendarOption[] = [
     { id: '1', name: 'My Admin Calendar', isAdmin: true },
@@ -95,10 +90,14 @@ export class EditPoll implements OnInit {
     });
 
     this.tags.clear();
-    mock.tags.forEach(t => this.tags.push(this.fb.control(t, [Validators.required, Validators.maxLength(30)])));
+    mock.tags.forEach(t =>
+      this.tags.push(this.fb.control(t, [Validators.required, Validators.maxLength(30)]))
+    );
 
     this.options.clear();
-    mock.options.forEach(o => this.options.push(this.fb.control(o, [Validators.required, Validators.maxLength(80)])));
+    mock.options.forEach(o =>
+      this.options.push(this.fb.control(o, [Validators.required, Validators.maxLength(80)]))
+    );
   }
 
   // ---- selection ----
@@ -213,39 +212,16 @@ export class EditPoll implements OnInit {
 
     setTimeout(() => {
       this.isSubmitting = false;
-      // return to view poll
       this.router.navigate(['/view-poll']);
       // later: this.router.navigate(['/view-poll', this.pollId]);
     }, 400);
   }
 
-  openDeleteConfirm(): void {
-  this.showDeleteConfirm = true;
-  }
-
-  closeDeleteConfirm(): void {
-    this.showDeleteConfirm = false;
-  }
-
-  confirmDeletePoll(): void {
-    this.apiError = '';
-    this.deleteInProgress = true;
-
-    // TODO: PollApiService.deletePoll(this.pollId).subscribe(...)
-    console.log('Deleting poll:', this.pollId);
-
-    setTimeout(() => {
-      this.deleteInProgress = false;
-      this.showDeleteConfirm = false;
-      this.router.navigate(['/dashboard']); // change if needed
-    }, 400);
-  }
-
-  // ---- delete poll ----
+  // ---- delete poll (route to delete component) ----
   deletePoll(): void {
-    this.openDeleteConfirm();
-}
-
+    this.router.navigate(['/delete-poll']);
+    // later (recommended): this.router.navigate(['/delete-poll', this.pollId]);
+  }
 
   cancel(): void {
     this.router.navigate(['/view-poll']);
@@ -256,11 +232,4 @@ export class EditPoll implements OnInit {
     const c = this.form.get(name);
     return !!c && c.touched && c.invalid;
   }
-
-  calendarNameForSelectedId(calendarId: string | null | undefined): string {
-    const id = calendarId ?? '';
-    const found = this.calendars.find(c => c.id === id);
-    return found?.name ?? 'Unknown Calendar';
-  }
-
 }
