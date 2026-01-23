@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 type CalendarUser = {
   id: string;
@@ -10,12 +11,11 @@ type CalendarUser = {
 
 @Component({
   selector: 'app-edit-calendar-group',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './edit-calendar-group.html',
   styleUrls: ['./edit-calendar-group.css'],
 })
 export class EditCalendarGroup implements OnInit {
-
   // UI state
   apiError = '';
   showDeleteConfirm = false;
@@ -101,6 +101,4 @@ export class EditCalendarGroup implements OnInit {
       u.id === this.selectedUserId ? { ...u, isAdmin: false } : u
     );
   }
-
-
 }

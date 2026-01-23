@@ -1,122 +1,166 @@
-<h1 class="page-header">Edit Calendar Group</h1>
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">Edit Calendar Group</h1>
 
-<div class="page-border">
-
-  <!-- Name field -->
-  <div class="name-box">
-    <input
-      class="input"
-      type="text"
-      placeholder="name field"
-      [value]="groupName"
-      (input)="groupName = ($any($event.target).value)"
-    />
-  </div>
-
-  <!-- Inner panel -->
-  <div class="inner-panel">
-
-    <!-- Link field -->
-    <div class="link-box">
-      <input
-        class="input"
-        type="text"
-        placeholder="Link Field"
-        [value]="inviteLink"
-        readonly
-      />
-    </div>
-
-    <!-- Generate link button -->
-    <button class="wide-button" type="button" (click)="generateLink()">
-      Generate Field Button
-    </button>
-
-    <!-- Users list -->
-    <div class="users-box">
-      <div class="users-title">List of users on calendar</div>
-
-      <div class="users-list" *ngIf="users.length > 0; else noUsers">
-        <button
-          type="button"
-          class="user-row"
-          *ngFor="let u of users"
-          [class.selected]="u.id === selectedUserId"
-          (click)="selectUser(u.id)"
-        >
-          <div class="user-left">
-            <div class="user-name">{{ u.username }}</div>
-            <div class="user-email">{{ u.email }}</div>
-          </div>
-
-          <div class="user-right">
-            <span class="badge" [class.admin]="u.isAdmin">{{ u.isAdmin ? 'Admin' : 'Member' }}</span>
-          </div>
-        </button>
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <!-- Name field -->
+      <div class="mb-3">
+        <label class="form-label">Calendar Group Name</label>
+        <input
+          class="form-control app-input"
+          type="text"
+          placeholder="Calendar group name"
+          [value]="groupName"
+          (input)="groupName = ($any($event.target).value)"
+        />
       </div>
 
-      <ng-template #noUsers>
-        <div class="empty">No users yet.</div>
-      </ng-template>
+      <!-- Link field -->
+      <div class="mb-3">
+        <label class="form-label">Invite Link</label>
+        <input
+          class="form-control app-input"
+          type="text"
+          placeholder="Invite link"
+          [value]="inviteLink"
+          readonly
+        />
+      </div>
+
+      <!-- Generate link button -->
+      <button
+        type="button"
+        class="btn btn-outline-secondary w-100 mb-3"
+        (click)="generateLink()"
+      >
+        Generate Link
+      </button>
+
+      <!-- Users list -->
+      <div class="mb-3">
+        <div class="fw-semibold mb-2">List of users on calendar</div>
+
+        <ng-container *ngIf="users.length > 0; else noUsers">
+          <div class="list-group">
+            <button
+              type="button"
+              class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+              *ngFor="let u of users"
+              [class.active]="u.id === selectedUserId"
+              (click)="selectUser(u.id)"
+            >
+              <div>
+                <div class="fw-bold">{{ u.username }}</div>
+                <div class="small opacity-75">{{ u.email }}</div>
+              </div>
+
+              <span
+                class="badge rounded-pill"
+                [ngClass]="u.isAdmin ? 'text-bg-success' : 'text-bg-secondary'"
+              >
+                {{ u.isAdmin ? 'Admin' : 'Member' }}
+              </span>
+            </button>
+          </div>
+        </ng-container>
+
+        <ng-template #noUsers>
+          <div class="border rounded p-3 bg-light">
+            No users yet.
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Action buttons under list -->
+      <div class="row g-2">
+        <div class="col-12 col-md-4">
+          <button
+            class="btn btn-outline-secondary w-100"
+            type="button"
+            (click)="promoteSelectedToAdmin()"
+            [disabled]="!selectedUserId || selectedUserIsAdmin"
+          >
+            Promote to Admin
+          </button>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <button
+            class="btn btn-outline-secondary w-100"
+            type="button"
+            (click)="demoteSelectedToMember()"
+            [disabled]="!selectedUserId || !selectedUserIsAdmin"
+          >
+            Demote to Member
+          </button>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <button
+            class="btn btn-outline-danger w-100"
+            type="button"
+            (click)="removeSelectedUser()"
+            [disabled]="!selectedUserId"
+          >
+            Remove User
+          </button>
+        </div>
+      </div>
+
+      <!-- Error display -->
+      <div *ngIf="apiError" class="alert alert-danger mt-3 mb-0" aria-live="polite">
+        {{ apiError }}
+      </div>
     </div>
 
-    <!-- Action buttons under list -->
-<div class="actions-row">
-  <button
-    class="small-button"
-    type="button"
-    (click)="promoteSelectedToAdmin()"
-    [disabled]="!selectedUserId || selectedUserIsAdmin"
-  >
-    Promote Selected User to Admin
-  </button>
+    <!-- Footer actions -->
+    <div class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <!-- Delete calendar group -->
+      <button
+        type="button"
+        class="btn btn-outline-danger"
+        (click)="openDeleteConfirm()"
+      >
+        Delete Calendar Group
+      </button>
 
-  <button
-    class="small-button"
-    type="button"
-    (click)="demoteSelectedToMember()"
-    [disabled]="!selectedUserId || !selectedUserIsAdmin"
-  >
-    Demote Selected User to Member
-  </button>
+      <!-- Right-side actions -->
+      <div class="d-flex gap-2 ms-auto">
+        <!-- Cancel -> back to view-calendar-group for this group -->
+        <a class="btn btn-outline-secondary" routerLink="/view-calendar-group">
+          Cancel
+        </a>
 
-  <button
-    class="small-button"
-    type="button"
-    (click)="removeSelectedUser()"
-    [disabled]="!selectedUserId"
-  >
-    Remove User Button
-  </button>
-</div>
-
-
+        <!-- Save Changes -> dashboard/main-page -->
+        <a class="btn btn-primary" routerLink="/main-page">
+          Save Changes
+        </a>
+      </div>
+    </div>
   </div>
 
-</div>
+  <!-- DELETE CONFIRM MODAL (Bootstrap utilities, no custom CSS needed) -->
+  <div
+    *ngIf="showDeleteConfirm"
+    class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75"
+    style="z-index: 1050"
+    (click)="closeDeleteConfirm()"
+  >
+    <div class="card app-card shadow-sm" style="width: min(720px, 92vw);" (click)="$event.stopPropagation()">
+      <div class="card-body">
+        <div class="h5 text-center mb-3">
+          Are you sure you want to delete this Calendar and all related events?
+        </div>
 
-<!-- Delete calendar group button -->
-<div class="footer">
-  <button class="delete-calendar-button" type="button" (click)="openDeleteConfirm()">
-    Delete Calendar Group
-  </button>
-</div>
-
-<!-- Error display -->
-<div class="api-error" *ngIf="apiError">{{ apiError }}</div>
-
-<!-- DELETE CONFIRM MODAL -->
-<div class="overlay" *ngIf="showDeleteConfirm" (click)="closeDeleteConfirm()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-title">
-      Are you sure you want to delete this Calendar and all related events?
-    </div>
-
-    <div class="modal-actions">
-      <button class="modal-btn" type="button" (click)="closeDeleteConfirm()">Cancel</button>
-      <button class="modal-btn danger" type="button" (click)="confirmDeleteCalendarGroup()">
-        Delete
-      </button>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="btn btn-outline-secondary" type="button" (click)="closeDeleteConfirm()">
+            Cancel
+          </button>
+          <button class="btn btn-outline-danger" type="button" (click)="confirmDeleteCalendarGroup()">
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

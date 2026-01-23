@@ -1,62 +1,51 @@
-<section class="page" aria-label="Create Calendar Page">
-  <!-- Page frame (matches view-calendar-group) -->
-  <section class="card page-frame" aria-label="Create Calendar Frame">
-    <div class="create-calendar">
-      <section class="card create-calendar__outer" aria-label="Create Calendar">
-        <header class="create-calendar__header">
-          <h1 class="create-calendar__title">Create Calendar</h1>
-        </header>
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">Create Calendar</h1>
 
-        <!-- Inner panel -->
-        <section class="card create-calendar__panel" aria-label="Create Calendar Panel">
-          <form class="create-calendar__form" [formGroup]="form" (ngSubmit)="sendData()">
-            <div class="card create-calendar__field">
-              <label class="create-calendar__label" for="calendar-name">
-                Calendar name:
-              </label>
-              <input
-                id="calendar-name"
-                class="create-calendar__input"
-                type="text"
-                formControlName="name"
-                required
-                minlength="1"
-                maxlength="50"
-                autocomplete="off"
-              />
-              <p class="create-calendar__hint">
-                Choose a short, recognizable name (1–50 characters).
-              </p>
-            </div>
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="sendData()" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="calendar-name">Calendar name:</label>
 
-            <div class="create-calendar__spacer"></div>
+          <input
+            id="calendar-name"
+            type="text"
+            class="form-control app-input"
+            formControlName="name"
+            placeholder="Calendar name"
+            required
+            minlength="1"
+            maxlength="50"
+            autocomplete="off"
+          />
 
-            <div class="create-calendar__actions">
-              <button
-                type="button"
-                class="create-calendar__btn"
-              >
-                Cancel
-              </button>
+          <div class="form-text">
+            Choose a short, recognizable name (1–50 characters).
+          </div>
+        </div>
 
-              <button
-                type="submit"
-                class="create-calendar__btn create-calendar__btn--primary"
-                [disabled]="!form.valid"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
-        </section>
-
+        <!-- Backend response -->
         @if (response) {
-          <div class="api-error" aria-live="polite">
+          <div class="alert alert-danger mt-3 mb-0">
             Backend response:
-            <span class="create-calendar__response-text">{{ response }}</span>
+            <strong>{{ response }}</strong>
           </div>
         }
-      </section>
+      </form>
     </div>
-  </section>
-</section>
+
+    <!-- Footer actions: same spacing model as Create Event -->
+    <div class="card-footer d-flex justify-content-end gap-2">
+      <a class="btn btn-outline-light" routerLink="/main-page">Cancel</a>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!form.valid"
+      >
+        Submit
+      </button>
+
+    </div>
+  </div>
+</div>

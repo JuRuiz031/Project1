@@ -1,12 +1,4 @@
-.main-footer {
-  background: var(--color-background-secondary);
-  color: var(--color-text-primary);
-  border-top: 1px solid var(--color-border-default);
-}
-
-.main-footer__inner {
-  padding: 12px 20px;
-  font-size: 12px;
-  opacity: 0.9;
-  text-align: right;
+/* Keep footer styling minimal and structural */
+:host {
+  display: block;
 }

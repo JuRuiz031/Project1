@@ -1,17 +1,25 @@
-<header class="main-header" role="banner">
-  <div class="main-header__inner">
-    <div class="main-header__brand">
+<header class="app-navbar navbar" role="banner">
+  <div class="container-fluid px-3 py-2">
+    <span class="navbar-brand mb-0 h1">
       {{ siteName }}
-    </div>
+    </span>
 
-    <button
-      *ngIf="showProfile"
-      type="button"
-      class="main-header__profile-btn"
-      aria-label="Profile (placeholder)"
-      routerLink="/account"
-    >
-      Profile
-    </button>
+    <div class="d-flex gap-2">
+      <a
+        *ngIf="showProfile"
+        class="btn btn-outline-light btn-sm"
+        routerLink="/account"
+      >
+        Profile
+      </a>
+
+      <a
+        *ngIf="showHome"
+        class="btn btn-outline-light btn-sm"
+        routerLink="/main-page"
+      >
+        Home
+      </a>
+    </div>
   </div>
 </header>

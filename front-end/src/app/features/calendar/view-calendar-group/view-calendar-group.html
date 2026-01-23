@@ -1,52 +1,46 @@
-<section class="page" aria-label="View Calendar Group Page">
-  <!-- NEW: page frame -->
-  <section class="card page-frame" aria-label="View Calendar Frame">
-    <div class="view-calendar">
-      <section class="card view-calendar__outer" aria-label="View Calendar Group">
-        <header class="view-calendar__header">
-          <h1 class="view-calendar__title">View Calendar Group</h1>
-        </header>
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">View Calendar Group</h1>
 
-        <!-- Name field -->
-        <div class="card view-calendar__name-box">
-          <span class="view-calendar__name-text">
-            {{ groupName }}
-          </span>
-        </div>
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <!-- Calendar name -->
+      <div class="mb-3 text-center fw-bold">
+        {{ groupName }}
+      </div>
 
-        <!-- Inner panel -->
-        <section class="card view-calendar__panel">
-          <div class="card view-calendar__field">
-            <span class="view-calendar__field-text">
-              {{ inviteLink || '—' }}
-            </span>
-          </div>
+      <!-- Invite link display -->
+      <div class="mb-3 text-center">
+        {{ inviteLink || '—' }}
+      </div>
 
-          <button
-            class="view-calendar__btn view-calendar__btn--full"
-            type="button"
-            (click)="generateLink()"
-          >
-            Generate Link
-          </button>
+      <!-- Generate link -->
+      <button
+        type="button"
+        class="btn btn-primary w-100 mb-3"
+        (click)="generateLink()"
+      >
+        Generate Link
+      </button>
 
-          <div class="view-calendar__spacer"></div>
-
-          <div class="view-calendar__footer">
-            <button
-              class="view-calendar__btn view-calendar__btn--primary"
-              type="button"
-              routerLink="/edit-calendar-group"
-            >
-              Edit Calendar
-            </button>
-          </div>
-        </section>
-
-        <div class="api-error" *ngIf="apiError" aria-live="polite">
-          {{ apiError }}
-        </div>
-      </section>
+      <!-- API error -->
+      <div *ngIf="apiError" class="alert alert-danger mt-2 mb-0" aria-live="polite">
+        {{ apiError }}
+      </div>
     </div>
-  </section>
-</section>
+
+    <!-- Footer actions (matches Create Event / Create Calendar spacing) -->
+    <div class="card-footer d-flex justify-content-end gap-2">
+      <a class="btn btn-outline-light" routerLink="/main-page">
+        Cancel
+      </a>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        routerLink="/edit-calendar-group"
+      >
+        Edit Calendar
+      </button>
+    </div>
+  </div>
+</div>

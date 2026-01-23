@@ -1,20 +1,20 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
 @Component({
   selector: 'app-create-event',
-  // standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './create-event.html',
   styleUrls: ['./create-event.css'],
 })
 export class CreateEvent implements OnInit {
   private fb = inject(FormBuilder);
 
-  // Später ersetzt du das durch einen API-Call (Calendars vom Backend laden)
   calendars: CalendarOption[] = [
     { id: '1', name: 'My Admin Calendar', isAdmin: true },
     { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
@@ -35,13 +35,11 @@ export class CreateEvent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Optional: Default = erster Admin-Kalender
     const firstAdmin = this.calendars.find(c => c.isAdmin);
     if (firstAdmin) this.form.patchValue({ calendarId: firstAdmin.id });
   }
 
   get adminCalendars(): CalendarOption[] {
-    // Wireframe: "can only create events for admin calendars"
     return this.calendars.filter(c => c.isAdmin);
   }
 
@@ -55,15 +53,14 @@ export class CreateEvent implements OnInit {
 
     const v = this.form.getRawValue();
 
-    // Combine date + time -> ISO (lokal)
     const start = new Date(`${v.startDate}T${v.startTime}:00`);
     const end = new Date(`${v.endDate}T${v.endTime}:00`);
 
-    if (!(start instanceof Date) || isNaN(start.getTime())) {
+    if (isNaN(start.getTime())) {
       this.apiError = 'Start date/time is invalid.';
       return;
     }
-    if (!(end instanceof Date) || isNaN(end.getTime())) {
+    if (isNaN(end.getTime())) {
       this.apiError = 'End date/time is invalid.';
       return;
     }
@@ -72,7 +69,6 @@ export class CreateEvent implements OnInit {
       return;
     }
 
-    // DTO für späteres Backend
     const payload = {
       calendar_id: v.calendarId,
       title: v.title,
@@ -82,18 +78,15 @@ export class CreateEvent implements OnInit {
       notes: v.notes ?? '',
     };
 
-    // TODO: hier rufst du später dein EventApiService.createEvent(payload) auf
     this.isSubmitting = true;
     console.log('CreateEvent payload:', payload);
 
-    // Simulierter Erfolg
     setTimeout(() => {
       this.isSubmitting = false;
       this.form.reset();
     }, 400);
   }
 
-  // kleine Helper für Template
   hasError(controlName: string): boolean {
     const c = this.form.get(controlName);
     return !!c && c.touched && c.invalid;

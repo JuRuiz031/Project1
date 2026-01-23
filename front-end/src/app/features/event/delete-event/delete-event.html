@@ -1,1 +1,33 @@
-<p>delete-event works!</p>
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">Delete Event</h1>
+
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <div class="delete-event__message">
+        Are you sure you want to delete
+        <strong>"{{ eventName }}"</strong>
+        from
+        <strong>"{{ calendarName }}"</strong>?
+      </div>
+
+      <div *ngIf="apiError" class="alert alert-danger mt-3 mb-0">
+        {{ apiError }}
+      </div>
+    </div>
+
+    <div class="card-footer d-flex justify-content-center gap-5">
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="confirmDelete()"
+        [disabled]="isDeleting"
+      >
+        {{ isDeleting ? 'Deleting...' : 'Confirm' }}
+      </button>
+      
+      <a class="btn btn-outline-light" routerLink="/view-event">
+        Cancel
+      </a>
+    </div>
+  </div>
+</div>

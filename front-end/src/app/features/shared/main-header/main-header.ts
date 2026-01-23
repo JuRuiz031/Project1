@@ -14,4 +14,5 @@ export class MainHeader {
   readonly siteName = BRAND_CONFIG.siteName;
 
   @Input() showProfile = true;
+  @Input() showHome = true;
 }
