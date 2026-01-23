@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
@@ -14,6 +14,7 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 })
 export class ViewEvent implements OnInit {
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   // Kept for UI consistency (dropdown still renders), but form stays disabled.
   calendars: CalendarOption[] = [
@@ -48,5 +49,14 @@ export class ViewEvent implements OnInit {
 
   get adminCalendars(): CalendarOption[] {
     return this.calendars.filter(c => c.isAdmin);
+  }
+
+  goBack(): void {
+    this.router.navigateByUrl('/main-page');
+  }
+
+  goToEditEvent(): void {
+    // Placeholder for future functionality to view event details
+    this.router.navigateByUrl('/edit-event');
   }
 }

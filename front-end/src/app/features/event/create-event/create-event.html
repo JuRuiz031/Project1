@@ -111,7 +111,14 @@
 
     <div class="card-footer d-flex justify-content-end gap-2">
       <!-- Cancel -->
-      <a class="btn btn-outline-light" routerLink="/main-page">Cancel</a>
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="cancel()"
+        [disabled]="isSubmitting"
+      >
+        Cancel
+      </button>
 
       <!-- Submit -->
       <button
