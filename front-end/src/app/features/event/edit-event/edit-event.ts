@@ -122,6 +122,32 @@ export class EditEvent implements OnInit {
     }, 400);
   }
 
+  deleteEvent(): void {
+    this.apiError = '';
+    this.isSubmitting = true;
+
+    console.log('Deleting event...');
+
+    // Placeholder "delete" behavior: pretend API call succeeded
+    setTimeout(() => {
+      this.isSubmitting = false;
+      this.router.navigateByUrl('/delete-event');
+    }, 400);
+  }
+
+  cancelEdit(): void {
+    this.apiError = '';
+    this.isSubmitting = true;
+
+    console.log('Cancelling edit...');
+
+    // Placeholder "cancel" behavior: navigate back to view-event
+    setTimeout(() => {
+      this.isSubmitting = false;
+      this.router.navigateByUrl('/view-event');
+    }, 200);
+  }
+
   hasError(controlName: string): boolean {
     const c = this.form.get(controlName);
     return !!c && c.touched && c.invalid;
