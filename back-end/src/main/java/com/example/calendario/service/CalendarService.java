@@ -1,6 +1,7 @@
 package com.example.calendario.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.calendar.CalendarCreateRequestDTO;
+import com.example.calendario.dto.calendar.CalendarDeleteResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteAcceptResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteResponseDTO;
 import com.example.calendario.dto.calendar.CalendarResponseDTO;
@@ -42,6 +44,12 @@ public class CalendarService {
         // Create new Calendar
         Calendar calendar = new Calendar();
         calendar.setName(dto.getName());
+
+        //no duplicate calendar name
+        List<String> userCalendarIds = userService.getCalendarIdsForUser(authenticatedUser.getId(), authenticatedUsername);
+        if (userCalendarIds.stream().anyMatch(id -> calendarRepository.findById(id).map(Calendar::getName).orElse("").equals(dto.getName()))) {
+            throw new ForbiddenException("You already have a calendar with the name: " + dto.getName());
+        }
 
         // Save calendar
         Calendar savedCalendar = calendarRepository.save(calendar);
@@ -116,7 +124,7 @@ public class CalendarService {
     }
 
     // Delete calendar
-    public void deleteCalendar(String calendarId, String authenticatedUsername) {
+    public CalendarDeleteResponseDTO deleteCalendar(String calendarId, String authenticatedUsername) {
         // Get authenticated user
         User authenticatedUser = userService.findByUsername(authenticatedUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
@@ -145,6 +153,8 @@ public class CalendarService {
 
         // Delete calendar
         calendarRepository.deleteById(calendarId);
+
+        return new CalendarDeleteResponseDTO(calendarId, true);
     }
 
     // Generate invite link

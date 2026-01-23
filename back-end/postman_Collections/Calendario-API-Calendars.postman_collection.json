@@ -270,6 +270,16 @@
     {
       "name": "7. Generate Invite Link - Forbidden (Not Admin)",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "notadmintoken",
+              "type": "string"
+            }
+          ]
+        },
         "method": "GET",
         "header": [
           {
@@ -299,6 +309,16 @@
     {
       "name": "8. Accept Invite - Success (Different User)",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
         "method": "POST",
         "header": [
           {
@@ -433,6 +453,16 @@
     {
       "name": "12. Delete Calendar - Forbidden (Not Admin)",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "notadmintoken",
+              "type": "string"
+            }
+          ]
+        },
         "method": "DELETE",
         "header": [
           {
