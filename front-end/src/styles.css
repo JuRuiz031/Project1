@@ -133,6 +133,20 @@
   --bs-btn-active-border-color: var(--color-accent-tertiary);
 }
 
+/* OUTLINE PRIMARY BUTTON */
+.btn-outline-primary {
+  --bs-btn-color: var(--color-accent-primary);
+  --bs-btn-border-color: var(--color-accent-primary);
+
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--color-accent-primary);
+  --bs-btn-hover-border-color: var(--color-accent-primary);
+
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--color-accent-tertiary);
+  --bs-btn-active-border-color: var(--color-accent-tertiary);
+}
+
 /* DANGER BUTTON */
 .btn-danger {
   --bs-btn-bg: var(--color-feedback-error);

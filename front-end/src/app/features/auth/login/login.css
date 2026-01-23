@@ -87,28 +87,3 @@
   height: 36px;
   border-radius: 8px;
 }
-
-/* Make outline buttons match your theme */
-.btn-outline-primary {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-default);
-}
-
-.btn-outline-primary:hover {
-  border-color: var(--color-accent-primary);
-  background: transparent;
-}
-
-.btn-outline-secondary {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-default);
-}
-
-.btn-outline-secondary:hover {
-  border-color: var(--color-accent-primary);
-  background: transparent;
-}
-
-.btn:active {
-  transform: translateY(1px);
-}
