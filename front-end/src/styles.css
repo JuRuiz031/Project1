@@ -1,6 +1,5 @@
-/* You can add global styles to this file, and also import other style files */
-/* angular-cli file: src/styles.css */
 @import "../node_modules/angular-calendar/css/angular-calendar.css";
+@import "bootstrap/dist/css/bootstrap.min.css";
 
 /* =====================================================
    Project 1 – Global Color Palette 01
@@ -26,4 +25,157 @@
   --color-text-secondary: #4b5563;
 
   --color-border-default: var(--color-ash-grey);
+
+  /* =====================================================
+     Global feedback colors
+     ===================================================== */
+  --color-feedback-error: #b91c1c;      /* readable error red */
+  --color-feedback-error-bg: #fee2e2;   /* light red background */
+
+  /* =====================================================
+     Global shadows
+     ===================================================== */
+  --shadow-elevation-2: 0 6px 18px rgba(0, 0, 0, 0.10);
+}
+
+/* App page background */
+.app-page {
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  min-height: calc(100vh - 120px); /* if header+footer */
+}
+
+/* App "card" look (instead of bg-dark/text-white/etc) */
+.app-card {
+  background: var(--color-background-secondary);
+  border: 2px solid var(--color-border-default);
+  color: var(--color-text-primary);
+}
+
+/* Inputs that match your design system */
+.app-input,
+.app-select,
+.app-textarea {
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+}
+
+/* Optional: make placeholder text consistent */
+.app-input::placeholder,
+.app-textarea::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* Bootstrap invalid feedback is fine; but you can align color */
+.invalid-feedback,
+.alert-danger {
+  color: var(--color-feedback-error);
+}
+
+/* =====================================================
+   App Header / Navbar (Bootstrap-based)
+   ===================================================== */
+.app-navbar {
+  background: var(--color-steel-blue);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Brand + links on the blue header */
+.app-navbar .navbar-brand,
+.app-navbar .nav-link {
+  color: #fff;
+}
+
+.app-navbar .navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* Outline button matches your previous "Profile" look */
+.app-navbar .btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.app-navbar .btn-outline-light:hover {
+  border-color: #fff;
+}
+
+/* =====================================================
+   App Footer (Bootstrap-based, header-aligned)
+   ===================================================== */
+.app-footer {
+  background: var(--color-steel-blue);
+  color: #fff;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.app-footer__text {
+  font-size: 12px;
+  opacity: 0.9;
+  text-align: right;
+}
+
+/* =====================================================
+   Bootstrap Button Overrides (Global)
+   ===================================================== */
+
+/* PRIMARY BUTTON */
+.btn-primary {
+  --bs-btn-bg: var(--color-accent-primary);
+  --bs-btn-border-color: var(--color-accent-primary);
+  --bs-btn-color: #fff;
+
+  --bs-btn-hover-bg: var(--color-accent-secondary);
+  --bs-btn-hover-border-color: var(--color-accent-secondary);
+
+  --bs-btn-active-bg: var(--color-accent-tertiary);
+  --bs-btn-active-border-color: var(--color-accent-tertiary);
+}
+
+/* OUTLINE PRIMARY BUTTON */
+.btn-outline-primary {
+  --bs-btn-color: var(--color-accent-primary);
+  --bs-btn-border-color: var(--color-accent-primary);
+
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--color-accent-primary);
+  --bs-btn-hover-border-color: var(--color-accent-primary);
+
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--color-accent-tertiary);
+  --bs-btn-active-border-color: var(--color-accent-tertiary);
+}
+
+/* DANGER BUTTON */
+.btn-danger {
+  --bs-btn-bg: var(--color-feedback-error);
+  --bs-btn-border-color: var(--color-feedback-error);
+  --bs-btn-color: #fff;
+
+  --bs-btn-hover-bg: #991b1b; /* slightly darker red */
+  --bs-btn-hover-border-color: #991b1b;
+
+  --bs-btn-active-bg: #7f1d1d;
+  --bs-btn-active-border-color: #7f1d1d;
+}
+
+/* OUTLINE DANGER BUTTON */
+.btn-outline-danger {
+  --bs-btn-color: var(--color-feedback-error);
+  --bs-btn-border-color: var(--color-feedback-error);
+
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--color-feedback-error);
+  --bs-btn-hover-border-color: var(--color-feedback-error);
+
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #7f1d1d;
+  --bs-btn-active-border-color: #7f1d1d;
+}
+
+/* Optional: consistent focus ring */
+.btn-primary:focus-visible,
+.btn-danger:focus-visible {
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.15);
 }

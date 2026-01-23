@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import { MainHeader } from './components/main-header/main-header';
-import { MainFooter } from './components/main-footer/main-footer';
+import { MainHeader } from '../../shared/main-header/main-header';
+import { MainFooter } from '../../shared/main-footer/main-footer';
 
 import { CalendarDisplay } from './components/calendar-display/calendar-display';
 import { CalendarOptions } from './components/calendar-options/calendar-options';

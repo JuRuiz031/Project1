@@ -1,76 +1,76 @@
-<div class="page-container">
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">Create Account</h1>
 
-  <div class="title-box">
-    <h1>CalendarIO</h1>
-  </div>
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <form [formGroup]="form" novalidate>
+        <div class="d-flex flex-column gap-3">
+          <!-- Name -->
+          <div>
+            <label class="form-label">Name</label>
+            <input
+              type="text"
+              class="form-control app-input"
+              formControlName="name"
+              placeholder="Full name"
+              [ngClass]="{ 'is-invalid': hasError('name') }"
+            />
+            <div class="invalid-feedback">Name is required.</div>
+          </div>
 
-  <div class="create-account-box">
-    <p class="welcome-text">Join CalendarIO and start managing your schedule today.</p>
+          <!-- Email -->
+          <div>
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control app-input"
+              formControlName="email"
+              placeholder="name@example.com"
+              [ngClass]="{ 'is-invalid': hasError('email') }"
+            />
+            <div class="invalid-feedback">Enter a valid email.</div>
+          </div>
 
-    <h2>Create Account</h2>
-
-    <form [formGroup]="form" (ngSubmit)="onCreateAccount()">
-
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Enter username" formControlName="username">
-        @if (form.get('username')?.touched && form.get('username')?.hasError('required')) {
-          <span class="error-text">Username is required</span>
-        }
-        @if (form.get('username')?.touched && form.get('username')?.hasError('minlength')) {
-          <span class="error-text">Username must be at least 3 characters</span>
-        }
-        @if (form.get('username')?.touched && form.get('username')?.hasError('maxlength')) {
-          <span class="error-text">Username cannot exceed 20 characters</span>
-        }
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Enter email" formControlName="email">
-        @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
-          <span class="error-text">Email is required</span>
-        }
-        @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
-          <span class="error-text">Please enter a valid email address</span>
-        }
-      </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter password (5-25 characters)" formControlName="password">
-        @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
-          <span class="error-text">Password is required</span>
-        }
-        @if (form.get('password')?.touched && form.get('password')?.hasError('minlength')) {
-          <span class="error-text">Password must be at least 5 characters</span>
-        }
-        @if (form.get('password')?.touched && form.get('password')?.hasError('maxlength')) {
-          <span class="error-text">Password cannot exceed 25 characters</span>
-        }
-      </div>
-
-      <div class="form-group">
-        <label for="passwordConfirm">Confirm Password</label>
-        <input type="password" id="passwordConfirm" placeholder="Re-enter password" formControlName="passwordConfirm">
-        @if (form.get('passwordConfirm')?.touched && form.get('passwordConfirm')?.hasError('required')) {
-          <span class="error-text">Please confirm your password</span>
-        }
-      </div>
-
-      @if (errorMessage) {
-        <div class="error-message">
-          {{ errorMessage }}
+          <!-- Password -->
+          <div>
+            <label class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control app-input"
+              formControlName="password"
+              placeholder="At least 8 characters"
+              [ngClass]="{ 'is-invalid': hasError('password') }"
+            />
+            <div class="invalid-feedback">
+              Password must be at least 8 characters.
+            </div>
+          </div>
         </div>
-      }
 
-      <div class="button-group">
-        <button type="submit" class="btn-create-account">Create Account</button>
-        
-        <button type="button" class="btn-login" routerLink="/login">Already a User? Log in here</button>
-      </div>
+        <div *ngIf="apiError" class="alert alert-danger mt-3 mb-0">
+          {{ apiError }}
+        </div>
+      </form>
+    </div>
 
-    </form>
+    <!-- Footer actions -->
+    <div class="card-footer d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="createAccount()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Creating...' : 'Create Account' }}
+      </button>
+    </div>
   </div>
-
 </div>

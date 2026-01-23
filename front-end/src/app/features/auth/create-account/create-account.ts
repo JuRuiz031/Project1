@@ -1,48 +1,59 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { UserService } from '../../../shared/services/user.service';
-import { UserRegistrationDTO } from '../../../shared/models/auth/user-registration.dto';
 
 @Component({
   selector: 'app-create-account',
-  imports: [RouterLink, ReactiveFormsModule],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './create-account.html',
   styleUrl: './create-account.css',
 })
-export class CreateAccount {
-  form: FormGroup;
-  errorMessage: string = '';
+export class CreateAccount implements OnInit {
+  form!: FormGroup;
 
-  constructor(
-    private userService: UserService,
-    private router: Router,
-    private fb: FormBuilder
-  ) {
+  apiError = '';
+  isSubmitting = false;
+
+  constructor(private fb: FormBuilder, private router: Router) {}
+
+  ngOnInit(): void {
     this.form = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(25)]],
-      passwordConfirm: ['', Validators.required]
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
     });
   }
 
-  onCreateAccount() {
-    if (this.form.get('password')?.value !== this.form.get('passwordConfirm')?.value) {
-      this.errorMessage = 'Passwords do not match';
+  hasError(name: string): boolean {
+    const c = this.form.get(name);
+    return !!c && c.touched && c.invalid;
+  }
+
+  createAccount(): void {
+    this.apiError = '';
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.apiError = 'Please fix validation errors.';
       return;
     }
 
-    this.userService.register(this.form.value).subscribe({
-      next: (response) => {
-        console.log('User created:', response);
-        this.router.navigate(['/login']);
-      },
-      error: (err) => {
-        console.error('Registration error:', err);
-        this.errorMessage = err.error?.message || 'Registration failed';
-      }
-    });
+    const payload = this.form.getRawValue();
+
+    this.isSubmitting = true;
+    console.log('Create account payload:', payload);
+
+    // TODO: replace with AuthApiService.createAccount(payload).subscribe(...)
+    setTimeout(() => {
+      this.isSubmitting = false;
+      // After successful account creation, return to login
+      this.router.navigate(['/login']);
+    }, 500);
+  }
+
+  cancel(): void {
+    this.router.navigate(['/login']);
   }
 }

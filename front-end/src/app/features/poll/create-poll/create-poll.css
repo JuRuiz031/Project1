@@ -1,0 +1,5 @@
+/* Match Create Event: constrain the card width and center it */
+.card {
+  max-width: 900px;
+  margin: 0 auto;
+}

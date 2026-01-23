@@ -1,11 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-delete-calendar-group',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './delete-calendar-group.html',
-  styleUrl: './delete-calendar-group.css',
+  styleUrls: ['./delete-calendar-group.css'],
 })
 export class DeleteCalendarGroup {
+  private router = inject(Router);
 
+  apiError = '';
+  isDeleting = false;
+
+  confirmDelete(): void {
+    this.apiError = '';
+    this.isDeleting = true;
+
+    // TODO: replace this with your real delete call later
+    console.log('Deleting calendar group...');
+
+    // Match delete-event behavior: confirm returns to main-page/dashboard
+    setTimeout(() => {
+      this.isDeleting = false;
+      this.router.navigateByUrl('/main-page');
+    }, 400);
+  }
 }

@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 
 type CalendarUser = {
   id: string;
@@ -10,11 +11,13 @@ type CalendarUser = {
 
 @Component({
   selector: 'app-edit-calendar-group',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './edit-calendar-group.html',
   styleUrls: ['./edit-calendar-group.css'],
 })
 export class EditCalendarGroup implements OnInit {
+  // Router Constructor
+  constructor(private router: Router) {}
 
   // UI state
   apiError = '';
@@ -71,21 +74,8 @@ export class EditCalendarGroup implements OnInit {
   }
 
   openDeleteConfirm() {
-    this.showDeleteConfirm = true;
-  }
-
-  closeDeleteConfirm() {
-    this.showDeleteConfirm = false;
-  }
-
-  confirmDeleteCalendarGroup() {
-    this.apiError = '';
-    this.showDeleteConfirm = false;
-
-    // TODO: API call -> calendarGroupApi.deleteGroup(groupId)
-    // danach navigate -> z.B. /dashboard oder /calendar-groups
-    console.log('Deleting calendar group:', this.groupId);
-  }
+  this.router.navigateByUrl('/delete-calendar-group');
+}
 
   get selectedUserIsAdmin(): boolean {
     if (!this.selectedUserId) return false;
@@ -101,6 +91,4 @@ export class EditCalendarGroup implements OnInit {
       u.id === this.selectedUserId ? { ...u, isAdmin: false } : u
     );
   }
-
-
 }

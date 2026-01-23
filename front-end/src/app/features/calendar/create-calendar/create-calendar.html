@@ -1,21 +1,51 @@
-<h2>Create Calendar</h2>
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">Create Calendar</h1>
 
-<form [formGroup]="form" (ngSubmit)="sendData()">
-    <label for="calendar-name">Calendar name:</label>
-    <input
-    id="calendar-name"
-    type="text"
-    formControlName="name"
-    required
-    minlength="1"
-    maxlength="50"
-    />
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="sendData()" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="calendar-name">Calendar name:</label>
 
-    <button type="submit" [disabled]="!form.valid">Submit</button>
-</form>
+          <input
+            id="calendar-name"
+            type="text"
+            class="form-control app-input"
+            formControlName="name"
+            placeholder="Calendar name"
+            required
+            minlength="1"
+            maxlength="50"
+            autocomplete="off"
+          />
 
-@if (response) {
-  <p>
-    Backend response: {{ response }}
-  </p>
-}
+          <div class="form-text">
+            Choose a short, recognizable name (1–50 characters).
+          </div>
+        </div>
+
+        <!-- Backend response -->
+        @if (response) {
+          <div class="alert alert-danger mt-3 mb-0">
+            Backend response:
+            <strong>{{ response }}</strong>
+          </div>
+        }
+      </form>
+    </div>
+
+    <!-- Footer actions: same spacing model as Create Event -->
+    <div class="card-footer d-flex justify-content-end gap-2">
+      <a class="btn btn-outline-light" routerLink="/main-page">Cancel</a>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!form.valid"
+      >
+        Submit
+      </button>
+
+    </div>
+  </div>
+</div>

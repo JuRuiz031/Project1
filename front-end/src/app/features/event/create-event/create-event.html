@@ -1,79 +1,127 @@
-<h1 class="page-header">Create Event</h1>
+<div class="container py-4 app-page">
+  <h1 class="h3 mb-3">Create Event</h1>
 
-<div class="page-border" [formGroup]="form">
+  <div class="card app-card shadow-sm">
+    <div class="card-body">
+      <form [formGroup]="form" novalidate>
+        <!-- Calendar dropdown -->
+        <div class="mb-3">
+          <label class="form-label">Calendar (admin only)</label>
+          <select
+            class="form-select app-select"
+            formControlName="calendarId"
+            [ngClass]="{ 'is-invalid': hasError('calendarId') }"
+          >
+            <option value="" disabled>Select calendar (admin only)</option>
+            <option *ngFor="let c of adminCalendars" [value]="c.id">
+              {{ c.name }}
+            </option>
+          </select>
+          <div class="invalid-feedback">Please select an admin calendar.</div>
+        </div>
 
-  <!-- Calendar dropdown -->
-  <div class="field-box">
-    <select class="input" formControlName="calendarId">
-      <option value="" disabled>Select calendar (admin only)</option>
-      <option *ngFor="let c of adminCalendars" [value]="c.id">
-        {{ c.name }}
-      </option>
-    </select>
+        <!-- Title -->
+        <div class="mb-3">
+          <label class="form-label">Event Title</label>
+          <input
+            type="text"
+            class="form-control app-input"
+            placeholder="Event Title"
+            formControlName="title"
+            [ngClass]="{ 'is-invalid': hasError('title') }"
+          />
+          <div class="invalid-feedback">Title is required (min 2 chars).</div>
+        </div>
 
-    <div class="error" *ngIf="hasError('calendarId')">
-      Please select an admin calendar.
+        <!-- Dates / times -->
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Start date</label>
+            <input
+              type="date"
+              class="form-control app-input"
+              formControlName="startDate"
+              [ngClass]="{ 'is-invalid': hasError('startDate') }"
+            />
+            <div class="invalid-feedback">Start date required.</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Start time</label>
+            <input
+              type="time"
+              class="form-control app-input"
+              formControlName="startTime"
+              [ngClass]="{ 'is-invalid': hasError('startTime') }"
+            />
+            <div class="invalid-feedback">Start time required.</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">End date</label>
+            <input
+              type="date"
+              class="form-control app-input"
+              formControlName="endDate"
+              [ngClass]="{ 'is-invalid': hasError('endDate') }"
+            />
+            <div class="invalid-feedback">End date required.</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">End time</label>
+            <input
+              type="time"
+              class="form-control app-input"
+              formControlName="endTime"
+              [ngClass]="{ 'is-invalid': hasError('endTime') }"
+            />
+            <div class="invalid-feedback">End time required.</div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mt-3 mb-3">
+          <label class="form-label">Description</label>
+          <textarea
+            rows="4"
+            class="form-control app-textarea"
+            placeholder="Description"
+            formControlName="description"
+          ></textarea>
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-2">
+          <label class="form-label">Notes</label>
+          <textarea
+            rows="4"
+            class="form-control app-textarea"
+            placeholder="Notes"
+            formControlName="notes"
+          ></textarea>
+        </div>
+
+        <!-- API error -->
+        <div *ngIf="apiError" class="alert alert-danger mt-3 mb-0">
+          {{ apiError }}
+        </div>
+      </form>
+    </div>
+
+    <div class="card-footer d-flex justify-content-end gap-2">
+      <!-- Cancel -->
+      <a class="btn btn-outline-light" routerLink="/main-page">Cancel</a>
+
+      <!-- Submit -->
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="submit()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Creating...' : 'Create Event' }}
+      </button>
     </div>
   </div>
-
-  <!-- Title -->
-  <div class="field-box">
-    <input class="input" type="text" placeholder="Event Title" formControlName="title" />
-    <div class="error" *ngIf="hasError('title')">
-      Title is required (min 2 chars).
-    </div>
-  </div>
-
-  <!-- Start date -->
-  <div class="field-box">
-    <input class="input" type="date" formControlName="startDate" />
-    <div class="error" *ngIf="hasError('startDate')">
-      Start date required.
-    </div>
-  </div>
-
-  <!-- Start time -->
-  <div class="field-box">
-    <input class="input" type="time" formControlName="startTime" />
-    <div class="error" *ngIf="hasError('startTime')">
-      Start time required.
-    </div>
-  </div>
-
-  <!-- End date -->
-  <div class="field-box">
-    <input class="input" type="date" formControlName="endDate" />
-    <div class="error" *ngIf="hasError('endDate')">
-      End date required.
-    </div>
-  </div>
-
-  <!-- End time -->
-  <div class="field-box">
-    <input class="input" type="time" formControlName="endTime" />
-    <div class="error" *ngIf="hasError('endTime')">
-      End time required.
-    </div>
-  </div>
-
-  <!-- Description -->
-  <div class="field-box">
-    <textarea class="textarea" rows="4" placeholder="Description" formControlName="description"></textarea>
-  </div>
-
-  <!-- Notes -->
-  <div class="field-box">
-    <textarea class="textarea" rows="4" placeholder="Notes" formControlName="notes"></textarea>
-  </div>
-
-</div>
-
-<div class="actions">
-  <button class="primary-btn" (click)="submit()" [disabled]="isSubmitting">
-    {{ isSubmitting ? 'Creating...' : 'Create Event' }}
-  </button>
-</div>
-
-<div class="api-error" *ngIf="apiError">
-  {{ apiError }}
 </div>

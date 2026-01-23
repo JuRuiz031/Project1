@@ -1,0 +1,4 @@
+/* Keep footer styling minimal and structural */
+:host {
+  display: block;
+}

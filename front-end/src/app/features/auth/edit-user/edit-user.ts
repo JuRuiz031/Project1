@@ -1,83 +1,85 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserApiService } from '../../../services/user-api.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-edit-user',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './edit-user.html',
-  styleUrls: ['./edit-user.css']
+  styleUrl: './edit-user.css',
 })
 export class EditUser implements OnInit {
-  isSaving = false;
+  form!: FormGroup;
+
   apiError = '';
-  userId = '';
+  isSubmitting = false;
 
-  private fb = inject(FormBuilder);
-  private userApi = inject(UserApiService);
-
-  form = this.fb.group({
-    username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(25)]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(50)]],
-  });
+  constructor(private fb: FormBuilder, private router: Router) {}
 
   ngOnInit(): void {
-    this.userId = this.getUserIdFromStorage();
-    if (!this.userId) {
-      this.apiError = 'No user logged in.';
-      return;
-    }
+    // TODO: Replace with real user data from auth/user service
+    const existingUser = {
+      name: 'Jane Doe',
+      email: 'jane@example.com',
+    };
 
-    this.userApi.getUserById(this.userId).subscribe({
-      next: (u) => this.form.patchValue({ username: u.username, email: u.email, password: '' }),
-      error: (err) => this.apiError = err?.error?.message ?? 'Failed to load user.'
+    this.form = this.fb.group({
+      name: [
+        existingUser.name,
+        [Validators.required, Validators.minLength(2), Validators.maxLength(80)],
+      ],
+      email: [
+        existingUser.email,
+        [Validators.required, Validators.email, Validators.maxLength(120)],
+      ],
+      newPassword: [
+        '',
+        [Validators.minLength(8)],
+      ],
     });
+  }
+
+  hasError(name: string): boolean {
+    const c = this.form.get(name);
+    return !!c && c.touched && c.invalid;
   }
 
   save(): void {
     this.apiError = '';
-    if (this.form.invalid || !this.userId) return;
 
-    this.isSaving = true;
-    this.userApi.updateUser(this.userId, this.form.value as any).subscribe({
-      next: () => this.isSaving = false,
-      error: (err) => {
-        this.isSaving = false;
-        this.apiError = err?.error?.message ?? 'Update failed.';
-      }
-    });
-  }
-
-  private getUserIdFromStorage(): string {
-    const raw = localStorage.getItem('auth');
-    if (!raw) return '';
-    try {
-      const auth = JSON.parse(raw);
-      return auth?.user?.user_id ?? auth?.user?.id ?? '';
-    } catch {
-      return '';
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.apiError = 'Please fix validation errors.';
+      return;
     }
+
+    const { name, email, newPassword } = this.form.getRawValue();
+
+    const payload = {
+      name,
+      email,
+      // only send password if user entered one
+      ...(newPassword ? { newPassword } : {}),
+    };
+
+    this.isSubmitting = true;
+    console.log('Edit profile payload:', payload);
+
+    // TODO: replace with UserApiService.updateProfile(payload).subscribe(...)
+    setTimeout(() => {
+      this.isSubmitting = false;
+      this.router.navigate(['/account']);
+    }, 400);
   }
 
-  showDeleteConfirm = false;
-
-  openDeleteConfirm() {
-    this.showDeleteConfirm = true;
+  cancel(): void {
+    this.router.navigate(['/account']);
   }
 
-  closeDeleteConfirm() {
-    this.showDeleteConfirm = false;
+  deleteProfile(): void {
+    // Match your existing delete flows later
+    this.router.navigate(['/delete-user']);
   }
-
-  // später: hier kommt deleteUser() rein
-  confirmDelete() {
-    // TODO: DELETE call + logout + navigate
-    this.showDeleteConfirm = false;
-  }
-
-
-  
 }
