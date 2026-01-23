@@ -51,4 +51,8 @@ export class CreateCalendar {
         });
     }
   }
+
+  cancel() {
+    this.router.navigate(['/main-page']);
+  }
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-view-calendar-group',
@@ -11,6 +11,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 })
 export class ViewCalendarGroup implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   groupId = '';
   groupName = 'Calendar Name';
@@ -35,5 +36,9 @@ export class ViewCalendarGroup implements OnInit {
     // Mock link generation:
     const token = Math.random().toString(36).slice(2, 10);
     this.inviteLink = `https://yourapp/join/${this.groupId}?t=${token}`;
+  }
+
+  cancel(): void {
+    this.router.navigateByUrl('/main-page');
   }
 }

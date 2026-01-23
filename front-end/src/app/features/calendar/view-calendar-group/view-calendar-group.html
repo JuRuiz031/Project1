@@ -30,9 +30,13 @@
 
     <!-- Footer actions (matches Create Event / Create Calendar spacing) -->
     <div class="card-footer d-flex justify-content-end gap-2">
-      <a class="btn btn-outline-light" routerLink="/main-page">
+      <button
+        type="button"
+        class="btn btn-outline-light"
+        (click)="cancel()"
+      >
         Cancel
-      </a>
+      </button>
 
       <button
         type="button"
