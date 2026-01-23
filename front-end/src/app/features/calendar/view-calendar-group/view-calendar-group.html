@@ -1,0 +1,27 @@
+<h1 class="page-header">View Calendar Group</h1>
+
+<div class="name-box">
+  Calendar Name: {{ groupName }}
+</div>
+
+<div class="page-border">
+
+  <div class="link-box">
+    Link: {{ inviteLink || '—' }}
+  </div>
+
+  <button class="generate-link-button" type="button" (click)="generateLink()">
+    Generate Link
+  </button>
+
+    <!-- Later add [routerLink]="['/edit-calendar-group', groupId]" -->
+  <button class="edit-calendar-button" type="button"
+            routerLink="/edit-calendar-group">
+    Edit Calendar
+  </button>
+
+</div>
+
+<div class="api-error" *ngIf="apiError">
+  {{ apiError }}
+</div>

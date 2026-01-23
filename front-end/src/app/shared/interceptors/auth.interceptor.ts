@@ -1,9 +1,12 @@
 import { HttpInterceptorFn } from "@angular/common/http";
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-    const isAuthEndpoint = req.url.includes('/login') || req.url.includes('/users');
-    if (isAuthEndpoint) {
-        return next(req); // skip adding token for auth endpoints
+    const isPublicEndpoint = 
+      (req.method === 'POST' && req.url.endsWith('/api/v1/users')) ||
+      (req.method === 'POST' && req.url.endsWith('/api/v1/login'));
+
+    if (isPublicEndpoint) {
+        return next(req); // skip adding token for public auth endpoints
     }
 
     // Read token from local storage
