@@ -1,0 +1,46 @@
+/* Page scaffold */
+.page {
+  min-height: calc(100vh - 120px); /* header + footer room (approx) */
+  padding: 20px;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+/* Main two-column layout */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 360px);
+  gap: 20px;
+  align-items: start;
+}
+
+/* Side panel stack */
+.side {
+  display: grid;
+  gap: 20px;
+}
+
+/* Shared card styling (wireframe boxes) */
+.card {
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-primary);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Calendar area should be visually dominant */
+.card--calendar {
+  min-height: 640px;
+}
+
+/* Responsive: stack side panel below on narrow screens */
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .card--calendar {
+    min-height: 520px;
+  }
+}

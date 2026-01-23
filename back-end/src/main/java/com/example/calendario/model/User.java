@@ -1,5 +1,8 @@
 package com.example.calendario.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -20,8 +23,29 @@ public class User {
 
     private Boolean isSuperuser; // Checks if the user has superuser privileges in the mongo document
 
-    // TO BE IMPLEMENTED LATER
-    // private List<Calendar> calendars = new ArrayList<>(); // List of calendars associated with the user
+    private List<CalendarMembership> calendarIds; // List of calendars and admin status
+
+
+    // Inner class for calendar membership
+    public static class CalendarMembership {
+        private String calendarId;
+        private Boolean isAdmin;
+
+        // Constructors
+        public CalendarMembership() {}
+
+        public CalendarMembership(String calendarId, Boolean isAdmin) {
+            this.calendarId = calendarId;
+            this.isAdmin = isAdmin;
+        }
+
+        // Getters and Setters
+        public String getCalendarId() { return calendarId; }
+        public void setCalendarId(String calendarId) { this.calendarId = calendarId; }
+
+        public Boolean getIsAdmin() { return isAdmin; }
+        public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
+    }
 
 
     // Constructors
@@ -49,4 +73,49 @@ public class User {
 
     public Boolean getIsSuperuser() { return isSuperuser; }
     public void setIsSuperuser(Boolean isSuperuser) { this.isSuperuser = isSuperuser; }
+
+    public List<CalendarMembership> getCalendarIds() { return calendarIds; }
+    public void setCalendarIds(List<CalendarMembership> calendarIds) { this.calendarIds = calendarIds; }
+
+    // Helper methods for calendar management
+    public void addCalendarMembership(String calendarId, Boolean isAdmin) {
+        if (this.calendarIds == null) {
+            this.calendarIds = new ArrayList<>();
+        }
+        
+        // Avoid duplicates
+        boolean alreadyExists = this.calendarIds.stream()
+                .anyMatch(cm -> cm.getCalendarId().equals(calendarId));
+        
+        if (!alreadyExists) {
+            this.calendarIds.add(new CalendarMembership(calendarId, isAdmin));
+        }
+    }
+
+    public boolean isAdminOfCalendar(String calendarId) {
+        if (this.calendarIds == null) {
+            return false;
+        }
+        
+        return this.calendarIds.stream()
+                .filter(cm -> cm.getCalendarId().equals(calendarId))
+                .findFirst()
+                .map(CalendarMembership::getIsAdmin)
+                .orElse(false);
+    }
+
+    public boolean isMemberOfCalendar(String calendarId) {
+        if (this.calendarIds == null) {
+            return false;
+        }
+        
+        return this.calendarIds.stream()
+                .anyMatch(cm -> cm.getCalendarId().equals(calendarId));
+    }
+
+    public void removeCalendarMembership(String calendarId) {
+        if (this.calendarIds != null) {
+            this.calendarIds.removeIf(cm -> cm.getCalendarId().equals(calendarId));
+        }
+    }
 }
