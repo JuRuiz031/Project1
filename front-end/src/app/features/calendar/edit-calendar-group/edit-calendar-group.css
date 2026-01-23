@@ -1,0 +1,216 @@
+.page-header {
+  text-align: left;
+  max-width: 900px;
+  margin: 0 auto 18px;
+  color: white;
+}
+
+.page-border {
+  background-color: rgb(0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.name-box {
+  display: flex;
+}
+
+.inner-panel {
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.input {
+  height: 56px;
+  width: 100%;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: rgb(18,18,18);
+  color: white;
+  padding: 0 16px;
+  font-size: 16px;
+  outline: none;
+}
+
+.wide-button {
+  height: 56px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: rgb(18,18,18);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.users-box {
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 10px;
+  padding: 14px;
+  min-height: 220px;
+}
+
+.users-title {
+  color: white;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.25);
+  background: rgb(10,10,10);
+  color: white;
+  cursor: pointer;
+  text-align: left;
+}
+
+.user-row.selected {
+  border-color: rgba(0,255,255,0.9);
+}
+
+.user-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-weight: 700;
+}
+
+.user-email {
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+.user-right {
+  display: flex;
+  align-items: center;
+}
+
+.badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.25);
+  font-size: 12px;
+}
+
+.badge.admin {
+  border-color: rgba(0,255,0,0.7);
+}
+
+.empty {
+  color: rgba(255,255,255,0.7);
+  padding: 18px;
+}
+
+.actions-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.small-button {
+  flex: 1;
+  height: 50px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: rgb(18,18,18);
+  color: white;
+  cursor: pointer;
+}
+
+.small-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.footer {
+  max-width: 900px;
+  margin: 18px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+.delete-calendar-button {
+  height: 56px;
+  min-width: 260px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,80,80,0.7);
+  background: rgb(18,18,18);
+  color: white;
+  cursor: pointer;
+}
+
+.api-error {
+  max-width: 900px;
+  margin: 12px auto 0;
+  color: #ffb3b3;
+  text-align: center;
+}
+
+/* MODAL */
+.overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal{
+  width: min(720px, 92vw);
+  background: rgb(0,0,0);
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  padding: 28px;
+  color: white;
+}
+
+.modal-title{
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 22px;
+}
+
+.modal-actions{
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+}
+
+.modal-btn{
+  min-width: 140px;
+  height: 56px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.45);
+  background: rgb(18,18,18);
+  color: white;
+  cursor: pointer;
+}
+
+.modal-btn.danger{
+  border-color: rgba(255,80,80,0.9);
+}

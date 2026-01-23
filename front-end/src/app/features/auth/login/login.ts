@@ -26,7 +26,25 @@ export class Login {
     });
   }
 
+  /* TEMPORARY LOGIN FUNCTION
+  *  REMOVE ONCE PAGE TRAVERSAL IS CONFIRMED
+  */
+  onLogin(event?: Event) {
+    event?.preventDefault();
+    console.log('DEV login bypass');
+
+    // optional: fake “logged in” state
+    localStorage.setItem('token', 'dev-token');
+    localStorage.setItem('user', JSON.stringify({ username: this.form.value.username }));
+
+    this.router.navigateByUrl('/dashboard/main-page');
+  }
+
+  /* ORIGINAL LOGIN FUNCTION
+  *  RESTORE AFTER CONFIRMING PAGE NAVIGATION
   onLogin() {
+    console.log('onLogin fired');
+    
     if (this.form.invalid) {
       return;
     }
@@ -37,7 +55,9 @@ export class Login {
         // TODO: Store token in localStorage or state management
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
-        this.router.navigate(['/main-page']);
+
+        // ✅ Navigate to dashboard main page
+        this.router.navigate(['/dashboard/main-page']);
       },
       error: (err) => {
         console.error('Login error:', err);
@@ -45,4 +65,7 @@ export class Login {
       }
     });
   }
+  */
+ 
 }
+

@@ -1,0 +1,71 @@
+<h1 class="page-header">Edit User</h1>
+
+<div class ="page-border" [formGroup]="form">
+
+  <label class="field">
+    <div class="field-label">Username</div>
+    <input class="field-input" type="text" formControlName="username" />
+    <div class="field-error" *ngIf="form.get('username')?.touched && form.get('username')?.invalid">
+      Username is required (min 3)
+    </div>
+  </label>
+
+    <label class="field">
+    <div class="field-label">Email</div>
+    <input class="field-input" type="email" formControlName="email" />
+    <div class="field-error" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+      Valid email is required
+    </div>
+  </label>
+
+  <label class="field">
+    <div class="field-label">Password</div>
+    <input class="field-input" type="password" formControlName="password" />
+    <div class="field-error" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+      Password is required (min 8)
+    </div>
+  </label>
+
+</div>
+
+<div class="container">
+  <button class="save-user-button" (click)="save()" [disabled]="form.invalid || isSaving">
+    {{ isSaving ? 'Saving...' : 'Save Changes' }}
+  </button>
+
+  <button class="delete-user-profile-button" type="button" (click)="openDeleteConfirm()">
+    Delete User Profile
+  </button>
+</div>
+
+<div class="api-error" *ngIf="apiError">
+  {{ apiError }}
+</div>
+
+<div class="overlay" *ngIf="showDeleteConfirm" (click)="closeDeleteConfirm()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-title">Are you sure you want to delete this user?</div>
+
+    <div class="modal-actions">
+      <button class="modal-btn" type="button" (click)="closeDeleteConfirm()">Cancel</button>
+      <button class="modal-btn danger" type="button" (click)="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- 
+  <div class="username-box">Username: </div>
+
+  <div class="password-box">Password: </div>
+
+  <div class="email-box">Email: </div>
+
+</div>
+
+
+
+<div class="container">
+  <div></div>
+
+  <button class="delete-user-profile-button" routerLink="/login">Delete user Profile</button>
+</div> -->

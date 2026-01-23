@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.calendario.dto.LoginRequestDTO;
-import com.example.calendario.dto.LoginSuccessDTO;
-import com.example.calendario.dto.UserRegistrationDTO;
-import com.example.calendario.dto.UserResponseDTO;
 import com.example.calendario.dto.UserUpdateDTO;
 import com.example.calendario.exception.ResourceNotFoundException;
+import com.example.calendario.dto.user.LoginRequestDTO;
+import com.example.calendario.dto.user.LoginSuccessDTO;
+import com.example.calendario.dto.user.UserRegistrationDTO;
+import com.example.calendario.dto.user.UserResponseDTO;
 import com.example.calendario.model.User;
 import com.example.calendario.service.UserService;
 

@@ -1,4 +1,4 @@
-package com.example.calendario.dto;
+package com.example.calendario.dto.user;
 
 import com.example.calendario.model.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
