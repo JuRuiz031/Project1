@@ -86,17 +86,6 @@
 
         <div class="col-12 col-md-4">
           <button
-            class="btn btn-outline-secondary w-100"
-            type="button"
-            (click)="demoteSelectedToMember()"
-            [disabled]="!selectedUserId || !selectedUserIsAdmin"
-          >
-            Demote to Member
-          </button>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <button
             class="btn btn-outline-danger w-100"
             type="button"
             (click)="removeSelectedUser()"
@@ -139,28 +128,4 @@
     </div>
   </div>
 
-  <!-- DELETE CONFIRM MODAL (Bootstrap utilities, no custom CSS needed) -->
-  <div
-    *ngIf="showDeleteConfirm"
-    class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75"
-    style="z-index: 1050"
-    (click)="closeDeleteConfirm()"
-  >
-    <div class="card app-card shadow-sm" style="width: min(720px, 92vw);" (click)="$event.stopPropagation()">
-      <div class="card-body">
-        <div class="h5 text-center mb-3">
-          Are you sure you want to delete this Calendar and all related events?
-        </div>
-
-        <div class="d-flex justify-content-center gap-3">
-          <button class="btn btn-outline-secondary" type="button" (click)="closeDeleteConfirm()">
-            Cancel
-          </button>
-          <button class="btn btn-outline-danger" type="button" (click)="confirmDeleteCalendarGroup()">
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>

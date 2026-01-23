@@ -20,20 +20,38 @@
       </div>
     </div>
 
-    <div class="card-footer d-flex justify-content-end gap-4">
-      <button class="btn btn-outline-secondary" type="button" (click)="goToDashboard()">
-        Back
-      </button>
-
-      <button class="btn btn-primary" type="button" (click)="goToEditUser()">
-        Edit Profile
-      </button>
-    </div>
-
-    <div class="card-footer d-flex justify-content-start gap-4">
-      <button class="btn btn-outline-danger" type="button" (click)="logOut()">
+    <div
+      class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2"
+    >
+      <!-- Left-side action -->
+      <button
+        class="btn btn-outline-danger"
+        type="button"
+        (click)="logOut()"
+      >
         Log Out
       </button>
+
+      <!-- Right-side actions -->
+      <div class="d-flex gap-2 ms-auto">
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="goToDashboard()"
+        >
+          Back
+        </button>
+
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="goToEditUser()"
+        >
+          Edit Profile
+        </button>
+      </div>
     </div>
+
+
   </div>
 </div>

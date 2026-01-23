@@ -115,3 +115,53 @@
   opacity: 0.9;
   text-align: right;
 }
+
+/* =====================================================
+   Bootstrap Button Overrides (Global)
+   ===================================================== */
+
+/* PRIMARY BUTTON */
+.btn-primary {
+  --bs-btn-bg: var(--color-accent-primary);
+  --bs-btn-border-color: var(--color-accent-primary);
+  --bs-btn-color: #fff;
+
+  --bs-btn-hover-bg: var(--color-accent-secondary);
+  --bs-btn-hover-border-color: var(--color-accent-secondary);
+
+  --bs-btn-active-bg: var(--color-accent-tertiary);
+  --bs-btn-active-border-color: var(--color-accent-tertiary);
+}
+
+/* DANGER BUTTON */
+.btn-danger {
+  --bs-btn-bg: var(--color-feedback-error);
+  --bs-btn-border-color: var(--color-feedback-error);
+  --bs-btn-color: #fff;
+
+  --bs-btn-hover-bg: #991b1b; /* slightly darker red */
+  --bs-btn-hover-border-color: #991b1b;
+
+  --bs-btn-active-bg: #7f1d1d;
+  --bs-btn-active-border-color: #7f1d1d;
+}
+
+/* OUTLINE DANGER BUTTON */
+.btn-outline-danger {
+  --bs-btn-color: var(--color-feedback-error);
+  --bs-btn-border-color: var(--color-feedback-error);
+
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--color-feedback-error);
+  --bs-btn-hover-border-color: var(--color-feedback-error);
+
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #7f1d1d;
+  --bs-btn-active-border-color: #7f1d1d;
+}
+
+/* Optional: consistent focus ring */
+.btn-primary:focus-visible,
+.btn-danger:focus-visible {
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.15);
+}

@@ -1,8 +1,23 @@
+/* =====================================================
+   Layout wrapper (Bootstrap card/container pattern)
+   ===================================================== */
+
+.calendar-display-card {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Keep component layout simple; Bootstrap handles most structure */
 .calendar-display {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
+
+/* =====================================================
+   UNCHANGED: "Month View" header + month-view block
+   (Do not edit — matches current styling exactly)
+   ===================================================== */
 
 /* Top bar */
 .calendar-display__header {
@@ -42,22 +57,12 @@
   text-align: center;
 }
 
-/* Bottom action bar */
+/* =====================================================
+   Footer actions (Bootstrap buttons)
+   ===================================================== */
+
 .calendar-display__footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-}
-
-.calendar-display__action-btn {
-  border: 1px solid var(--color-border-default);
-  background: var(--color-accent-secondary);
-  border-radius: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.calendar-display__action-btn:hover,
-.calendar-display__view-btn:hover {
-  border-color: var(--color-accent-primary);
 }
