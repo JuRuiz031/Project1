@@ -1,6 +1,9 @@
 package com.example.calendario.service;
 import java.util.Date;
 import java.util.Optional;
+import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -114,5 +117,18 @@ public class UserService {
        // Step 3: Return the requested user
        return findById(requestedUserId)
            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestedUserId));
+   }
+
+   // Get all calendar IDs that belong to a user
+   public List<String> getCalendarIdsForUser(String userId, String authenticatedUsername) {
+       User user = validateUserAccess(userId, authenticatedUsername);
+
+       if (user.getCalendarIds() == null) {
+           return Collections.emptyList();
+       }
+
+       return user.getCalendarIds().stream()
+               .map(User.CalendarMembership::getCalendarId)
+               .collect(Collectors.toList());
    }
 }

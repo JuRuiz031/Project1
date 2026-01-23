@@ -1,6 +1,7 @@
 package com.example.calendario.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +43,12 @@ public class CalendarService {
         // Create new Calendar
         Calendar calendar = new Calendar();
         calendar.setName(dto.getName());
+
+        //no duplicate calendar name
+        List<String> userCalendarIds = userService.getCalendarIdsForUser(authenticatedUser.getId(), authenticatedUsername);
+        if (userCalendarIds.stream().anyMatch(id -> calendarRepository.findById(id).map(Calendar::getName).orElse("").equals(dto.getName()))) {
+            throw new ForbiddenException("You already have a calendar with the name: " + dto.getName());
+        }
 
         // Save calendar
         Calendar savedCalendar = calendarRepository.save(calendar);
