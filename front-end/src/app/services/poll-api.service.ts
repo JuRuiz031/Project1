@@ -1,46 +1,57 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { CreatePollDTO } from '../shared/models/polls/create-poll.dto';
 import { UpdatePollDTO } from '../shared/models/polls/update-poll.dto';
 import { DeletePollDTO } from '../shared/models/polls/delete-poll.dto';
-import { PollDTO } from '../shared/models/polls/poll.dto';
+
+import { CreatePollResponseDTO } from '../shared/models/polls/create-poll-response.dto';
+import { UpdatePollResponseDTO } from '../shared/models/polls/update-poll-response.dto';
+import { DeletePollResponseDTO } from '../shared/models/polls/delete-poll-response.dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PollApiService {
-  private baseUrl = 'http://localhost:8080/api/v1';
+  private readonly baseUrl = 'http://localhost:8080/api/v1';
 
   constructor(private http: HttpClient) {}
 
-  /** POST /polls */
-  createPoll(dto: CreatePollDTO): Observable<PollDTO> {
-    return this.http.post<PollDTO>(`${this.baseUrl}/polls`, dto);
-  }
-
-  /** PATCH /polls/{id} */
-  updatePoll(pollId: string, dto: UpdatePollDTO): Observable<PollDTO> {
-    return this.http.patch<PollDTO>(`${this.baseUrl}/polls/${pollId}`, dto);
+  /**
+   * POST /polls
+   */
+  createPoll(dto: CreatePollDTO): Observable<CreatePollResponseDTO> {
+    return this.http.post<CreatePollResponseDTO>(
+      `${this.baseUrl}/polls`,
+      dto
+    );
   }
 
   /**
-   * DELETE /polls/{id}
-   * Your API spec includes a request body on DELETE, so we send it using options.body.
+   * PATCH /polls/{poll_id}
    */
-  deletePoll(pollId: string, dto: DeletePollDTO): Observable<{ poll_id: string; deleted: boolean }> {
-    return this.http.delete<{ poll_id: string; deleted: boolean }>(`${this.baseUrl}/polls/${pollId}`, {
-      body: dto,
-    });
+  updatePoll(
+    pollId: number,
+    dto: UpdatePollDTO
+  ): Observable<UpdatePollResponseDTO> {
+    return this.http.patch<UpdatePollResponseDTO>(
+      `${this.baseUrl}/polls/${pollId}`,
+      dto
+    );
   }
 
   /**
-   * Poll reads happen through calendar reads:
-   * GET /calendar?pollIds=id1,id2
+   * DELETE /polls/{poll_id}
+   * (uses request body per API spec)
    */
-  getPollsByIds(pollIds: string[]): Observable<{ polls: PollDTO[] }> {
-    const params = new HttpParams().set('pollIds', pollIds.join(','));
-    return this.http.get<{ polls: PollDTO[] }>(`${this.baseUrl}/calendar`, { params });
+  deletePoll(
+    pollId: number,
+    dto: DeletePollDTO
+  ): Observable<DeletePollResponseDTO> {
+    return this.http.delete<DeletePollResponseDTO>(
+      `${this.baseUrl}/polls/${pollId}`,
+      { body: dto }
+    );
   }
 }
