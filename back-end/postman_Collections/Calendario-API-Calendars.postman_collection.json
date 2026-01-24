@@ -112,7 +112,134 @@
       "response": []
     },
     {
-      "name": "3. Update Calendar Name - Success",
+      "name": "3. Get Calendar Homepage",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Get Events by Calendar IDs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar?calendarIds={{calendar_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar"
+          ],
+          "query": [
+            {
+              "key": "calendarIds",
+              "value": "{{calendar_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get Events by Event IDs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar?eventIds={{event_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar"
+          ],
+          "query": [
+            {
+              "key": "eventIds",
+              "value": "{{event_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Get Calendar - Superuser Access",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superuser_jwt_token}}",
+            "type": "text",
+            "description": "JWT token for user with isSuperuser: true"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/calendar?calendarIds={{calendar_id}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "calendar"
+          ],
+          "query": [
+            {
+              "key": "calendarIds",
+              "value": "{{calendar_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Update Calendar Name - Success",
       "request": {
         "method": "PATCH",
         "header": [
@@ -148,7 +275,7 @@
       "response": []
     },
     {
-      "name": "4. Update Calendar - Promote Admins",
+      "name": "8. Update Calendar - Promote Admins",
       "request": {
         "method": "PATCH",
         "header": [
@@ -184,7 +311,7 @@
       "response": []
     },
     {
-      "name": "5. Update Calendar - Forbidden (Not Admin)",
+      "name": "9. Update Calendar - Forbidden (Not Admin)",
       "request": {
         "method": "PATCH",
         "header": [
@@ -220,7 +347,7 @@
       "response": []
     },
     {
-      "name": "6. Generate Invite Link - Success",
+      "name": "10. Generate Invite Link - Success",
       "event": [
         {
           "listen": "test",
@@ -268,7 +395,7 @@
       "response": []
     },
     {
-      "name": "7. Generate Invite Link - Forbidden (Not Admin)",
+      "name": "11. Generate Invite Link - Forbidden (Not Admin)",
       "request": {
         "auth": {
           "type": "bearer",
@@ -307,7 +434,7 @@
       "response": []
     },
     {
-      "name": "8. Accept Invite - Success (Different User)",
+      "name": "12. Accept Invite - Success (Different User)",
       "request": {
         "auth": {
           "type": "bearer",
@@ -354,7 +481,7 @@
       "response": []
     },
     {
-      "name": "9. Accept Invite - Invalid Token",
+      "name": "13. Accept Invite - Invalid Token",
       "request": {
         "method": "POST",
         "header": [
@@ -391,7 +518,7 @@
       "response": []
     },
     {
-      "name": "10. Accept Invite - Unauthorized (No Token)",
+      "name": "14. Accept Invite - Unauthorized (No Token)",
       "request": {
         "method": "POST",
         "header": [
@@ -423,7 +550,7 @@
       "response": []
     },
     {
-      "name": "11. Delete Calendar - Success",
+      "name": "15. Delete Calendar - Success",
       "request": {
         "method": "DELETE",
         "header": [
@@ -451,7 +578,7 @@
       "response": []
     },
     {
-      "name": "12. Delete Calendar - Forbidden (Not Admin)",
+      "name": "16. Delete Calendar - Forbidden (Not Admin)",
       "request": {
         "auth": {
           "type": "bearer",
@@ -489,7 +616,7 @@
       "response": []
     },
     {
-      "name": "13. Delete Calendar - Not Found",
+      "name": "17. Delete Calendar - Not Found",
       "request": {
         "method": "DELETE",
         "header": [

@@ -11,16 +11,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.calendario.dto.calendar.CalendarCreateRequestDTO;
 import com.example.calendario.dto.calendar.CalendarDeleteResponseDTO;
+import com.example.calendario.dto.calendar.CalendarFilterResponseDTO;
+import com.example.calendario.dto.calendar.CalendarHomepageResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteAcceptRequestDTO;
 import com.example.calendario.dto.calendar.CalendarInviteAcceptResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteResponseDTO;
 import com.example.calendario.dto.calendar.CalendarResponseDTO;
 import com.example.calendario.dto.calendar.CalendarUpdateRequestDTO;
 import com.example.calendario.dto.calendar.CalendarUpdateResponseDTO;
+import com.example.calendario.dto.calendar.EventFilterResponseDTO;
 import com.example.calendario.service.CalendarService;
 
 import jakarta.validation.Valid;
@@ -35,6 +39,39 @@ public class CalendarController {
     // Constructor
     public CalendarController(CalendarService calendarService) {
         this.calendarService = calendarService;
+    }
+
+    // GET Calendar Homepage (calendars + tags)
+    @GetMapping("/calendar")
+    public ResponseEntity<?> getCalendar(
+            @RequestParam(required = false) String calendarIds,
+            @RequestParam(required = false) String eventIds,
+            @RequestParam(required = false) String tags) {
+        // Get authenticated username from JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticatedUsername = authentication.getName();
+
+        // Route based on query parameters
+        if (calendarIds != null) {
+            // Filter by calendar IDs
+            java.util.List<String> idList = java.util.Arrays.asList(calendarIds.split(","));
+            CalendarFilterResponseDTO response = calendarService.getEventsByCalendarIds(idList, authenticatedUsername);
+            return ResponseEntity.ok(response);
+        } else if (eventIds != null) {
+            // Filter by event IDs
+            java.util.List<String> idList = java.util.Arrays.asList(eventIds.split(","));
+            EventFilterResponseDTO response = calendarService.getEventsByIds(idList, authenticatedUsername);
+            return ResponseEntity.ok(response);
+        } else if (tags != null) {
+            // Filter by tags
+            java.util.List<String> tagList = java.util.Arrays.asList(tags.split(","));
+            EventFilterResponseDTO response = calendarService.getEventsByTags(tagList, authenticatedUsername);
+            return ResponseEntity.ok(response);
+        } else {
+            // Homepage - return calendars and tags
+            CalendarHomepageResponseDTO response = calendarService.getCalendarHomepage(authenticatedUsername);
+            return ResponseEntity.ok(response);
+        }
     }
 
     // POST Create Calendar
