@@ -5,7 +5,7 @@
         <!-- Top controls -->
         <header class="calendar-display__header">
           <div class="calendar-display__title">
-            {{ currentViewLabel }} View
+            Calendar Display
           </div>
         </header>
 
@@ -13,10 +13,13 @@
         <div class="calendar-display__body">
           <!-- <div class="calendar-display__placeholder"> -->
             <!-- Calendar content will render here -->
-             <mwl-calendar-month-view
+            <app-calendar-widget
               [viewDate]="viewDate"
-              [events]="events">
-            </mwl-calendar-month-view>
+              [events]="events"
+              (viewDateChange)="viewDate = $event"
+              (eventClicked)="onEventClicked($event)"
+            ></app-calendar-widget>
+
 
           <!-- </div> -->
         </div>
