@@ -1,5 +1,7 @@
 package com.example.calendario.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -51,27 +53,27 @@ public class CalendarController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String authenticatedUsername = authentication.getName();
 
-        // Route based on query parameters
+        List<String> calendarIdList = java.util.Collections.emptyList();
+        List<String> eventIdList = java.util.Collections.emptyList();
+        List<String> tagList = java.util.Collections.emptyList();
         if (calendarIds != null) {
-            // Filter by calendar IDs
-            java.util.List<String> idList = java.util.Arrays.asList(calendarIds.split(","));
-            CalendarFilterResponseDTO response = calendarService.getEventsByCalendarIds(idList, authenticatedUsername);
-            return ResponseEntity.ok(response);
+            calendarIdList = java.util.Arrays.asList(calendarIds.split(","));
         } else if (eventIds != null) {
-            // Filter by event IDs
-            java.util.List<String> idList = java.util.Arrays.asList(eventIds.split(","));
-            EventFilterResponseDTO response = calendarService.getEventsByIds(idList, authenticatedUsername);
-            return ResponseEntity.ok(response);
+            eventIdList = java.util.Arrays.asList(eventIds.split(","));
         } else if (tags != null) {
-            // Filter by tags
-            java.util.List<String> tagList = java.util.Arrays.asList(tags.split(","));
-            EventFilterResponseDTO response = calendarService.getEventsByTags(tagList, authenticatedUsername);
-            return ResponseEntity.ok(response);
+            tagList = java.util.Arrays.asList(tags.split(","));
         } else {
             // Homepage - return calendars and tags
             CalendarHomepageResponseDTO response = calendarService.getCalendarHomepage(authenticatedUsername);
             return ResponseEntity.ok(response);
         }
+        // Filtered view - return events and users based on filters
+        CalendarFilterResponseDTO response = calendarService.getFilteredCalendarView(
+                calendarIdList,
+                eventIdList,
+                tagList,
+                authenticatedUsername);
+        return ResponseEntity.ok(response);
     }
 
     // POST Create Calendar
