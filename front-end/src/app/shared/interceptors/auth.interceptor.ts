@@ -3,7 +3,8 @@ import { HttpInterceptorFn } from "@angular/common/http";
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const isPublicEndpoint = 
       (req.method === 'POST' && req.url.endsWith('/api/v1/users')) ||
-      (req.method === 'POST' && req.url.endsWith('/api/v1/login'));
+      (req.method === 'POST' && req.url.endsWith('/api/v1/login')) ||
+      (req.method === 'POST' && req.url.includes('/api/v1/invites/events/guest/')); // Guest access without JWT
 
     if (isPublicEndpoint) {
         return next(req); // skip adding token for public auth endpoints
