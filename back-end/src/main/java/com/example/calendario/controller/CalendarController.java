@@ -56,16 +56,19 @@ public class CalendarController {
         List<String> calendarIdList = java.util.Collections.emptyList();
         List<String> eventIdList = java.util.Collections.emptyList();
         List<String> tagList = java.util.Collections.emptyList();
-        if (calendarIds != null) {
-            calendarIdList = java.util.Arrays.asList(calendarIds.split(","));
-        } else if (eventIds != null) {
-            eventIdList = java.util.Arrays.asList(eventIds.split(","));
-        } else if (tags != null) {
-            tagList = java.util.Arrays.asList(tags.split(","));
-        } else {
+        if (calendarIds == null && eventIds == null && tags == null) {
             // Homepage - return calendars and tags
             CalendarHomepageResponseDTO response = calendarService.getCalendarHomepage(authenticatedUsername);
             return ResponseEntity.ok(response);
+        }
+        if (calendarIds != null) {
+            calendarIdList = java.util.Arrays.asList(calendarIds.split(","));
+        }
+        if (eventIds != null) {
+            eventIdList = java.util.Arrays.asList(eventIds.split(","));
+        }
+        if (tags != null) {
+            tagList = java.util.Arrays.asList(tags.split(","));
         }
         // Filtered view - return events and users based on filters
         CalendarFilterResponseDTO response = calendarService.getFilteredCalendarView(
