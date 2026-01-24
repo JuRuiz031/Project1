@@ -34,4 +34,8 @@ export class DeleteEvent {
       this.router.navigateByUrl('/main-page');
     }, 400);
   }
+
+  cancel(): void {
+    this.router.navigateByUrl('/edit-event');
+  }
 }

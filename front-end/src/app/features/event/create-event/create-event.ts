@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
@@ -14,6 +14,7 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 })
 export class CreateEvent implements OnInit {
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   calendars: CalendarOption[] = [
     { id: '1', name: 'My Admin Calendar', isAdmin: true },
@@ -90,5 +91,9 @@ export class CreateEvent implements OnInit {
   hasError(controlName: string): boolean {
     const c = this.form.get(controlName);
     return !!c && c.touched && c.invalid;
+  }
+
+  cancel(): void {
+    this.router.navigateByUrl('/main-page');
   }
 }

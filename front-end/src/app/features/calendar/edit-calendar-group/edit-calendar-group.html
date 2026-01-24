@@ -84,7 +84,7 @@
           </button>
         </div>
 
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-4" *ngIf="!selectedUserIsAdmin">
           <button
             class="btn btn-outline-danger w-100"
             type="button"
@@ -115,15 +115,22 @@
 
       <!-- Right-side actions -->
       <div class="d-flex gap-2 ms-auto">
-        <!-- Cancel -> back to view-calendar-group for this group -->
-        <a class="btn btn-outline-secondary" routerLink="/view-calendar-group">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="cancel()"
+        >
           Cancel
-        </a>
+        </button>
 
         <!-- Save Changes -> dashboard/main-page -->
-        <a class="btn btn-primary" routerLink="/main-page">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="saveChanges()"
+        >
           Save Changes
-        </a>
+        </button>
       </div>
     </div>
   </div>

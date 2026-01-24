@@ -28,4 +28,8 @@ export class DeleteCalendarGroup {
       this.router.navigateByUrl('/main-page');
     }, 400);
   }
+
+  cancel(): void {
+    this.router.navigateByUrl('/edit-calendar-group');
+  }
 }

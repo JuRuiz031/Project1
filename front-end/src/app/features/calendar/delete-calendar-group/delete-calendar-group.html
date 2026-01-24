@@ -24,9 +24,13 @@
         {{ isDeleting ? 'Deleting...' : 'Confirm' }}
       </button>
 
-      <a class="btn btn-outline-light" routerLink="/edit-calendar-group">
+      <button
+        type="button"
+        class="btn btn-outline-light"
+        (click)="cancel()"
+      >
         Cancel
-      </a>
+      </button>
     </div>
   </div>
 </div>

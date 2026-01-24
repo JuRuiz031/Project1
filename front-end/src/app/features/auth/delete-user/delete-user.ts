@@ -30,4 +30,8 @@ export class DeleteUser {
       this.router.navigateByUrl('/login');
     }, 400);
   }
+
+  cancelDelete(): void {
+    this.router.navigateByUrl('/edit-user');
+  }
 }

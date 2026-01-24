@@ -34,4 +34,8 @@ export class DeletePoll {
       this.router.navigateByUrl('/main-page');
     }, 400);
   }
+
+  cancelDelete(): void {
+    this.router.navigateByUrl('/edit-poll');
+  }
 }

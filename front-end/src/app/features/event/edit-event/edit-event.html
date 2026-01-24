@@ -110,8 +110,12 @@
     </div>
 
     <div class="card-footer d-flex justify-content-end gap-2">
-      <!-- Cancel: return to View Event -->
-      <a class="btn btn-outline-light" routerLink="/view-event">Cancel</a>
+      <button
+        type="button"
+        class="btn btn-outline-light"
+        (click)="cancelEdit()"
+        [disabled]="isSubmitting"
+      >Cancel</button>
 
       <!-- Save: return to Main Page -->
       <button
@@ -123,9 +127,13 @@
         {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
       </button>
 
-      <a class="btn btn-danger" routerLink="/delete-event">
-        Delete
-      </a>
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="deleteEvent()"
+        [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Deleting...' : 'Delete' }}
+      </button>
     </div>
   </div>
 </div>

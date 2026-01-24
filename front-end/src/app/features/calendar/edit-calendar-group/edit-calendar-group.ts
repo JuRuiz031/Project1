@@ -91,4 +91,13 @@ export class EditCalendarGroup implements OnInit {
       u.id === this.selectedUserId ? { ...u, isAdmin: false } : u
     );
   }
+
+  cancel() {
+    this.router.navigateByUrl('/view-calendar-group');
+  }
+
+  saveChanges() {
+    // TODO: API call -> calendarGroupApi.updateGroup(groupId, { name: groupName })
+    this.router.navigateByUrl('/main-page');
+  }
 }

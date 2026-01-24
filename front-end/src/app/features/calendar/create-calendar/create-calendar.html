@@ -36,7 +36,13 @@
 
     <!-- Footer actions: same spacing model as Create Event -->
     <div class="card-footer d-flex justify-content-end gap-2">
-      <a class="btn btn-outline-light" routerLink="/main-page">Cancel</a>
+      <button
+        type="button"
+        class="btn btn-outline-light"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
 
       <button
         type="submit"

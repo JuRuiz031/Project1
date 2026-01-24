@@ -23,9 +23,15 @@
         {{ isDeleting ? 'Deleting...' : 'Confirm' }}
       </button>
 
-      <a class="btn btn-outline-light" routerLink="/view-poll">
+      <button
+        type="button"
+        class="btn btn-outline-light"
+        (click)="cancelDelete()"
+        [disabled]="isDeleting"
+      >
         Cancel
-      </a>
+      </button>
+
     </div>
   </div>
 </div>
