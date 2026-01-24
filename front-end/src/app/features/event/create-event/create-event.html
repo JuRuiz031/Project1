@@ -3,7 +3,7 @@
 
   <div class="card app-card shadow-sm">
     <div class="card-body">
-      <form [formGroup]="form" novalidate>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <!-- Calendar dropdown -->
         <div class="mb-3">
           <label class="form-label">Calendar (admin only)</label>
