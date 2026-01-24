@@ -1,18 +1,18 @@
 package com.example.calendario.service;
-import java.util.Date;
-import java.util.Optional;
-import java.util.List;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.example.calendario.dto.user.UserDeleteResponseDTO;
-import com.example.calendario.dto.user.UserUpdateDTO;
 import com.example.calendario.dto.user.LoginRequestDTO;
 import com.example.calendario.dto.user.LoginSuccessDTO;
+import com.example.calendario.dto.user.UserDeleteResponseDTO;
 import com.example.calendario.dto.user.UserRegistrationDTO;
 import com.example.calendario.dto.user.UserResponseDTO;
+import com.example.calendario.dto.user.UserUpdateDTO;
 import com.example.calendario.exception.DuplicateEmailException;
 import com.example.calendario.exception.DuplicateUsernameException;
 import com.example.calendario.exception.ForbiddenException;
@@ -194,5 +194,10 @@ public class UserService {
        return user.getCalendarIds().stream()
                .map(User.CalendarMembership::getCalendarId)
                .collect(Collectors.toList());
+   }
+
+   // Get users by calendar membership (optimized query)
+   public List<User> getUsersByCalendarMembership(String calendarId) {
+       return userRepository.findByCalendarIdsMembershipCalendarId(calendarId);
    }
 }
