@@ -10,6 +10,8 @@ import com.example.calendario.model.Event;
 
 @Repository
 public interface EventRepository extends MongoRepository<Event, String> {
+    // Find events by a list of IDs
+    List<Event> findByIdIn(List<String> eventIds);
     
     // Find all events for a specific calendar
     List<Event> findByCalendarId(String calendarId);

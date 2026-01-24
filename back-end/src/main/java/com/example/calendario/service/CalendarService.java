@@ -18,6 +18,7 @@ import com.example.calendario.dto.calendar.CalendarUpdateResponseDTO;
 import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.exception.ResourceNotFoundException;
 import com.example.calendario.model.Calendar;
+import com.example.calendario.model.Event;
 import com.example.calendario.model.User;
 import com.example.calendario.repository.CalendarRepository;
 
@@ -398,5 +399,81 @@ public class CalendarService {
         }
 
         return new com.example.calendario.dto.calendar.EventFilterResponseDTO(eventDTOs);
+    }
+
+    public com.example.calendario.dto.calendar.CalendarFilterResponseDTO getFilteredCalendarView(
+            java.util.List<String> calendarIds,
+            java.util.List<String> eventIds,
+            java.util.List<String> tags,
+            String authenticatedUsername) {
+        // Get authenticated user
+        User authenticatedUser = userService.findByUsername(authenticatedUsername)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        // Validate access for provided calendarIds and collect accessibleCalendarIds
+        java.util.List<String> accessibleCalendarIds = new java.util.ArrayList<>();
+        if (calendarIds != null && !calendarIds.isEmpty()) {
+            for (String calendarId : calendarIds) {
+                if (authenticatedUser.isSuperuser() || authenticatedUser.isMemberOfCalendar(calendarId)) {
+                    accessibleCalendarIds.add(calendarId);
+                } else {
+                    throw new ForbiddenException("You do not have permission to view calendar: " + calendarId);
+                }
+            }
+        }
+
+        // Collect events from any of the provided criteria
+        java.util.List<com.example.calendario.model.Event> filteredEvents = new java.util.ArrayList<>();
+        if (!accessibleCalendarIds.isEmpty()) {
+            filteredEvents.addAll(eventRepository.findByCalendarIdIn(accessibleCalendarIds));
+        }
+        if (eventIds != null && !eventIds.isEmpty()) {
+            filteredEvents.addAll(eventRepository.findByIdIn(eventIds));
+        }
+        if (tags != null && !tags.isEmpty()) {
+            filteredEvents.addAll(eventRepository.findByTagsIn(tags));
+        }
+
+        // Deduplicate events by id while preserving insertion order
+        java.util.Map<String, com.example.calendario.model.Event> eventMap = new java.util.LinkedHashMap<>();
+        for (com.example.calendario.model.Event event : filteredEvents) {
+            if (event != null && event.getId() != null) {
+                eventMap.putIfAbsent(event.getId(), event);
+            }
+        }
+
+        // Filter events the authenticated user has access to and map to DTOs
+        java.util.List<com.example.calendario.dto.event.EventResponseDTO> eventDTOs = eventMap.values().stream()
+                .filter(event -> authenticatedUser.isSuperuser() || authenticatedUser.isMemberOfCalendar(event.getCalendarId()))
+                .map(event -> new com.example.calendario.dto.event.EventResponseDTO(
+                        event.getId(),
+                        event.getCalendarId(),
+                        event.getTitle(),
+                        event.getStartTime(),
+                        event.getEndTime(),
+                        event.getDescription(),
+                        event.getNotes(),
+                        event.getTags()
+                ))
+                .collect(java.util.stream.Collectors.toList());
+
+        // Build users list only for the supplied calendarIds where the authenticated user is admin (or superuser)
+        java.util.List<com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo> users = new java.util.ArrayList<>();
+        if (calendarIds != null && !calendarIds.isEmpty()) {
+            for (String calendarId : calendarIds) {
+                if (authenticatedUser.isSuperuser() || authenticatedUser.isAdminOfCalendar(calendarId)) {
+                    for (User user : userService.getAllUsers()) {
+                        if (user.isMemberOfCalendar(calendarId) && !user.isSuperuser()) {
+                            users.add(new com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo(
+                                    calendarId,
+                                    user.getId(),
+                                    user.getUsername()
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
+        return new com.example.calendario.dto.calendar.CalendarFilterResponseDTO(eventDTOs, users.isEmpty() ? null : users);
     }
 }
