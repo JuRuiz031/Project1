@@ -2,7 +2,7 @@
  * Response body for PATCH /calendar/{calendar_id}
  */
 export interface UpdateCalendarResponseDTO {
-  calendar_id: number;
+  calendar_id: string;
   name: string;
-  admins: number[];
+  admins: string[];
 }

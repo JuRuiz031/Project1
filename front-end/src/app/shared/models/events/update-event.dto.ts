@@ -3,8 +3,8 @@
  * All fields optional; omitted fields remain unchanged.
  */
 export interface UpdateEventDTO {
-  user_id?: number;
-  calendar_id?: number;
+  user_id?: string;
+  calendar_id?: string;
 
   title?: string;
 

@@ -1,7 +1,10 @@
-import { UserResponseDTO } from './user-response.dto';
+import { LoginUserDTO } from './login-success.dto';
 
+/**
+ * Response body for GET /login (auth status check)
+ */
 export interface LoginStatusDTO {
   authenticated: boolean;
-  user?: UserResponseDTO;
+  user?: LoginUserDTO;
   token_expires_at?: string;
 }

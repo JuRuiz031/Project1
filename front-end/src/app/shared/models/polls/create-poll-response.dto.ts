@@ -5,8 +5,8 @@
  * Note: write endpoints return `poll_id` (not `id`).
  */
 export interface CreatePollResponseDTO {
-  poll_id: number;
-  calendar_id: number;
+  poll_id: string;
+  calendar_id: string;
 
   title: string;
 
@@ -21,7 +21,7 @@ export interface CreatePollResponseDTO {
   allow_multiple_votes: boolean;
 
   options: Array<{
-    option_id: number;
+    option_id: string;
     description: string;
   }>;
 

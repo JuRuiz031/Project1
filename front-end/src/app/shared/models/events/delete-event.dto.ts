@@ -1,4 +1,4 @@
 export interface DeleteEventDTO {
-  user_id: number;
-  calendar_id: number;
+  user_id: string;
+  calendar_id: string;
 }

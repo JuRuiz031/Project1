@@ -4,7 +4,7 @@
  * requesting user is an admin of the calendar.
  */
 export interface CalendarUserDTO {
-  calendar_id: number;
-  user_id: number;
+  calendar_id: string;
+  user_id: string;
   username: string;
 }

@@ -9,12 +9,12 @@
  * - `calendars` is returned on view-user (GET /users/{id}).
  */
 export interface UserResponseDTO {
-  user_id: number;
+  user_id: string;
   username: string;
   email?: string;
 
   calendars?: Array<{
-    calendar_id: number;
+    calendar_id: string;
     name: string;
   }>;
 }
