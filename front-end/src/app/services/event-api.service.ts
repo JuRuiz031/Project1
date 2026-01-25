@@ -32,7 +32,7 @@ export class EventApiService {
    * PATCH /events/{event_id}
    */
   updateEvent(
-    eventId: number,
+    eventId: string,
     dto: UpdateEventDTO
   ): Observable<UpdateEventResponseDTO> {
     return this.http.patch<UpdateEventResponseDTO>(
@@ -46,7 +46,7 @@ export class EventApiService {
    * (uses request body per API spec)
    */
   deleteEvent(
-    eventId: number,
+    eventId: string,
     dto: DeleteEventDTO
   ): Observable<DeleteEventResponseDTO> {
     return this.http.delete<DeleteEventResponseDTO>(

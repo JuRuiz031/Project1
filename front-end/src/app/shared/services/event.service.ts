@@ -27,7 +27,7 @@ export class EventService {
   }
 
   update(id: string | number, dto: UpdateEventDTO): Observable<EventDTO> {
-    return this.api.updateEvent(id, dto).pipe(
+    return this.api.updateEvent(String(id), dto).pipe(
       map((r) => ({
         id: r.event_id,
         calendar_id: r.calendar_id,
@@ -42,6 +42,6 @@ export class EventService {
   }
 
   delete(id: string | number, dto: DeleteEventDTO): Observable<boolean> {
-    return this.api.deleteEvent(id, dto).pipe(map((r) => r.deleted));
+    return this.api.deleteEvent(String(id), dto).pipe(map((r) => r.deleted));
   }
 }
