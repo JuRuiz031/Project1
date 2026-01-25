@@ -132,7 +132,9 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals(token, result.getToken());
         assertNotNull(result.getUser());
+        assertEquals("user-123", result.getUser().getUserId());
         assertEquals("testuser", result.getUser().getUsername());
+        assertNotNull(result.getExpiresAt());
         verify(jwtUtil, times(1)).generateToken("testuser");
     }
 
@@ -160,6 +162,28 @@ class UserServiceTest {
         });
         assertEquals("Invalid password", exception.getMessage());
     }
+
+    @Test
+    void testAuthenticateUser_ReturnsSimplifiedUserDTO() {
+        // Arrange - Test that login returns LoginUserDTO with only user_id and username
+        String token = "jwt-token-456";
+        Date expiration = new Date(System.currentTimeMillis() + 3600000);
+        
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(jwtUtil.generateToken("testuser")).thenReturn(token);
+        when(jwtUtil.extractExpiration(token)).thenReturn(expiration);
+
+        // Act
+        LoginSuccessDTO result = userService.authenticateUser(loginRequestDTO);
+
+        // Assert - Verify LoginUserDTO contains only user_id and username (no email, no password)
+        assertNotNull(result.getUser());
+        assertEquals("user-123", result.getUser().getUserId());
+        assertEquals("testuser", result.getUser().getUsername());
+        // LoginUserDTO should not expose email or other sensitive data
+        // This is verified by the DTO structure itself
+    }
+
 
     @Test
     void testUpdateUser_Success() {

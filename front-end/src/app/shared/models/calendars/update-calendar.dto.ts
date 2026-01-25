@@ -4,5 +4,5 @@
  */
 export interface UpdateCalendarDTO {
   name?: string;
-  admins?: number[];
+  admins?: string[];
 }

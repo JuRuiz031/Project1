@@ -3,8 +3,8 @@
  * All fields are optional; omitted fields remain unchanged.
  */
 export interface UpdatePollDTO {
-  user_id?: number;
-  calendar_id?: number;
+  user_id?: string;
+  calendar_id?: string;
 
   title?: string;
   description?: string;

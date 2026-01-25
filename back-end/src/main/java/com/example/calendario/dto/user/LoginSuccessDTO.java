@@ -8,13 +8,13 @@ public class LoginSuccessDTO {
     private String token;
 
     @JsonProperty("user")
-    private UserResponseDTO user;
+    private LoginUserDTO user;
 
     @JsonProperty("expires_at")
     private String expiresAt;
 
     // Constructor
-    public LoginSuccessDTO(String token, UserResponseDTO user, String expiresAt) {
+    public LoginSuccessDTO(String token, LoginUserDTO user, String expiresAt) {
         this.token = token;
         this.user = user;
         this.expiresAt = expiresAt;
@@ -24,8 +24,8 @@ public class LoginSuccessDTO {
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 
-    public UserResponseDTO getUser() { return user; }
-    public void setUser(UserResponseDTO user) { this.user = user; }
+    public LoginUserDTO getUser() { return user; }
+    public void setUser(LoginUserDTO user) { this.user = user; }
 
     public String getExpiresAt() { return expiresAt; }
     public void setExpiresAt(String expiresAt) { this.expiresAt = expiresAt; }

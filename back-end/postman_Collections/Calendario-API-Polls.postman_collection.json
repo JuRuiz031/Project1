@@ -1,0 +1,106 @@
+{
+  "info": {
+    "_postman_id": "7562dba9-7eed-4cfd-96ab-f6c130044981",
+    "name": "Calendario API v1 - Polls",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51732412",
+    "_collection_link": "https://go.postman.co/collection/51732412-7562dba9-7eed-4cfd-96ab-f6c130044981?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Create Poll - Success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {\r",
+              "    const responseData = pm.response.json();\r",
+              "    pm.environment.set('poll_id', responseData.poll_id);\r",
+              "    console.log('Poll created with ID: ' + responseData.poll_id);\r",
+              "    console.log('Poll title: ' + responseData.title);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"user_id\":\"{{user_id}}\",\n\t\"calendar_id\":\"{{calendar_id}}\",\n\t\"title\":\"When should we demo?\",\n\t\"description\":\"Pick a time for the project demo\",\n\t\"notes\":\"Client may join remotely\",\n\t\"start_time\":\"2024-03-15T09:00:00Z\",\n\t\"end_time\":\"2024-03-18T17:00:00Z\",\n\t\"results_visible\":true,\n\t\"allow_multiple_votes\":false,\n\t\"options\":[\n\t\t{\n\t\t\t\"description\":\"Monday 10am\"\n\t\t},\n\t\t{\n\t\t\t\"description\":\"Wednesday 2pm\"\n\t\t}\n\t],\n\t\"tags\":[\"Work\",\"Demo\"]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/polls",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vote on Poll - Success",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"user_id\": \"{{user_id}}\",\r\n    \"calendar_id\": \"{{calendar_id}}\",\r\n    \"options\" : [0, 1]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/polls/{{poll_id}}/vote",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "polls",
+            "{{poll_id}}",
+            "vote"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

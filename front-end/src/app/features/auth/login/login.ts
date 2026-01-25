@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { BRAND_CONFIG } from '../../../config/brand.config';
 import { LoginRequestDTO } from '../../../shared/models/auth/login-request.dto';
-import { UserApiService } from '../../../services/user-api.service';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 
 @Component({
   selector: 'app-login',

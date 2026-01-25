@@ -4,7 +4,7 @@ import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { Login } from './login';
-import { UserApiService } from '../../../services/user-api.service';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 
 describe('Login', () => {
   let fixture: ComponentFixture<Login>;

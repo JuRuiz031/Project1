@@ -6,13 +6,13 @@ import {
 
 import { EventApiService } from './event-api.service';
 
-import { CreateEventDTO } from '../shared/models/events/create-event.dto';
-import { UpdateEventDTO } from '../shared/models/events/update-event.dto';
-import { DeleteEventDTO } from '../shared/models/events/delete-event.dto';
+import { CreateEventDTO } from '../../models/events/create-event.dto';
+import { UpdateEventDTO } from '../../models/events/update-event.dto';
+import { DeleteEventDTO } from '../../models/events/delete-event.dto';
 
-import { CreateEventResponseDTO } from '../shared/models/events/create-event-response.dto';
-import { UpdateEventResponseDTO } from '../shared/models/events/update-event-response.dto';
-import { DeleteEventResponseDTO } from '../shared/models/events/delete-event-response.dto';
+import { CreateEventResponseDTO } from '../../models/events/create-event-response.dto';
+import { UpdateEventResponseDTO } from '../../models/events/update-event-response.dto';
+import { DeleteEventResponseDTO } from '../../models/events/delete-event-response.dto';
 
 describe('EventApiService', () => {
   let service: EventApiService;
@@ -41,7 +41,7 @@ describe('EventApiService', () => {
     } as unknown as CreateEventDTO;
 
     const mockResponse = {
-      event_id: 101,
+      event_id: '101',
     } as unknown as CreateEventResponseDTO;
 
     service.createEvent(dto).subscribe((res) => {
@@ -61,10 +61,10 @@ describe('EventApiService', () => {
     } as unknown as UpdateEventDTO;
 
     const mockResponse = {
-      event_id: 101,
+      event_id: '101',
     } as unknown as UpdateEventResponseDTO;
 
-    service.updateEvent(101, dto).subscribe((res) => {
+    service.updateEvent('101', dto).subscribe((res) => {
       expect(res).toBeTruthy();
     });
 
@@ -82,11 +82,11 @@ describe('EventApiService', () => {
     } as unknown as DeleteEventDTO;
 
     const mockResponse = {
-      event_id: 101,
+      event_id: '101',
       deleted: true,
     } as unknown as DeleteEventResponseDTO;
 
-    service.deleteEvent(101, dto).subscribe((res) => {
+    service.deleteEvent('101', dto).subscribe((res) => {
       expect(res).toBeTruthy();
     });
 

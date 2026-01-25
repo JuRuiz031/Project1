@@ -3,7 +3,7 @@ import { Subject, throwError, firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 
 import { CreateAccount } from './create-account';
-import { UserApiService } from '../../../services/user-api.service';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 import { Router } from '@angular/router';
 
 describe('CreateAccount', () => {

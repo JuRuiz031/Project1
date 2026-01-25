@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { CreateEventDTO } from '../shared/models/events/create-event.dto';
-import { UpdateEventDTO } from '../shared/models/events/update-event.dto';
-import { DeleteEventDTO } from '../shared/models/events/delete-event.dto';
+import { CreateEventDTO } from '../../models/events/create-event.dto';
+import { UpdateEventDTO } from '../../models/events/update-event.dto';
+import { DeleteEventDTO } from '../../models/events/delete-event.dto';
 
-import { CreateEventResponseDTO } from '../shared/models/events/create-event-response.dto';
-import { UpdateEventResponseDTO } from '../shared/models/events/update-event-response.dto';
-import { DeleteEventResponseDTO } from '../shared/models/events/delete-event-response.dto';
+import { CreateEventResponseDTO } from '../../models/events/create-event-response.dto';
+import { UpdateEventResponseDTO } from '../../models/events/update-event-response.dto';
+import { DeleteEventResponseDTO } from '../../models/events/delete-event-response.dto';
 
 @Injectable({
   providedIn: 'root',

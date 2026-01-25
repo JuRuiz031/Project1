@@ -251,7 +251,7 @@ public class CalendarService {
             }
             // Get all events to collect tags
             for (com.example.calendario.model.Event event : eventRepository.findByCalendarIdIn(
-                    calendarInfos.stream().map(com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.CalendarInfo::getId).collect(java.util.stream.Collectors.toList()))) {
+                    calendarInfos.stream().map(com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.CalendarInfo::getCalendarId).collect(java.util.stream.Collectors.toList()))) {
                 if (event.getTags() != null) {
                     allTags.addAll(event.getTags());
                 }

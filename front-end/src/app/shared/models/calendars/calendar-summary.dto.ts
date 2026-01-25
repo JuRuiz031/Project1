@@ -2,6 +2,6 @@
  * Minimal calendar representation used in lists and selectors.
  */
 export interface CalendarSummaryDTO {
-  id: number;
+  calendar_id: string;
   name: string;
 }

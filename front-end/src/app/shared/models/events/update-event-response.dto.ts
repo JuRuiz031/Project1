@@ -5,8 +5,8 @@
  * Note: write endpoints return `event_id` (not `id`).
  */
 export interface UpdateEventResponseDTO {
-  event_id: number;
-  calendar_id: number;
+  event_id: string;
+  calendar_id: string;
 
   title: string;
 
