@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -8,11 +9,14 @@ import { UserApiService } from '../../../services/user-api.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
+  /** TEMP: set true to bypass backend auth while backend is being fixed */
+  private readonly BYPASS_AUTH = true;
+
   form: FormGroup;
   errorMessage: string = '';
   readonly siteName = BRAND_CONFIG.siteName;
@@ -37,6 +41,23 @@ export class Login {
       return;
     }
 
+    // ✅ BYPASS MODE: skip API call, go straight to main page
+    if (this.BYPASS_AUTH) {
+      localStorage.setItem('token', 'dev-bypass-token');
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          user_id: 0,
+          username: String(this.form.value.username ?? 'dev'),
+          email: 'dev@example.com',
+          is_superuser: true,
+        })
+      );
+
+      this.router.navigateByUrl('/dashboard/main-page');
+      return;
+    }
+
     const dto: LoginRequestDTO = {
       username: String(this.form.value.username ?? ''),
       password: String(this.form.value.password ?? ''),
@@ -49,7 +70,12 @@ export class Login {
         this.router.navigateByUrl('/dashboard/main-page');
       },
       error: (err) => {
-        this.errorMessage = err?.error?.message || 'Login failed';
+        const message =
+          (err?.error && typeof err.error === 'string' && err.error) ||
+          err?.error?.message ||
+          err?.message;
+
+        this.errorMessage = message || 'Login failed';
       },
     });
   }
