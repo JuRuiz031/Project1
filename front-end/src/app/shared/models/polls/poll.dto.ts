@@ -4,7 +4,7 @@ import { PollOptionDTO } from './poll-option.dto';
  * Represents a poll returned from calendar read endpoints and poll write endpoints.
  */
 export interface PollDTO {
-  id: string;
+  poll_id: string;
   calendar_id: string;
 
   title: string;

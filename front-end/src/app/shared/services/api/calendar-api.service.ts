@@ -2,20 +2,20 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { CalendarHomeDTO } from '../shared/models/calendars/calendar-home.dto';
-import { CalendarFilterResponseDTO } from '../shared/models/calendars/calendar-filter-response.dto';
+import { CalendarHomeDTO } from '../../models/calendars/calendar-home.dto';
+import { CalendarFilterResponseDTO } from '../../models/calendars/calendar-filter-response.dto';
 
-import { CreateCalendarDTO } from '../shared/models/calendars/create-calendar.dto';
-import { CreateCalendarResponseDTO } from '../shared/models/calendars/create-calendar-response.dto';
+import { CreateCalendarDTO } from '../../models/calendars/create-calendar.dto';
+import { CreateCalendarResponseDTO } from '../../models/calendars/create-calendar-response.dto';
 
-import { UpdateCalendarDTO } from '../shared/models/calendars/update-calendar.dto';
-import { UpdateCalendarResponseDTO } from '../shared/models/calendars/update-calendar-response.dto';
+import { UpdateCalendarDTO } from '../../models/calendars/update-calendar.dto';
+import { UpdateCalendarResponseDTO } from '../../models/calendars/update-calendar-response.dto';
 
-import { DeleteCalendarResponseDTO } from '../shared/models/calendars/delete-calendar-response.dto';
+import { DeleteCalendarResponseDTO } from '../../models/calendars/delete-calendar-response.dto';
 
-import { InviteCalendarResponseDTO } from '../shared/models/calendars/invite-calendar-response.dto';
-import { AcceptInviteDTO } from '../shared/models/calendars/accept-invite.dto';
-import { AcceptInviteResponseDTO } from '../shared/models/calendars/accept-invite-response.dto';
+import { InviteCalendarResponseDTO } from '../../models/calendars/invite-calendar-response.dto';
+import { AcceptInviteDTO } from '../../models/calendars/accept-invite.dto';
+import { AcceptInviteResponseDTO } from '../../models/calendars/accept-invite-response.dto';
 
 @Injectable({
   providedIn: 'root',

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
-import { EventApiService } from '../../services/event-api.service';
+import { EventApiService } from './api/event-api.service';
 import { CreateEventDTO } from '../models/events/create-event.dto';
 import { UpdateEventDTO } from '../models/events/update-event.dto';
 import { DeleteEventDTO } from '../models/events/delete-event.dto';
@@ -11,10 +11,11 @@ import { EventDTO } from '../models/events/event.dto';
 export class EventService {
   constructor(private api: EventApiService) {}
 
+  // POST /events: create new event, requires admin
   create(dto: CreateEventDTO): Observable<EventDTO> {
     return this.api.createEvent(dto).pipe(
       map((r) => ({
-        id: r.event_id,          // normalize to read-shape
+        event_id: r.event_id,
         calendar_id: r.calendar_id,
         title: r.title,
         start_time: r.start_time,
@@ -26,10 +27,11 @@ export class EventService {
     );
   }
 
-  update(id: string | number, dto: UpdateEventDTO): Observable<EventDTO> {
-    return this.api.updateEvent(String(id), dto).pipe(
+  // PATCH /events/{id}: update event, requires admin
+  update(eventId: string, dto: UpdateEventDTO): Observable<EventDTO> {
+    return this.api.updateEvent(eventId, dto).pipe(
       map((r) => ({
-        id: r.event_id,
+        event_id: r.event_id,
         calendar_id: r.calendar_id,
         title: r.title,
         start_time: r.start_time,
@@ -41,7 +43,8 @@ export class EventService {
     );
   }
 
-  delete(id: string | number, dto: DeleteEventDTO): Observable<boolean> {
-    return this.api.deleteEvent(String(id), dto).pipe(map((r) => r.deleted));
+  // DELETE /events/{id}: delete event, requires admin
+  delete(eventId: string, dto: DeleteEventDTO): Observable<boolean> {
+    return this.api.deleteEvent(eventId, dto).pipe(map((r) => r.deleted));
   }
 }

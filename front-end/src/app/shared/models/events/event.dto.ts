@@ -3,7 +3,7 @@
  * Events are READ via /calendar queries and WRITTEN via /events endpoints.
  */
 export interface EventDTO {
-  id: string;
+  event_id: string;
   calendar_id: string;
 
   title: string;

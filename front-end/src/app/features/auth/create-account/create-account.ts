@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
-import { UserApiService } from '../../../services/user-api.service';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 
 @Component({
   selector: 'app-create-account',

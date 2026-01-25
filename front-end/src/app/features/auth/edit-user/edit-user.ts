@@ -5,7 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 
-import { UserApiService, UpdateUserDTO } from '../../../services/user-api.service';
+import { UserApiService, UpdateUserDTO } from '../../../shared/services/api/user-api.service';
 
 @Component({
   selector: 'app-edit-user',
@@ -21,7 +21,7 @@ export class EditUser implements OnInit {
   isSubmitting = false;
 
   // TODO: replace with real user_id from auth/login status
-  private readonly userId = 3;
+  private readonly userId = '3';
 
   constructor(
     private fb: FormBuilder,
