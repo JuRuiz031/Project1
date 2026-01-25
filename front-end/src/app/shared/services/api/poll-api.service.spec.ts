@@ -6,13 +6,13 @@ import {
 
 import { PollApiService } from './poll-api.service';
 
-import { CreatePollDTO } from '../shared/models/polls/create-poll.dto';
-import { UpdatePollDTO } from '../shared/models/polls/update-poll.dto';
-import { DeletePollDTO } from '../shared/models/polls/delete-poll.dto';
+import { CreatePollDTO } from '../../models/polls/create-poll.dto';
+import { UpdatePollDTO } from '../../models/polls/update-poll.dto';
+import { DeletePollDTO } from '../../models/polls/delete-poll.dto';
 
-import { CreatePollResponseDTO } from '../shared/models/polls/create-poll-response.dto';
-import { UpdatePollResponseDTO } from '../shared/models/polls/update-poll-response.dto';
-import { DeletePollResponseDTO } from '../shared/models/polls/delete-poll-response.dto';
+import { CreatePollResponseDTO } from '../../models/polls/create-poll-response.dto';
+import { UpdatePollResponseDTO } from '../../models/polls/update-poll-response.dto';
+import { DeletePollResponseDTO } from '../../models/polls/delete-poll-response.dto';
 
 describe('PollApiService', () => {
   let service: PollApiService;
@@ -40,7 +40,7 @@ describe('PollApiService', () => {
     } as unknown as CreatePollDTO;
 
     const mockResponse = {
-      poll_id: 201,
+      poll_id: '201',
     } as unknown as CreatePollResponseDTO;
 
     service.createPoll(dto).subscribe((res) => {
@@ -60,10 +60,10 @@ describe('PollApiService', () => {
     } as unknown as UpdatePollDTO;
 
     const mockResponse = {
-      poll_id: 201,
+      poll_id: '201',
     } as unknown as UpdatePollResponseDTO;
 
-    service.updatePoll(201, dto).subscribe((res) => {
+    service.updatePoll('201', dto).subscribe((res) => {
       expect(res).toBeTruthy();
     });
 
@@ -80,11 +80,11 @@ describe('PollApiService', () => {
     } as unknown as DeletePollDTO;
 
     const mockResponse = {
-      poll_id: 201,
+      poll_id: '201',
       deleted: true,
     } as unknown as DeletePollResponseDTO;
 
-    service.deletePoll(201, dto).subscribe((res) => {
+    service.deletePoll('201', dto).subscribe((res) => {
       expect(res).toBeTruthy();
     });
 

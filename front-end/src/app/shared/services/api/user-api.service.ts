@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { UserRegistrationDTO } from '../shared/models/auth/user-registration.dto';
-import { UserResponseDTO } from '../shared/models/auth/user-response.dto';
-import { LoginRequestDTO } from '../shared/models/auth/login-request.dto';
-import { LoginSuccessDTO } from '../shared/models/auth/login-success.dto';
-import { LoginStatusDTO } from '../shared/models/auth/login-status.dto';
+import { UserRegistrationDTO } from '../../models/auth/user-registration.dto';
+import { UserResponseDTO } from '../../models/auth/user-response.dto';
+import { LoginRequestDTO } from '../../models/auth/login-request.dto';
+import { LoginSuccessDTO } from '../../models/auth/login-success.dto';
+import { LoginStatusDTO } from '../../models/auth/login-status.dto';
 
 /**
  * PATCH /users/{id} request body
@@ -22,7 +22,7 @@ export interface UpdateUserDTO {
  * DELETE /users/{id} response body (per Endpoints.md)
  */
 export interface DeleteUserResponseDTO {
-  user_id: number;
+  user_id: string;
   deleted: boolean;
 }
 
@@ -58,21 +58,21 @@ export class UserApiService {
   /**
    * GET /users/{id}
    */
-  getUserById(id: number): Observable<UserResponseDTO> {
+  getUserById(id: string): Observable<UserResponseDTO> {
     return this.http.get<UserResponseDTO>(`${this.baseUrl}/users/${id}`);
   }
 
   /**
    * PATCH /users/{id}
    */
-  updateUser(id: number, dto: UpdateUserDTO): Observable<UserResponseDTO> {
+  updateUser(id: string, dto: UpdateUserDTO): Observable<UserResponseDTO> {
     return this.http.patch<UserResponseDTO>(`${this.baseUrl}/users/${id}`, dto);
   }
 
   /**
    * DELETE /users/{id}
    */
-  deleteUser(id: number): Observable<DeleteUserResponseDTO> {
+  deleteUser(id: string): Observable<DeleteUserResponseDTO> {
     return this.http.delete<DeleteUserResponseDTO>(`${this.baseUrl}/users/${id}`);
   }
 }

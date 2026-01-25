@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { CreatePollDTO } from '../shared/models/polls/create-poll.dto';
-import { UpdatePollDTO } from '../shared/models/polls/update-poll.dto';
-import { DeletePollDTO } from '../shared/models/polls/delete-poll.dto';
+import { CreatePollDTO } from '../../models/polls/create-poll.dto';
+import { UpdatePollDTO } from '../../models/polls/update-poll.dto';
+import { DeletePollDTO } from '../../models/polls/delete-poll.dto';
 
-import { CreatePollResponseDTO } from '../shared/models/polls/create-poll-response.dto';
-import { UpdatePollResponseDTO } from '../shared/models/polls/update-poll-response.dto';
-import { DeletePollResponseDTO } from '../shared/models/polls/delete-poll-response.dto';
+import { CreatePollResponseDTO } from '../../models/polls/create-poll-response.dto';
+import { UpdatePollResponseDTO } from '../../models/polls/update-poll-response.dto';
+import { DeletePollResponseDTO } from '../../models/polls/delete-poll-response.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -32,7 +32,7 @@ export class PollApiService {
    * PATCH /polls/{poll_id}
    */
   updatePoll(
-    pollId: number,
+    pollId: string,
     dto: UpdatePollDTO
   ): Observable<UpdatePollResponseDTO> {
     return this.http.patch<UpdatePollResponseDTO>(
@@ -46,7 +46,7 @@ export class PollApiService {
    * (uses request body per API spec)
    */
   deletePoll(
-    pollId: number,
+    pollId: string,
     dto: DeletePollDTO
   ): Observable<DeletePollResponseDTO> {
     return this.http.delete<DeletePollResponseDTO>(

@@ -4,7 +4,7 @@ import { of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { EditUser } from './edit-user';
-import { UserApiService } from '../../../services/user-api.service';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 
 // Vitest globals (no Jasmine)
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -81,7 +81,7 @@ describe('EditUser', () => {
 
     // DTO mapping: name -> username, newPassword -> password (only if present)
     expect(userApiMock.updateUser).toHaveBeenCalledWith(
-      3,
+      '3',
       { username: 'Jane Doe', email: 'jane@example.com' }
     );
 
@@ -90,7 +90,7 @@ describe('EditUser', () => {
 
   it('save() should include password when newPassword is provided', () => {
     userApiMock.updateUser.mockReturnValue(
-      of({ user_id: 3, username: 'Jane Doe', email: 'jane@example.com' })
+      of({ user_id: '3', username: 'Jane Doe', email: 'jane@example.com' })
     );
 
     component.form.patchValue({
@@ -102,7 +102,7 @@ describe('EditUser', () => {
     component.save();
 
     expect(userApiMock.updateUser).toHaveBeenCalledWith(
-      3,
+      '3',
       { username: 'Jane Doe', email: 'jane@example.com', password: 'password123' }
     );
   });

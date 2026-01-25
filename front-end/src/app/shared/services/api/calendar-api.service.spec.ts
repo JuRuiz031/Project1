@@ -3,20 +3,20 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 
 import { CalendarApiService } from './calendar-api.service';
 
-import { CalendarHomeDTO } from '../shared/models/calendars/calendar-home.dto';
-import { CalendarFilterResponseDTO } from '../shared/models/calendars/calendar-filter-response.dto';
+import { CalendarHomeDTO } from '../../models/calendars/calendar-home.dto';
+import { CalendarFilterResponseDTO } from '../../models/calendars/calendar-filter-response.dto';
 
-import { CreateCalendarDTO } from '../shared/models/calendars/create-calendar.dto';
-import { CreateCalendarResponseDTO } from '../shared/models/calendars/create-calendar-response.dto';
+import { CreateCalendarDTO } from '../../models/calendars/create-calendar.dto';
+import { CreateCalendarResponseDTO } from '../../models/calendars/create-calendar-response.dto';
 
-import { UpdateCalendarDTO } from '../shared/models/calendars/update-calendar.dto';
-import { UpdateCalendarResponseDTO } from '../shared/models/calendars/update-calendar-response.dto';
+import { UpdateCalendarDTO } from '../../models/calendars/update-calendar.dto';
+import { UpdateCalendarResponseDTO } from '../../models/calendars/update-calendar-response.dto';
 
-import { DeleteCalendarResponseDTO } from '../shared/models/calendars/delete-calendar-response.dto';
+import { DeleteCalendarResponseDTO } from '../../models/calendars/delete-calendar-response.dto';
 
-import { InviteCalendarResponseDTO } from '../shared/models/calendars/invite-calendar-response.dto';
-import { AcceptInviteDTO } from '../shared/models/calendars/accept-invite.dto';
-import { AcceptInviteResponseDTO } from '../shared/models/calendars/accept-invite-response.dto';
+import { InviteCalendarResponseDTO } from '../../models/calendars/invite-calendar-response.dto';
+import { AcceptInviteDTO } from '../../models/calendars/accept-invite.dto';
+import { AcceptInviteResponseDTO } from '../../models/calendars/accept-invite-response.dto';
 
 describe('CalendarApiService', () => {
   let service: CalendarApiService;
@@ -62,7 +62,7 @@ describe('CalendarApiService', () => {
   it('getByCalendarIds() should GET /calendar?calendarIds=1,2,3', () => {
     const mock = { ok: true } as unknown as CalendarFilterResponseDTO;
 
-    service.getByCalendarIds([1, 2, 3]).subscribe();
+    service.getByCalendarIds(['1', '2', '3']).subscribe();
 
     const req = httpMock.expectOne((r) => r.url === `${baseUrl}/calendar`);
     expect(req.request.method).toBe('GET');
@@ -86,7 +86,7 @@ describe('CalendarApiService', () => {
   it('getByEventIds() should GET /calendar?eventIds=10,11', () => {
     const mock = { ok: true } as unknown as CalendarFilterResponseDTO;
 
-    service.getByEventIds([10, 11]).subscribe();
+    service.getByEventIds(['10', '11']).subscribe();
 
     const req = httpMock.expectOne((r) => r.url === `${baseUrl}/calendar`);
     expect(req.request.method).toBe('GET');
@@ -98,7 +98,7 @@ describe('CalendarApiService', () => {
   it('getByPollIds() should GET /calendar?pollIds=7,8', () => {
     const mock = { ok: true } as unknown as CalendarFilterResponseDTO;
 
-    service.getByPollIds([7, 8]).subscribe();
+    service.getByPollIds(['7', '8']).subscribe();
 
     const req = httpMock.expectOne((r) => r.url === `${baseUrl}/calendar`);
     expect(req.request.method).toBe('GET');
@@ -127,9 +127,9 @@ describe('CalendarApiService', () => {
     const mock = { ok: true } as unknown as CalendarFilterResponseDTO;
 
     service.getFiltered({
-      calendarIds: [1, 2],
-      eventIds: [10],
-      pollIds: [7, 8],
+      calendarIds: ['1', '2'],
+      eventIds: ['10'],
+      pollIds: ['7', '8'],
       tags: ['work'],
     }).subscribe();
 
@@ -162,7 +162,7 @@ describe('CalendarApiService', () => {
 
   it('createCalendar() should POST /calendar', () => {
     const dto = { name: 'My Calendar' } as unknown as CreateCalendarDTO;
-    const mock = { calendar_id: 123 } as unknown as CreateCalendarResponseDTO;
+    const mock = { calendar_id: '123' } as unknown as CreateCalendarResponseDTO;
 
     service.createCalendar(dto).subscribe((res) => {
       expect(res).toBeTruthy();
@@ -177,9 +177,9 @@ describe('CalendarApiService', () => {
 
   it('updateCalendar() should PATCH /calendar/{id}', () => {
     const dto = { name: 'Updated Name' } as unknown as UpdateCalendarDTO;
-    const mock = { calendar_id: 123 } as unknown as UpdateCalendarResponseDTO;
+    const mock = { calendar_id: '123' } as unknown as UpdateCalendarResponseDTO;
 
-    service.updateCalendar(123, dto).subscribe((res) => {
+    service.updateCalendar('123', dto).subscribe((res) => {
       expect(res).toBeTruthy();
     });
 
@@ -191,9 +191,9 @@ describe('CalendarApiService', () => {
   });
 
   it('deleteCalendar() should DELETE /calendar/{id}', () => {
-    const mock = { calendar_id: 123, deleted: true } as unknown as DeleteCalendarResponseDTO;
+    const mock = { calendar_id: '123', deleted: true } as unknown as DeleteCalendarResponseDTO;
 
-    service.deleteCalendar(123).subscribe((res) => {
+    service.deleteCalendar('123').subscribe((res) => {
       expect(res).toBeTruthy();
     });
 
@@ -210,7 +210,7 @@ describe('CalendarApiService', () => {
   it('getInviteLink() should GET /calendars/{id}/invite', () => {
     const mock = { invite_url: 'https://example.com/invite' } as unknown as InviteCalendarResponseDTO;
 
-    service.getInviteLink(55).subscribe((res) => {
+    service.getInviteLink('55').subscribe((res) => {
       expect(res).toBeTruthy();
     });
 

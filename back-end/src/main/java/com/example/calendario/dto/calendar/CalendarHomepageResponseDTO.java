@@ -14,21 +14,21 @@ public class CalendarHomepageResponseDTO {
     
     // Inner class for calendar info
     public static class CalendarInfo {
-        @JsonProperty("id")
-        private String id;
+        @JsonProperty("calendar_id")
+        private String calendarId;
         
         @JsonProperty("name")
         private String name;
         
         public CalendarInfo() {}
         
-        public CalendarInfo(String id, String name) {
-            this.id = id;
+        public CalendarInfo(String calendarId, String name) {
+            this.calendarId = calendarId;
             this.name = name;
         }
         
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
+        public String getCalendarId() { return calendarId; }
+        public void setCalendarId(String calendarId) { this.calendarId = calendarId; }
         
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
