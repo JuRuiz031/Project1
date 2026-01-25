@@ -1,7 +1,11 @@
+// edit-user.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { catchError, finalize, of } from 'rxjs';
+
+import { UserApiService, UpdateUserDTO } from '../../../services/user-api.service';
 
 @Component({
   selector: 'app-edit-user',
@@ -16,7 +20,14 @@ export class EditUser implements OnInit {
   apiError = '';
   isSubmitting = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {}
+  // TODO: replace with real user_id from auth/login status
+  private readonly userId = 3;
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private userApi: UserApiService
+  ) {}
 
   ngOnInit(): void {
     // TODO: Replace with real user data from auth/user service
@@ -34,10 +45,7 @@ export class EditUser implements OnInit {
         existingUser.email,
         [Validators.required, Validators.email, Validators.maxLength(120)],
       ],
-      newPassword: [
-        '',
-        [Validators.minLength(8)],
-      ],
+      newPassword: ['', [Validators.minLength(8)]],
     });
   }
 
@@ -57,21 +65,27 @@ export class EditUser implements OnInit {
 
     const { name, email, newPassword } = this.form.getRawValue();
 
-    const payload = {
-      name,
+    // Map UI fields -> endpoint DTO fields (PATCH /users/{id})
+    const dto: UpdateUserDTO = {
+      username: name,
       email,
-      // only send password if user entered one
-      ...(newPassword ? { newPassword } : {}),
+      ...(newPassword ? { password: newPassword } : {}),
     };
 
     this.isSubmitting = true;
-    console.log('Edit profile payload:', payload);
 
-    // TODO: replace with UserApiService.updateProfile(payload).subscribe(...)
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.router.navigate(['/account']);
-    }, 400);
+    this.userApi
+      .updateUser(this.userId, dto)
+      .pipe(
+        catchError(() => {
+          this.apiError = 'Could not update profile. Please try again.';
+          return of(null);
+        }),
+        finalize(() => (this.isSubmitting = false))
+      )
+      .subscribe((res) => {
+        if (res) this.router.navigate(['/account']);
+      });
   }
 
   cancel(): void {
@@ -79,7 +93,6 @@ export class EditUser implements OnInit {
   }
 
   deleteProfile(): void {
-    // Match your existing delete flows later
     this.router.navigate(['/delete-user']);
   }
 }
