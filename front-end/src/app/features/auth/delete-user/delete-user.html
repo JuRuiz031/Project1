@@ -10,9 +10,11 @@
         <span class="text-muted">This action cannot be undone.</span>
       </div>
 
-      <div *ngIf="apiError" class="alert alert-danger mt-3 mb-0">
-        {{ apiError }}
-      </div>
+      @if (apiError) {
+        <div class="alert alert-danger mt-3 mb-0">
+          {{ apiError }}
+        </div>
+      }
     </div>
 
     <div class="card-footer d-flex justify-content-center gap-5">
@@ -22,7 +24,7 @@
         (click)="confirmDelete()"
         [disabled]="isDeleting"
       >
-        {{ isDeleting ? 'Deleting...' : 'Confirm' }}
+        @if (isDeleting) { Deleting... } @else { Confirm }
       </button>
 
       <button

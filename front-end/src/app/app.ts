@@ -16,7 +16,7 @@ import { CalendarEvent } from 'angular-calendar';
 
 @Component({
   selector: 'app-root',
-  // standalone: true,
+  standalone: true,
   templateUrl: './app.html',
   styleUrl: './app.css',
   imports: [RouterOutlet],

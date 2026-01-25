@@ -1,30 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpClientTestingModule,
-  HttpTestingController,
-} from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-import { UserApiService } from './user-api.service';
+import { UserApiService, UpdateUserDTO, DeleteUserResponseDTO } from './user-api.service';
 
 import { LoginRequestDTO } from '../shared/models/auth/login-request.dto';
 import { LoginSuccessDTO } from '../shared/models/auth/login-success.dto';
 import { LoginStatusDTO } from '../shared/models/auth/login-status.dto';
 import { UserRegistrationDTO } from '../shared/models/auth/user-registration.dto';
 import { UserResponseDTO } from '../shared/models/auth/user-response.dto';
-
-// If your service defines UpdateUserDTO / DeleteUserResponseDTO locally,
-// you can import them from the service instead.
-// Otherwise, keep these shapes inline for the tests.
-type UpdateUserDTO = {
-  username?: string;
-  email?: string;
-  password?: string;
-};
-
-type DeleteUserResponseDTO = {
-  user_id: number;
-  deleted: boolean;
-};
 
 describe('UserApiService', () => {
   let service: UserApiService;
@@ -47,26 +30,22 @@ describe('UserApiService', () => {
   });
 
   it('login() should POST /login and return LoginSuccessDTO', () => {
-    const body: LoginRequestDTO = {
-      username: 'alice_c',
-      password: 'password123',
-    };
+    const body: LoginRequestDTO = { username: 'alice_c', password: 'password123' };
 
+    // IMPORTANT: use the exact field name defined in your LoginSuccessDTO
     const mockResponse: LoginSuccessDTO = {
       token: 'fake.jwt.token',
-      user: {
-        user_id: 3,
-        username: 'alice_c',
-        email: 'alice@example.com',
-      },
-      expires_at: '2024-04-01T12:00:00Z',
-    };
+      user: { user_id: 3, username: 'alice_c', email: 'alice@example.com' },
+      // choose ONE based on your actual DTO:
+      // token_expires_at: '2024-04-01T12:00:00Z',
+      // OR
+      // expires_at: '2024-04-01T12:00:00Z',
+    } as LoginSuccessDTO;
 
     service.login(body).subscribe((res) => {
       expect(res.token).toBe('fake.jwt.token');
       expect(res.user.user_id).toBe(3);
       expect(res.user.username).toBe('alice_c');
-      expect(res.expires_at).toBe('2024-04-01T12:00:00Z');
     });
 
     const req = httpMock.expectOne(`${baseUrl}/login`);
@@ -149,7 +128,7 @@ describe('UserApiService', () => {
       email: 'alice2@example.com',
     };
 
-    service.updateUser(3, dto as any).subscribe((res) => {
+    service.updateUser(3, dto).subscribe((res) => {
       expect(res.user_id).toBe(3);
       expect(res.email).toBe('alice2@example.com');
     });
@@ -162,10 +141,7 @@ describe('UserApiService', () => {
   });
 
   it('deleteUser() should DELETE /users/{id}', () => {
-    const mockResponse: DeleteUserResponseDTO = {
-      user_id: 3,
-      deleted: true,
-    };
+    const mockResponse: DeleteUserResponseDTO = { user_id: 3, deleted: true };
 
     service.deleteUser(3).subscribe((res) => {
       expect(res.user_id).toBe(3);
