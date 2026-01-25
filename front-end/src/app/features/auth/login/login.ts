@@ -15,7 +15,7 @@ import { UserApiService } from '../../../services/user-api.service';
 })
 export class Login {
   /** TEMP: set true to bypass backend auth while backend is being fixed */
-  private readonly BYPASS_AUTH = true;
+  private readonly BYPASS_AUTH = false;
 
   form: FormGroup;
   errorMessage: string = '';
