@@ -26,7 +26,6 @@ import com.example.calendario.dto.calendar.CalendarInviteResponseDTO;
 import com.example.calendario.dto.calendar.CalendarResponseDTO;
 import com.example.calendario.dto.calendar.CalendarUpdateRequestDTO;
 import com.example.calendario.dto.calendar.CalendarUpdateResponseDTO;
-import com.example.calendario.dto.calendar.EventFilterResponseDTO;
 import com.example.calendario.service.CalendarService;
 
 import jakarta.validation.Valid;

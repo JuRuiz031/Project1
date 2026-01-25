@@ -10,7 +10,6 @@ import com.example.calendario.dto.event.EventResponseDTO;
 import com.example.calendario.dto.event.EventUpdateRequestDTO;
 import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.exception.ResourceNotFoundException;
-import com.example.calendario.model.Calendar;
 import com.example.calendario.model.Event;
 import com.example.calendario.model.User;
 import com.example.calendario.repository.EventRepository;
@@ -34,8 +33,8 @@ public class EventService {
         User authenticatedUser = userService.findByUsername(authenticatedUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
 
-        // Validate calendar exists
-        Calendar calendar = calendarService.getCalendarById(dto.getCalendarId());
+        // Validate calendar exists (throws exception if not found)
+        calendarService.getCalendarById(dto.getCalendarId());
 
         // Check if authenticated user is admin of this calendar
         if (!authenticatedUser.isAdminOfCalendar(dto.getCalendarId()) && !authenticatedUser.isSuperuser()) {
