@@ -56,6 +56,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRequest(InvalidRequestException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            e.getMessage(),
+            HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(AlreadyVotedException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyVoted(AlreadyVotedException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            e.getMessage(),
+            HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
         ErrorResponse errorResponse = new ErrorResponse(
