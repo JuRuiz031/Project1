@@ -1,4 +1,3 @@
-/* Page background + centering */
 .page-container {
   min-height: 100vh;
   padding: 32px 16px;
@@ -12,15 +11,14 @@
   color: var(--color-text-primary);
 }
 
-/* Constrain the cards like your wireframe */
 .title-box,
 .login-box {
   max-width: 520px;
+  margin: 0 auto;
   border: 2px solid var(--color-border-default);
   background: var(--color-background-secondary);
 }
 
-/* Title */
 .title-box h1 {
   font-size: 32px;
   font-weight: 700;
@@ -28,7 +26,6 @@
   color: var(--color-text-primary);
 }
 
-/* Headings + helper text */
 .login-box h2 {
   font-size: 20px;
   color: var(--color-text-primary);
@@ -40,28 +37,6 @@
   line-height: 1.35;
 }
 
-/* Bootstrap form elements themed with your palette */
-.form-label {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.form-control {
-  height: 34px;
-  padding: 6px 10px;
-  border-radius: 6px;
-
-  border: 1px solid var(--color-border-default);
-  background: var(--color-background-primary);
-  color: var(--color-text-primary);
-}
-
-.form-control:focus {
-  border-color: var(--color-accent-primary);
-  box-shadow: 0 0 0 0.2rem rgba(32, 129, 195, 0.15); /* subtle focus ring */
-}
-
-/* Validation feedback */
 .error-text {
   display: inline-block;
   margin-top: 6px;
@@ -69,18 +44,12 @@
   font-size: 12px;
 }
 
-.error-message {
-  padding: 10px 12px;
-
-  border: 1px solid var(--color-feedback-error);
-  background: var(--color-feedback-error-bg);
-  border-radius: 8px;
-
-  font-size: 13px;
+.app-input {
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-primary);
   color: var(--color-text-primary);
 }
 
-/* Buttons: keep your wireframe sizing */
 .btn-sign-in,
 .btn-create {
   width: 200px;
