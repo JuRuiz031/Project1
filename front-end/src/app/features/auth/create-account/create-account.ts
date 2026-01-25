@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
+
+import { UserApiService } from '../../../services/user-api.service';
 
 @Component({
   selector: 'app-create-account',
@@ -16,7 +19,11 @@ export class CreateAccount implements OnInit {
   apiError = '';
   isSubmitting = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private userApi: UserApiService
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -40,17 +47,35 @@ export class CreateAccount implements OnInit {
       return;
     }
 
-    const payload = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+
+    // Endpoint DTO mapping: UI "name" -> API "username"
+    const dto = {
+      username: raw.name,
+      email: raw.email,
+      password: raw.password,
+    };
 
     this.isSubmitting = true;
-    console.log('Create account payload:', payload);
 
-    // TODO: replace with AuthApiService.createAccount(payload).subscribe(...)
-    setTimeout(() => {
-      this.isSubmitting = false;
-      // After successful account creation, return to login
-      this.router.navigate(['/login']);
-    }, 500);
+    // POST /api/v1/users
+    this.userApi
+      .register(dto)
+      .pipe(finalize(() => (this.isSubmitting = false)))
+      .subscribe({
+        next: () => {
+          // After successful account creation, return to login
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          const message =
+            (err?.error && typeof err.error === 'string' && err.error) ||
+            err?.error?.message ||
+            err?.message;
+
+          this.apiError = message || 'Failed to create account. Please try again.';
+        },
+      });
   }
 
   cancel(): void {

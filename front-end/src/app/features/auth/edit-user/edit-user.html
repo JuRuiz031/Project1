@@ -47,9 +47,11 @@
           </div>
         </div>
 
-        <div *ngIf="apiError" class="alert alert-danger mt-3 mb-0">
-          {{ apiError }}
-        </div>
+        @if (apiError) {
+          <div class="alert alert-danger mt-3 mb-0">
+            {{ apiError }}
+          </div>
+        }
       </form>
     </div>
 
