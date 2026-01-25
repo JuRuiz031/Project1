@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.calendario.dto.user.LoginRequestDTO;
+import com.example.calendario.dto.user.LoginStatusDTO;
 import com.example.calendario.dto.user.LoginSuccessDTO;
 import com.example.calendario.dto.user.UserDeleteResponseDTO;
 import com.example.calendario.dto.user.UserRegistrationDTO;
@@ -42,6 +43,16 @@ public class UserController {
         return ResponseEntity.ok(new UserResponseDTO(createdUser));
     }
 
+    // GET Login Status - check if user is authenticated
+    @GetMapping("/login")
+    public ResponseEntity<LoginStatusDTO> getLoginStatus() {
+        // Get authenticated username from JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticatedUsername = authentication.getName();
+
+        LoginStatusDTO response = userService.checkLoginStatus(authenticatedUsername);
+        return ResponseEntity.ok(response);
+    }
 
     // POST Login Users
     @PostMapping("/login")

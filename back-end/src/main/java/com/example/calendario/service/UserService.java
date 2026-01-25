@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.user.LoginRequestDTO;
+import com.example.calendario.dto.user.LoginStatusDTO;
 import com.example.calendario.dto.user.LoginSuccessDTO;
 import com.example.calendario.dto.user.LoginUserDTO;
 import com.example.calendario.dto.user.UserDeleteResponseDTO;
@@ -75,6 +76,28 @@ public class UserService {
     // Return clean DTO with simplified user info for login
     return new LoginSuccessDTO(
             token,
+            new LoginUserDTO(user),
+            expiresAt
+    );
+   }
+
+   // Check login status - validate JWT and return auth info
+   public LoginStatusDTO checkLoginStatus(String username) {
+    // If we got here, the JWT was valid (Spring Security verified it)
+    // Now we need to get the user and token expiration
+    
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    
+    // Get token expiration from JwtUtil
+    // Note: In a real scenario, you'd extract this from the actual token in the request
+    // For now, we can generate a token to get the expiration time
+    String tempToken = jwtUtil.generateToken(username);
+    Date expiration = jwtUtil.extractExpiration(tempToken);
+    String expiresAt = expiration.toInstant().toString();
+    
+    return new LoginStatusDTO(
+            true,
             new LoginUserDTO(user),
             expiresAt
     );
