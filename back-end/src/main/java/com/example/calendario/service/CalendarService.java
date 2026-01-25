@@ -18,7 +18,6 @@ import com.example.calendario.dto.calendar.CalendarUpdateResponseDTO;
 import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.exception.ResourceNotFoundException;
 import com.example.calendario.model.Calendar;
-import com.example.calendario.model.Event;
 import com.example.calendario.model.User;
 import com.example.calendario.repository.CalendarRepository;
 
@@ -49,9 +48,10 @@ public class CalendarService {
         Calendar calendar = new Calendar();
         calendar.setName(dto.getName());
 
-        //no duplicate calendar name
+        //no duplicate calendar name - batch fetch calendars for performance
         List<String> userCalendarIds = userService.getCalendarIdsForUser(authenticatedUser.getId(), authenticatedUsername);
-        if (userCalendarIds.stream().anyMatch(id -> calendarRepository.findById(id).map(Calendar::getName).orElse("").equals(dto.getName()))) {
+        List<Calendar> userCalendars = calendarRepository.findAllById(userCalendarIds);
+        if (userCalendars.stream().anyMatch(cal -> cal.getName().equals(dto.getName()))) {
             throw new ForbiddenException("You already have a calendar with the name: " + dto.getName());
         }
 
@@ -141,18 +141,15 @@ public class CalendarService {
             throw new ForbiddenException("You do not have permission to delete this calendar");
         }
 
-        // Cascade delete: Remove calendar from all users' calendarIds
-        java.util.List<User> usersToUpdate = new java.util.ArrayList<>();
-        for (User user : userService.getAllUsers()) {
-            if (user.isMemberOfCalendar(calendarId)) {
-                user.removeCalendarMembership(calendarId);
-                usersToUpdate.add(user);
-            }
+        // Cascade delete: Remove calendar from members' calendarIds - optimized query
+        java.util.List<User> calendarMembers = userService.getUsersByCalendarMembership(calendarId);
+        for (User user : calendarMembers) {
+            user.removeCalendarMembership(calendarId);
         }
         
         // Batch save all users at once (more efficient)
-        if (!usersToUpdate.isEmpty()) {
-            userService.saveAllUsers(usersToUpdate);
+        if (!calendarMembers.isEmpty()) {
+            userService.saveAllUsers(calendarMembers);
         }
 
         // Delete calendar
