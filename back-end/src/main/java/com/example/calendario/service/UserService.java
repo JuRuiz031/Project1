@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.user.LoginRequestDTO;
 import com.example.calendario.dto.user.LoginSuccessDTO;
+import com.example.calendario.dto.user.LoginUserDTO;
 import com.example.calendario.dto.user.UserDeleteResponseDTO;
 import com.example.calendario.dto.user.UserRegistrationDTO;
-import com.example.calendario.dto.user.UserResponseDTO;
 import com.example.calendario.dto.user.UserUpdateDTO;
 import com.example.calendario.exception.DuplicateEmailException;
 import com.example.calendario.exception.DuplicateUsernameException;
@@ -72,10 +72,10 @@ public class UserService {
     Date expiration = jwtUtil.extractExpiration(token);
     String expiresAt = expiration.toInstant().toString();
 
-    // Return clean DTO
+    // Return clean DTO with simplified user info for login
     return new LoginSuccessDTO(
             token,
-            new UserResponseDTO(user),
+            new LoginUserDTO(user),
             expiresAt
     );
    }
