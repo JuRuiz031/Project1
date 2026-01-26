@@ -1,24 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CalendarModule, CalendarEvent } from 'angular-calendar';
+import { CalendarEvent } from 'angular-calendar';
 import { CalendarWidget } from './calendar-widget/calendar-widget';
-
-// TEST MOCK DATA IMPORT
-import { MOCK_CALENDAR_EVENTS_RESPONSE } 
-  from '../../../../../mock-data/calendar-events.mock';
-
-// (optional) define the API shape so TS helps you
-type ApiEvent = {
-  id: number;
-  calendar_id: number;
-  title: string;
-  start_time: string;
-  end_time?: string;
-  description?: string;
-  notes?: string;
-  tags?: string[];
-  all_day?: boolean;
-};
   
 @Component({
   selector: 'app-calendar-display',
@@ -34,19 +17,19 @@ export class CalendarDisplay {
   events: CalendarEvent[] = [];
 
   constructor() {
-    const apiEvents = MOCK_CALENDAR_EVENTS_RESPONSE.events as ApiEvent[];
+    const apiEvents: any[] = [];
 
     this.events = apiEvents.map((e) => ({
       title: e.title,
       start: new Date(e.start_time),
-      end: e.end_time ? new Date(e.end_time) : undefined,
-      allDay: e.all_day ?? false,
+      end: new Date(e.end_time),           // always present now
+      allDay: false,                       // UI-only concern, not in API
       meta: {
-        id: e.id,
+        id: e.event_id,
         calendarId: e.calendar_id,
         description: e.description ?? '',
         notes: e.notes ?? '',
-        tags: e.tags ?? [],
+        tags: e.tags,                      // guaranteed by DTO
       },
     }));
   }
