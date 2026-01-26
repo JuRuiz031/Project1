@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 type CalendarUser = {
   id: string;
@@ -11,7 +11,7 @@ type CalendarUser = {
 
 @Component({
   selector: 'app-edit-calendar-group',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './edit-calendar-group.html',
   styleUrls: ['./edit-calendar-group.css'],
 })

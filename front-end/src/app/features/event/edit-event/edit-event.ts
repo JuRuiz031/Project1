@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
@@ -20,7 +20,7 @@ type EventDTO = {
 @Component({
   selector: 'app-edit-event',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './edit-event.html',
   styleUrls: ['./edit-event.css'],
 })
