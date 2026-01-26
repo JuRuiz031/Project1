@@ -1,7 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+
+import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
+import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
+import { EventDTO } from '../../../shared/models/events/event.dto';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
@@ -15,17 +19,16 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 export class ViewEvent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private calendarApi = inject(CalendarApiService);
 
-  // Kept for UI consistency (dropdown still renders), but form stays disabled.
   calendars: CalendarOption[] = [
     { id: '1', name: 'My Admin Calendar', isAdmin: true },
     { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
   ];
 
-  // Optional: keep this pattern consistent with CreateEvent
   apiError = '';
 
-  // All fields intentionally empty for now.
   form = this.fb.group({
     calendarId: [{ value: '', disabled: true }],
     title: [{ value: '', disabled: true }],
@@ -38,13 +41,26 @@ export class ViewEvent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Keep the same “default calendar selection” behavior visually,
-    // but the control remains disabled and empty until you wire real data.
-    const firstAdmin = this.calendars.find(c => c.isAdmin);
-    if (firstAdmin) this.form.patchValue({ calendarId: firstAdmin.id });
-
-    // Ensure the entire form is uneditable for View mode.
     this.form.disable({ emitEvent: false });
+
+    const eventId = this.route.snapshot.paramMap.get('eventId');
+    if (!eventId) {
+      this.apiError = 'Missing event id';
+      return;
+    }
+
+    // Use team service: GET /calendar?eventIds=...
+    this.calendarApi.getByEventIds([eventId]).subscribe({
+      next: (res: CalendarFilterResponseDTO) => {
+        const event = res?.events?.[0];
+        if (!event) {
+          this.apiError = 'Event not found';
+          return;
+        }
+        this.displayEvent(event);
+      },
+      error: () => (this.apiError = 'Could not load event'),
+    });
   }
 
   get adminCalendars(): CalendarOption[] {
@@ -56,7 +72,38 @@ export class ViewEvent implements OnInit {
   }
 
   goToEditEvent(): void {
-    // Placeholder for future functionality to view event details
     this.router.navigateByUrl('/edit-event');
+  }
+
+  displayEvent(event: EventDTO): void {
+    this.apiError = '';
+
+    const start = this.isoToDateTime(event.start_time);
+    const end = this.isoToDateTime(event.end_time);
+
+    this.form.patchValue(
+      {
+        calendarId: event.calendar_id ?? '',
+        title: event.title ?? '',
+        startDate: start.date,
+        startTime: start.time,
+        endDate: end.date,
+        endTime: end.time,
+        description: event.description ?? '',
+        notes: event.notes ?? '',
+      },
+      { emitEvent: false }
+    );
+
+    this.form.disable({ emitEvent: false });
+  }
+
+  private isoToDateTime(iso: string): { date: string; time: string } {
+    if (!iso) return { date: '', time: '' };
+
+    const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+    if (!match) return { date: '', time: '' };
+
+    return { date: match[1], time: match[2] };
   }
 }
