@@ -122,6 +122,12 @@ public class PollService {
 		);
 	}
 
+    // Get event by ID
+    public Poll getPollById(String pollId) {
+        return pollRepository.findById(pollId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+    }
+
     public PollResponseDTO updatePoll(String pollId, PollUpdateRequestDTO dto, String authenticatedUsername) {
         // Validate authenticated user exists
 		User authenticatedUser = userService.findByUsername(authenticatedUsername)

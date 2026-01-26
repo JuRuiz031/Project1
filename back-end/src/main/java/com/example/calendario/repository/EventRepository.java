@@ -23,6 +23,6 @@ public interface EventRepository extends MongoRepository<Event, String> {
     List<Event> findByTagsIn(List<String> tags);
     
     // Find event by guest link token
-    Optional<Event> findByGuestLinksToken(String token);
+    Optional<Event> findByInviteLinksToken(String token);
 
 }

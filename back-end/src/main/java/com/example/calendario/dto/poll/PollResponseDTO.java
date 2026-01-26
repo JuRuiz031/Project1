@@ -3,12 +3,13 @@ package com.example.calendario.dto.poll;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.calendario.dto.CalendarItemResponseDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-public class PollResponseDTO {
+public class PollResponseDTO implements CalendarItemResponseDTO {
 
     @NotNull(message = "Poll ID cannot be null")
     @JsonProperty("poll_id")
