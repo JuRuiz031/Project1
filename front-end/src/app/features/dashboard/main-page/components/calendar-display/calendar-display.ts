@@ -90,59 +90,23 @@ export class CalendarDisplay {
         // Adjust property names if your CalendarFilterResponseDTO differs
         const apiEvents = (dto as any).events as EventDTO[] | undefined;
 
-        this.events = (apiEvents ?? []).map((e) => {
-          const color = calendarIdToColor(e.calendar_id);
-
-          return {
-            title: e.title,
-            start: new Date(e.start_time),
-            end: new Date(e.end_time),
-            allDay: false,
-
-            // angular-calendar supports this "color" field
-            color,
-
-            meta: {
-              id: e.event_id,
-              calendarId: e.calendar_id,
-              description: e.description ?? '',
-              notes: e.notes ?? '',
-              tags: e.tags ?? [],
-              color,
-            } satisfies EventMeta,
-          } as CalendarEvent;
-        });
+        this.events = (apiEvents ?? []).map((e) => ({
+          title: e.title,
+          start: new Date(e.start_time),
+          end: new Date(e.end_time),
+          allDay: false,
+          meta: {
+            id: e.event_id,
+            calendarId: e.calendar_id,
+            description: e.description ?? '',
+            notes: e.notes ?? '',
+            tags: e.tags ?? [],
+          },
+        }));
       });
   }
 
   onEventClicked(event: CalendarEvent) {
     console.log('Clicked event:', event.meta?.id, event);
   }
-}
-
-type EventMeta = {
-  id: string;
-  calendarId: string;
-  description: string;
-  notes: string;
-  tags: string[];
-  color: { primary: string; secondary: string };
-};
-
-function hashToHue(input: string): number {
-  let h = 0;
-  for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) >>> 0;
-  return h % 360;
-}
-
-function hsl(h: number, s: number, l: number) {
-  return `hsl(${h} ${s}% ${l}%)`;
-}
-
-function calendarIdToColor(calendarId: string) {
-  const hue = hashToHue(calendarId);
-  return {
-    primary: hsl(hue, 70, 40),
-    secondary: hsl(hue, 70, 92),
-  };
 }
