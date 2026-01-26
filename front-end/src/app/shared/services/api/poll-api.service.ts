@@ -5,10 +5,12 @@ import { Observable } from 'rxjs';
 import { CreatePollDTO } from '../../models/polls/create-poll.dto';
 import { UpdatePollDTO } from '../../models/polls/update-poll.dto';
 import { DeletePollDTO } from '../../models/polls/delete-poll.dto';
+import { VotePollDTO } from '../../models/polls/vote-poll.dto';
 
 import { CreatePollResponseDTO } from '../../models/polls/create-poll-response.dto';
 import { UpdatePollResponseDTO } from '../../models/polls/update-poll-response.dto';
 import { DeletePollResponseDTO } from '../../models/polls/delete-poll-response.dto';
+import { VotePollResponseDTO } from '../../models/polls/vote-poll-response.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -52,6 +54,18 @@ export class PollApiService {
     return this.http.delete<DeletePollResponseDTO>(
       `${this.baseUrl}/polls/${pollId}`,
       { body: dto }
+    );
+  }
+
+  /**
+   * POST /polls/{poll_id}/vote
+   * Submits a vote for one or more options on a poll.
+   * Requires JWT auth. User must have access to the calendar (admin not required).
+   */
+  votePoll(pollId: string, dto: VotePollDTO): Observable<VotePollResponseDTO> {
+    return this.http.post<VotePollResponseDTO>(
+      `${this.baseUrl}/polls/${pollId}/vote`,
+      dto
     );
   }
 }

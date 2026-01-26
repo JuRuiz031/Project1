@@ -1,0 +1,99 @@
+{
+  "info": {
+    "_postman_id": "a51c281d-3dc2-418f-93dc-179d15f00d97",
+    "name": "Calendario API v1 - Invite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51732412",
+    "_collection_link": "https://go.postman.co/collection/51732412-a51c281d-3dc2-418f-93dc-179d15f00d97?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Generate Invite - Success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {\r",
+              "    const responseData = pm.response.json();\r",
+              "    pm.environment.set(\"invite_token\", responseData.invite_link.split('?token=')[1]);\r",
+              "    console.log(\"invite link generated with token: \"+ pm.environment.get(\"invite_token\"));\r",
+              "    console.log(\"invite generated for poll or event id: \" + responseData.poll_id + responseData.event_id);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"poll_id\": \"{{poll_id}}\",\r\n    \"expiration_date\": \"2026-03-15T09:00:00Z\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/invite",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "invite"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Access Invite Link",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/invitelink?token={{invite_token}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "invitelink"
+          ],
+          "query": [
+            {
+              "key": "token",
+              "value": "{{invite_token}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

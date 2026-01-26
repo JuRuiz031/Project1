@@ -47,7 +47,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authz -> authz
             .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/v1/invites/events/guest/**").permitAll() // Guest access without JWT
+            .requestMatchers(HttpMethod.GET, "/api/v1/invitelink**").permitAll() // Guest access without JWT
             .anyRequest().authenticated()
         );
         

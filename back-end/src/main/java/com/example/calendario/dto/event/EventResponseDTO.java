@@ -3,9 +3,10 @@ package com.example.calendario.dto.event;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.calendario.dto.CalendarItemResponseDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EventResponseDTO {
+public class EventResponseDTO implements CalendarItemResponseDTO {
     
     @JsonProperty("event_id")
     private String eventId;
