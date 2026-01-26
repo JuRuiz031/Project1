@@ -1,312 +1,543 @@
-const {connection} = require(`PATH TO .js FILE CONTAINING THE DATABASE STRING. FOR EXAMPLE;
-    C:/Users/JohnDoe/Documents/mongodb_directory/db_connection.js
-`);
+/**
+ * MongoDB Database Creation Script for Calendario
+ * 
+ * This script creates sample data matching the current backend schema.
+ * Run with: mongosh < db_creation.js
+ * 
+ * Schema version: 2026-01-26
+ */
 
-db = connect(connection); 
+const { connection } = require('./db_connection.js');
 
-if (!db.getCollectionNames().includes("calendars")) {
-    print("adding calendars");
-    db.createCollection("calendars");
-    db.calendars.insertMany([
-        {
-            "name": "Work"
-        },
-        {
-            "name": "Personal"
-        },
-        {
-            "name": "Family"
-        },
-        {
-            "name": "Fitness"
-        },
-        {
-            "name": "Travel"
-        },
-        {
-            "name": "School"
-        },
-        {
-            "name": "Project Alpha"
-        },
-        {
-            "name": "Meetings"
-        },
-        {
-            "name": "Deadlines"
-        },
-        {
-            "name": "Holidays"
-        }
-    ]);
-    print("added calendars");
+db = connect(connection);
+
+// Helper to generate UUID tokens for invite links
+function generateToken() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
-const calendarIds = db.calendars.find(
-        {}, //filter by, in this case filter by nothing
-        {_id: 1} //projection, get all _id from the result of this query
-    ).toArray().map(c => c._id);
+/*
+=================================================
+                    CALENDARS
+=================================================
+Schema:
+{
+    _id: ObjectId,
+    name: String,
+    invites: [{ link: String, expiresAt: ISODate }],
+    createdAt: ISODate,
+    updatedAt: ISODate
+}
+*/
+if (!db.getCollectionNames().includes("calendars")) {
+    print("Creating calendars collection...");
+    db.createCollection("calendars");
+
+    const now = new Date();
+    const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    db.calendars.insertMany([
+        {
+            name: "Work",
+            invites: [{ link: generateToken(), expiresAt: oneWeekLater }],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Personal",
+            invites: [],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Family",
+            invites: [{ link: generateToken(), expiresAt: oneWeekLater }],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Fitness",
+            invites: [],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Travel",
+            invites: [],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "School",
+            invites: [],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Project Alpha",
+            invites: [{ link: generateToken(), expiresAt: oneWeekLater }],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Meetings",
+            invites: [],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Deadlines",
+            invites: [],
+            createdAt: now,
+            updatedAt: now
+        },
+        {
+            name: "Holidays",
+            invites: [],
+            createdAt: now,
+            updatedAt: now
+        }
+    ]);
+    print("✓ Created calendars");
+}
+
+const calendarIds = db.calendars.find({}, { _id: 1 }).toArray().map(c => c._id);
 
 /*
 =================================================
                     USERS
 =================================================
+Schema:
+{
+    _id: ObjectId,
+    username: String (unique),
+    email: String (unique),
+    password: String,
+    isSuperuser: Boolean,
+    calendarIds: [{ calendarId: String, isAdmin: Boolean }]
+}
 */
 if (!db.getCollectionNames().includes("users")) {
-    print("adding users");
+    print("Creating users collection...");
     db.createCollection("users");
 
+    // Create unique indexes
+    db.users.createIndex({ username: 1 }, { unique: true });
+    db.users.createIndex({ email: 1 }, { unique: true });
 
     db.users.insertMany([
-    {
-        username: "alice_w",
-        email: "alice.w@example.com",
-        password: "alicePass123",
-        calendarIds: [calendarIds[0], calendarIds[1]]
-    },
-    {
-        username: "bob_smith",
-        email: "bob.smith@example.com",
-        password: "bobSecure456",
-        calendarIds: [calendarIds[2]]
-    },
-    {
-        username: "charlie_k",
-        email: "charlie.k@example.com",
-        password: "charliePwd789",
-        calendarIds: [calendarIds[3], calendarIds[4]]
-    },
-    {
-        username: "diana_p",
-        email: "diana.p@example.com",
-        password: "dianaPass321",
-        calendarIds: []
-    },
-    {
-        username: "ethan_r",
-        email: "ethan.r@example.com",
-        password: "ethanPwd654",
-        calendarIds: [calendarIds[5]]
-    },
-    {
-        username: "fiona_l",
-        email: "fiona.l@example.com",
-        password: "fionaPass987",
-        calendarIds: [calendarIds[6], calendarIds[7]]
-    },
-    {
-        username: "george_m",
-        email: "george.m@example.com",
-        password: "georgePwd111",
-        calendarIds: [calendarIds[8]]
-    },
-    {
-        username: "hannah_t",
-        email: "hannah.t@example.com",
-        password: "hannahPass222",
-        calendarIds: [calendarIds[9]]
-    },
-    {
-        username: "ivan_d",
-        email: "ivan.d@example.com",
-        password: "ivanPwd333",
-        calendarIds: []
-    },
-    {
-        username: "julia_n",
-        email: "julia.n@example.com",
-        password: "juliaPass444",
-        calendarIds: [calendarIds[0]]
-    }
+        {
+            username: "alice_w",
+            email: "alice.w@example.com",
+            password: "password123",
+            isSuperuser: true,
+            calendarIds: [
+                { calendarId: calendarIds[0].toString(), isAdmin: true },  // Work - admin
+                { calendarId: calendarIds[1].toString(), isAdmin: false }  // Personal - member
+            ]
+        },
+        {
+            username: "bob_smith",
+            email: "bob.smith@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: [
+                { calendarId: calendarIds[2].toString(), isAdmin: true }   // Family - admin
+            ]
+        },
+        {
+            username: "charlie_k",
+            email: "charlie.k@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: [
+                { calendarId: calendarIds[3].toString(), isAdmin: true },  // Fitness - admin
+                { calendarId: calendarIds[4].toString(), isAdmin: false }  // Travel - member
+            ]
+        },
+        {
+            username: "diana_p",
+            email: "diana.p@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: []  // No calendars yet
+        },
+        {
+            username: "ethan_r",
+            email: "ethan.r@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: [
+                { calendarId: calendarIds[5].toString(), isAdmin: true }   // School - admin
+            ]
+        },
+        {
+            username: "fiona_l",
+            email: "fiona.l@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: [
+                { calendarId: calendarIds[6].toString(), isAdmin: true },  // Project Alpha - admin
+                { calendarId: calendarIds[7].toString(), isAdmin: false }  // Meetings - member
+            ]
+        },
+        {
+            username: "george_m",
+            email: "george.m@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: [
+                { calendarId: calendarIds[8].toString(), isAdmin: true }   // Deadlines - admin
+            ]
+        },
+        {
+            username: "hannah_t",
+            email: "hannah.t@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: [
+                { calendarId: calendarIds[9].toString(), isAdmin: true }   // Holidays - admin
+            ]
+        },
+        {
+            username: "ivan_d",
+            email: "ivan.d@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: []  // No calendars
+        },
+        {
+            username: "julia_n",
+            email: "julia.n@example.com",
+            password: "password123",
+            isSuperuser: false,
+            calendarIds: [
+                { calendarId: calendarIds[0].toString(), isAdmin: false }  // Work - member (not admin)
+            ]
+        }
     ]);
-    print("added users");
+    print("✓ Created users");
 }
 
-const userIds = db.users.find(
-        {}, //filter by, in this case filter by nothing
-        {_id: 1} //projection, get all _id from the result of this query
-    ).toArray().map(c => c._id);
+const userIds = db.users.find({}, { _id: 1 }).toArray().map(u => u._id);
+
 /*
 =================================================
                     EVENTS
 =================================================
+Schema:
+{
+    _id: ObjectId,
+    calendarId: String,
+    title: String,
+    startTime: ISODate,
+    endTime: ISODate,
+    description: String,
+    notes: String,
+    tags: [String],
+    inviteLinks: [{ token: String, createdAt: ISODate, expiresAt: ISODate }]
+}
 */
 if (!db.getCollectionNames().includes("events")) {
-    print("adding events");
+    print("Creating events collection...");
     db.createCollection("events");
 
+    const now = new Date();
+    const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
     db.events.insertMany([
-    {
-        calendar_id: calendarIds[0],
-        title: "Team Standup",
-        start: new Date("2024-10-01T09:00:00Z"),
-        end: new Date("2024-10-01T09:30:00Z"),
-        tags: ["work", "meeting"]
-    },
-    {
-        calendar_id: calendarIds[0],
-        title: "Sprint Planning",
-        start: new Date("2024-10-02T10:00:00Z"),
-        end: new Date("2024-10-02T11:30:00Z"),
-        tags: ["work", "planning"]
-    },
-    {
-        calendar_id: calendarIds[1],
-        title: "Doctor Appointment",
-        start: new Date("2024-10-03T15:00:00Z"),
-        end: new Date("2024-10-03T16:00:00Z"),
-        tags: ["personal", "health"]
-    },
-    {
-        calendar_id: calendarIds[2],
-        title: "Family Dinner",
-        start: new Date("2024-10-04T18:00:00Z"),
-        end: new Date("2024-10-04T20:00:00Z"),
-        tags: ["family"]
-    },
-    {
-        calendar_id: calendarIds[3],
-        title: "Gym Session",
-        start: new Date("2024-10-05T07:00:00Z"),
-        end: new Date("2024-10-05T08:00:00Z"),
-        tags: ["fitness"]
-    },
-    {
-        calendar_id: calendarIds[4],
-        title: "Flight to NYC",
-        start: new Date("2024-10-06T12:00:00Z"),
-        end: new Date("2024-10-06T16:00:00Z"),
-        tags: ["travel"]
-    },
-    {
-        calendar_id: calendarIds[5],
-        title: "Final Exam",
-        start: new Date("2024-10-07T13:00:00Z"),
-        end: new Date("2024-10-07T15:00:00Z"),
-        tags: ["school"]
-    },
-    {
-        calendar_id: calendarIds[6],
-        title: "Project Alpha Demo",
-        start: new Date("2024-10-08T14:00:00Z"),
-        end: new Date("2024-10-08T15:00:00Z"),
-        tags: ["work", "project"]
-    },
-    {
-        calendar_id: calendarIds[7],
-        title: "Weekly Sync",
-        start: new Date("2024-10-09T11:00:00Z"),
-        end: new Date("2024-10-09T11:30:00Z"),
-        tags: ["meeting"]
-    },
-    {
-        calendar_id: calendarIds[8],
-        title: "Release Deadline",
-        start: new Date("2024-10-10T17:00:00Z"),
-        end: new Date("2024-10-10T18:00:00Z"),
-        tags: ["deadline", "work"]
-    }
+        {
+            calendarId: calendarIds[0].toString(),
+            title: "Team Standup",
+            startTime: new Date("2026-02-01T09:00:00Z"),
+            endTime: new Date("2026-02-01T09:30:00Z"),
+            description: "Daily standup meeting for the development team",
+            notes: "Zoom link: https://zoom.us/j/123456789",
+            tags: ["work", "meeting", "daily"],
+            inviteLinks: [
+                { token: generateToken(), createdAt: now, expiresAt: oneWeekLater }
+            ]
+        },
+        {
+            calendarId: calendarIds[0].toString(),
+            title: "Sprint Planning",
+            startTime: new Date("2026-02-02T10:00:00Z"),
+            endTime: new Date("2026-02-02T11:30:00Z"),
+            description: "Planning session for Sprint 14",
+            notes: "Bring your backlog items prepared",
+            tags: ["work", "planning", "sprint"],
+            inviteLinks: []
+        },
+        {
+            calendarId: calendarIds[1].toString(),
+            title: "Doctor Appointment",
+            startTime: new Date("2026-02-03T15:00:00Z"),
+            endTime: new Date("2026-02-03T16:00:00Z"),
+            description: "Annual checkup with Dr. Smith",
+            notes: "Bring insurance card",
+            tags: ["personal", "health"],
+            inviteLinks: []
+        },
+        {
+            calendarId: calendarIds[2].toString(),
+            title: "Family Dinner",
+            startTime: new Date("2026-02-04T18:00:00Z"),
+            endTime: new Date("2026-02-04T20:00:00Z"),
+            description: "Monthly family dinner at grandma's house",
+            notes: "Bring dessert",
+            tags: ["family", "dinner"],
+            inviteLinks: [
+                { token: generateToken(), createdAt: now, expiresAt: oneWeekLater }
+            ]
+        },
+        {
+            calendarId: calendarIds[3].toString(),
+            title: "Gym Session",
+            startTime: new Date("2026-02-05T07:00:00Z"),
+            endTime: new Date("2026-02-05T08:00:00Z"),
+            description: "Morning workout - leg day",
+            notes: "",
+            tags: ["fitness", "gym"],
+            inviteLinks: []
+        },
+        {
+            calendarId: calendarIds[4].toString(),
+            title: "Flight to NYC",
+            startTime: new Date("2026-02-06T12:00:00Z"),
+            endTime: new Date("2026-02-06T16:00:00Z"),
+            description: "United Airlines UA123",
+            notes: "Confirmation: ABC123. Terminal 2.",
+            tags: ["travel", "flight"],
+            inviteLinks: []
+        },
+        {
+            calendarId: calendarIds[5].toString(),
+            title: "Final Exam - Calculus",
+            startTime: new Date("2026-02-07T13:00:00Z"),
+            endTime: new Date("2026-02-07T15:00:00Z"),
+            description: "Calculus II Final Examination",
+            notes: "Room 301, bring calculator",
+            tags: ["school", "exam"],
+            inviteLinks: []
+        },
+        {
+            calendarId: calendarIds[6].toString(),
+            title: "Project Alpha Demo",
+            startTime: new Date("2026-02-08T14:00:00Z"),
+            endTime: new Date("2026-02-08T15:00:00Z"),
+            description: "Demo presentation for stakeholders",
+            notes: "Prepare slides and live demo environment",
+            tags: ["work", "project", "demo"],
+            inviteLinks: [
+                { token: generateToken(), createdAt: now, expiresAt: oneWeekLater }
+            ]
+        },
+        {
+            calendarId: calendarIds[7].toString(),
+            title: "Weekly Sync",
+            startTime: new Date("2026-02-09T11:00:00Z"),
+            endTime: new Date("2026-02-09T11:30:00Z"),
+            description: "Cross-team synchronization meeting",
+            notes: "",
+            tags: ["meeting", "sync"],
+            inviteLinks: []
+        },
+        {
+            calendarId: calendarIds[8].toString(),
+            title: "Release Deadline",
+            startTime: new Date("2026-02-10T17:00:00Z"),
+            endTime: new Date("2026-02-10T18:00:00Z"),
+            description: "v2.0 release deadline",
+            notes: "All features must be merged by 5 PM",
+            tags: ["deadline", "work", "release"],
+            inviteLinks: []
+        }
     ]);
-    print("added events");
+    print("✓ Created events");
 }
+
+const eventIds = db.events.find({}, { _id: 1 }).toArray().map(e => e._id);
+
 /*
 =================================================
                     POLLS
 =================================================
+Schema:
+{
+    _id: ObjectId,
+    calendarId: String,
+    title: String,
+    description: String,
+    notes: String,
+    startTime: ISODate,
+    endTime: ISODate,
+    resultsVisible: Boolean,
+    allowMultipleVotes: Boolean,
+    tags: [String],
+    inviteLinks: [{ token: String, createdAt: ISODate, expiresAt: ISODate }],
+    options: {
+        "0": { optionId: 0, description: String, userVotes: [String], guestVotes: [String] },
+        "1": { optionId: 1, description: String, userVotes: [String], guestVotes: [String] },
+        ...
+    }
+}
+Note: options is stored as a Map<Integer, Option> in Java, which MongoDB stores as an object with string keys.
 */
 if (!db.getCollectionNames().includes("polls")) {
-    print("adding polls");
+    print("Creating polls collection...");
     db.createCollection("polls");
+
+    const now = new Date();
+    const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     db.polls.insertMany([
         {
-            calendar_id: calendarIds[0],
-            proposal: "Best time for weekly standup",
+            calendarId: calendarIds[0].toString(),
+            title: "Best time for weekly standup",
             description: "Vote on the best time for our weekly team standup meeting.",
             notes: "Please consider your recurring conflicts.",
-            start_time: new Date("2024-10-01T00:00:00Z"),
-            end_time: new Date("2024-10-03T23:59:59Z"),
+            startTime: new Date("2026-02-01T00:00:00Z"),
+            endTime: new Date("2026-02-03T23:59:59Z"),
             resultsVisible: true,
             allowMultipleVotes: false,
-            tags: ["work", "meeting"],
-            options: [
-            {
-                description: "Monday 9:00 AM",
-                userVotes: [userIds[0], userIds[1]],
-                guestVotes: ["Alice (guest)"]
-            },
-            {
-                description: "Tuesday 10:00 AM",
-                userVotes: [userIds[2]],
-                guestVotes: []
+            tags: ["work", "meeting", "scheduling"],
+            inviteLinks: [
+                { token: generateToken(), createdAt: now, expiresAt: oneWeekLater }
+            ],
+            options: {
+                "0": {
+                    optionId: 0,
+                    description: "Monday 9:00 AM",
+                    userVotes: [userIds[0].toString(), userIds[1].toString()],
+                    guestVotes: ["Alice (guest)"]
+                },
+                "1": {
+                    optionId: 1,
+                    description: "Tuesday 10:00 AM",
+                    userVotes: [userIds[2].toString()],
+                    guestVotes: []
+                },
+                "2": {
+                    optionId: 2,
+                    description: "Wednesday 9:30 AM",
+                    userVotes: [],
+                    guestVotes: []
+                }
             }
-            ]
         },
         {
-            calendar_id: calendarIds[1],
-            proposal: "Choose team lunch location",
+            calendarId: calendarIds[1].toString(),
+            title: "Choose team lunch location",
             description: "Help decide where we should go for the next team lunch.",
             notes: "",
-            start_time: new Date("2024-10-05T00:00:00Z"),
-            end_time: new Date("2024-10-07T23:59:59Z"),
-            tags: ["social"],
-            options: [
-            {
-                description: "Italian Restaurant",
-                userVotes: [userIds[0]],
-                guestVotes: ["Bob"]
-            },
-            {
-                description: "Sushi Place",
-                userVotes: [userIds[1], userIds[3]],
-                guestVotes: []
-            }
-            ]
-        },
-        {
-            calendar_id: calendarIds[2],
-            proposal: "Select project deadline",
-            description: "Finalize the deadline for Project Alpha.",
-            notes: "Deadline impacts release planning.",
-            start_time: new Date("2024-10-08T00:00:00Z"),
-            end_time: new Date("2024-10-10T23:59:59Z"),
-            resultsVisible: false,
-            tags: ["project", "deadline"],
-            options: [
-            {
-                description: "October 20",
-                userVotes: [userIds[2]],
-                guestVotes: []
-            },
-            {
-                description: "October 27",
-                userVotes: [userIds[0], userIds[3]],
-                guestVotes: ["Charlie"]
-            }
-            ]
-        },
-        {
-            calendar_id: calendarIds[3],
-            proposal: "Pick fitness class",
-            description: "Vote on which fitness class to attend this month.",
-            notes: "",
-            start_time: new Date("2024-10-11T00:00:00Z"),
-            end_time: new Date("2024-10-13T23:59:59Z"),
+            startTime: new Date("2026-02-05T00:00:00Z"),
+            endTime: new Date("2026-02-07T23:59:59Z"),
+            resultsVisible: true,
             allowMultipleVotes: true,
-            tags: ["fitness"],
-            options: [
-            {
-                description: "Yoga",
-                userVotes: [userIds[1]],
-                guestVotes: []
-            },
-            {
-                description: "Spin Class",
-                userVotes: [userIds[2]],
-                guestVotes: ["Dana"]
+            tags: ["social", "food"],
+            inviteLinks: [],
+            options: {
+                "0": {
+                    optionId: 0,
+                    description: "Italian Restaurant",
+                    userVotes: [userIds[0].toString()],
+                    guestVotes: ["Bob"]
+                },
+                "1": {
+                    optionId: 1,
+                    description: "Sushi Place",
+                    userVotes: [userIds[1].toString(), userIds[3].toString()],
+                    guestVotes: []
+                },
+                "2": {
+                    optionId: 2,
+                    description: "Mexican Grill",
+                    userVotes: [userIds[2].toString()],
+                    guestVotes: ["Guest123"]
+                }
             }
-            ]
+        },
+        {
+            calendarId: calendarIds[6].toString(),
+            title: "Select project deadline",
+            description: "Finalize the deadline for Project Alpha.",
+            notes: "Deadline impacts release planning and resource allocation.",
+            startTime: new Date("2026-02-08T00:00:00Z"),
+            endTime: new Date("2026-02-10T23:59:59Z"),
+            resultsVisible: false,
+            allowMultipleVotes: false,
+            tags: ["project", "deadline", "planning"],
+            inviteLinks: [
+                { token: generateToken(), createdAt: now, expiresAt: oneWeekLater }
+            ],
+            options: {
+                "0": {
+                    optionId: 0,
+                    description: "February 20",
+                    userVotes: [userIds[2].toString()],
+                    guestVotes: []
+                },
+                "1": {
+                    optionId: 1,
+                    description: "February 27",
+                    userVotes: [userIds[0].toString(), userIds[3].toString()],
+                    guestVotes: ["Charlie"]
+                }
+            }
+        },
+        {
+            calendarId: calendarIds[3].toString(),
+            title: "Pick fitness class",
+            description: "Vote on which fitness class to attend this month.",
+            notes: "Classes are held every Saturday morning.",
+            startTime: new Date("2026-02-11T00:00:00Z"),
+            endTime: new Date("2026-02-13T23:59:59Z"),
+            resultsVisible: true,
+            allowMultipleVotes: true,
+            tags: ["fitness", "class"],
+            inviteLinks: [],
+            options: {
+                "0": {
+                    optionId: 0,
+                    description: "Yoga",
+                    userVotes: [userIds[1].toString()],
+                    guestVotes: []
+                },
+                "1": {
+                    optionId: 1,
+                    description: "Spin Class",
+                    userVotes: [userIds[2].toString()],
+                    guestVotes: ["Dana"]
+                },
+                "2": {
+                    optionId: 2,
+                    description: "HIIT Training",
+                    userVotes: [userIds[0].toString(), userIds[4].toString()],
+                    guestVotes: []
+                }
+            }
         }
-]);
-
+    ]);
+    print("✓ Created polls");
 }
+
+/*
+=================================================
+                    SUMMARY
+=================================================
+*/
+print("\n========== Database Setup Complete ==========");
+print("Collections created:");
+print("  - calendars: " + db.calendars.countDocuments() + " documents");
+print("  - users: " + db.users.countDocuments() + " documents");
+print("  - events: " + db.events.countDocuments() + " documents");
+print("  - polls: " + db.polls.countDocuments() + " documents");
+print("\nTest accounts (all use password: 'password123'):");
+print("  - alice_w (superuser, admin of Work calendar)");
+print("  - bob_smith (admin of Family calendar)");
+print("  - julia_n (member of Work calendar, not admin)");
+print("=============================================\n");
