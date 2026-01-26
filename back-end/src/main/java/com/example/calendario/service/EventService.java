@@ -152,46 +152,38 @@ public class EventService {
     }
 
     // Generate guest invite link for an event
-    public com.example.calendario.dto.invite.EventInviteResponseDTO generateEventGuestLink(
-            String eventId, String guestName, String authenticatedUsername) {
-        // Get authenticated user
-        User authenticatedUser = userService.findByUsername(authenticatedUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+    // public com.example.calendario.dto.invite.EventInviteResponseDTO generateEventGuestLink(
+    //         String eventId, String guestName, String authenticatedUsername) {
+    //     // Get authenticated user
+    //     User authenticatedUser = userService.findByUsername(authenticatedUsername)
+    //             .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
 
-        // Get event
-        Event event = getEventById(eventId);
+    //     // Get event
+    //     Event event = getEventById(eventId);
 
-        // Check if user has permission (admin of calendar or superuser)
-        if (!authenticatedUser.isAdminOfCalendar(event.getCalendarId()) && !authenticatedUser.isSuperuser()) {
-            throw new ForbiddenException("You do not have permission to create guest links for this event");
-        }
+    //     // Check if user has permission (admin of calendar or superuser)
+    //     if (!authenticatedUser.isAdminOfCalendar(event.getCalendarId()) && !authenticatedUser.isSuperuser()) {
+    //         throw new ForbiddenException("You do not have permission to create guest links for this event");
+    //     }
 
-        // Generate unique token
-        String token = java.util.UUID.randomUUID().toString();
+    //     // Generate unique token
+    //     String token = java.util.UUID.randomUUID().toString();
 
-        // Add guest link to event
-        event.addGuestLink(token, guestName, java.time.LocalDateTime.now());
-        eventRepository.save(event);
+    //     // Add guest link to event
+    //     event.addGuestLink(token, guestName, java.time.LocalDateTime.now());
+    //     eventRepository.save(event);
 
-        // Build invite link (you can configure base URL via application.properties)
-        String inviteLink = "http://localhost:3000/events/guest/" + token; // Frontend URL
+    //     // Build invite link (you can configure base URL via application.properties)
+    //     String inviteLink = "http://localhost:3000/events/guest/" + token; // Frontend URL
 
-        return new com.example.calendario.dto.invite.EventInviteResponseDTO(eventId, inviteLink, guestName);
-    }
+    //     return new com.example.calendario.dto.invite.EventInviteResponseDTO(eventId, inviteLink, guestName);
+    // }
 
     // Get event by guest token with guest name verification
-    public com.example.calendario.dto.event.EventResponseDTO getEventByGuestToken(String token, String guestName) {
+    public com.example.calendario.dto.event.EventResponseDTO getEventByInviteToken(String token, String guestName) {
         // Find event by guest token
-        Event event = eventRepository.findByGuestLinksToken(token)
+        Event event = eventRepository.findByInviteLinksToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid or expired invite link"));
-
-        // Verify guest name matches
-        boolean nameMatches = event.getGuestLinks().stream()
-                .anyMatch(link -> link.getToken().equals(token) && link.getGuestName().equalsIgnoreCase(guestName));
-
-        if (!nameMatches) {
-            throw new ForbiddenException("Guest name does not match the invite");
-        }
 
         // Return event details
         return new com.example.calendario.dto.event.EventResponseDTO(
