@@ -38,6 +38,7 @@ import com.example.calendario.model.Calendar;
 import com.example.calendario.model.User;
 import com.example.calendario.repository.CalendarRepository;
 import com.example.calendario.repository.EventRepository;
+import com.example.calendario.repository.PollRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CalendarServiceTest {
@@ -50,6 +51,9 @@ class CalendarServiceTest {
 
     @Mock
     private EventRepository eventRepository;
+
+    @Mock
+    private PollRepository pollRepository;
 
     @InjectMocks
     private CalendarService calendarService;
@@ -403,7 +407,8 @@ class CalendarServiceTest {
 
         when(userService.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(eventRepository.findByCalendarIdIn(List.of("cal-123"))).thenReturn(List.of(event1));
-        when(userService.getAllUsers()).thenReturn(List.of(testUser, otherUser));
+        when(pollRepository.findByCalendarIdIn(List.of("cal-123"))).thenReturn(List.of());
+        when(userService.getUsersByCalendarMembership("cal-123")).thenReturn(List.of(testUser, otherUser));
 
         // Act
         com.example.calendario.dto.calendar.CalendarFilterResponseDTO result = 
@@ -464,6 +469,7 @@ class CalendarServiceTest {
 
         when(userService.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         when(eventRepository.findByTagsIn(List.of("work"))).thenReturn(List.of(event1));
+        when(pollRepository.findByTagsIn(List.of("work"))).thenReturn(List.of());
 
         // Act
         com.example.calendario.dto.calendar.CalendarFilterResponseDTO result = 
@@ -489,8 +495,10 @@ class CalendarServiceTest {
         when(userService.findByUsername("testuser")).thenReturn(Optional.of(testUser));
         // Event should appear from both calendar filter and tag filter
         when(eventRepository.findByCalendarIdIn(List.of("cal-123"))).thenReturn(List.of(event1));
+        when(pollRepository.findByCalendarIdIn(List.of("cal-123"))).thenReturn(List.of());
         when(eventRepository.findByTagsIn(List.of("work"))).thenReturn(List.of(event1));
-        when(userService.getAllUsers()).thenReturn(List.of(testUser));
+        when(pollRepository.findByTagsIn(List.of("work"))).thenReturn(List.of());
+        when(userService.getUsersByCalendarMembership("cal-123")).thenReturn(List.of(testUser));
 
         // Act
         com.example.calendario.dto.calendar.CalendarFilterResponseDTO result = 
