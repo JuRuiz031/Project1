@@ -25,15 +25,13 @@ public class InviteService {
     private final PollRepository pollRepository;
 
     private final UserService userService;
-    private final CalendarService calendarService;
     private final EventService eventService;
     private final PollService pollService;
 
-    public InviteService(EventRepository eventRepository, PollRepository pollRepository, UserService userService, CalendarService calendarService, EventService eventService, PollService pollService) {
+    public InviteService(EventRepository eventRepository, PollRepository pollRepository, UserService userService, EventService eventService, PollService pollService) {
         this.eventRepository = eventRepository;
         this.pollRepository = pollRepository;
         this.userService = userService;
-        this.calendarService = calendarService;
         this.eventService = eventService;
         this.pollService = pollService;
     }
