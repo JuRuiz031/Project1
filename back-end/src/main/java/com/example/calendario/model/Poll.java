@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.LinkedHashMap;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "polls")
@@ -37,6 +38,9 @@ public class Poll {
 
     private Set<InviteLink> inviteLinks = new HashSet<>();
 
+    private List<Option> optionsList = new ArrayList<>();
+
+    @Transient
     private Map<Integer, Option> options = new LinkedHashMap<>();
 
     public static class Option {
@@ -76,6 +80,7 @@ public class Poll {
             nextId = java.util.Collections.max(options.keySet()) + 1;
         }
         options.put(nextId, new Option(nextId, description));
+        optionsList.add(new Option(nextId, description));
     }
 
     public void addOption(String description, List<String> userVotes, List<String> guestVotes) {
@@ -87,14 +92,17 @@ public class Poll {
         option.setUserVotes(userVotes);
         option.setGuestVotes(guestVotes);
         options.put(nextId, option);
+        optionsList.add(option);
     }
 
     public void removeOption(int optionId) {
         options.remove(optionId);
+        optionsList.removeIf(o -> o.getOptionId() == optionId);
     }
 
     public void clearOptions() {
         options.clear();
+        optionsList.clear();
     }
 
     // Getters and Setters
@@ -135,14 +143,16 @@ public class Poll {
     }
 
     // Return options as a list to preserve compatibility with existing code
-    public List<Option> getOptions() { return new ArrayList<>(options.values()); }
+    public List<Option> getOptions() { return optionsList; }
 
     // Set options from a list (rebuilds internal map using each option's optionId)
     public void setOptions(List<Option> optionsList) {
         this.options.clear();
+        this.optionsList.clear();
         if (optionsList != null) {
             for (Option o : optionsList) {
                 this.options.put(o.getOptionId(), o);
+                this.optionsList.add(o);
             }
         }
     }
