@@ -23,6 +23,7 @@ import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.exception.ResourceNotFoundException;
 import com.example.calendario.exception.InvalidRequestException;
 import com.example.calendario.model.User;
+import com.example.calendario.model.Event;
 import com.example.calendario.model.Poll;
 
 @Service
@@ -124,6 +125,12 @@ public class PollService {
 				saved.getTags()
 		);
 	}
+
+    // Get event by ID
+    public Poll getPollById(String pollId) {
+        return pollRepository.findById(pollId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+    }
 
     public PollResponseDTO updatePoll(String pollId, PollUpdateRequestDTO dto, String authenticatedUsername) {
         // Validate authenticated user exists
