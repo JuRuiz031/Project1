@@ -1,4 +1,10 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  OnChanges,
+  SimpleChanges } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
   CalendarEvent,
@@ -54,5 +60,11 @@ export class CalendarWidget {
 
   handleEventClicked(event: CalendarEvent) {
     this.eventClicked.emit(event);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['events']) {
+      this.refresh.next();
+    }
   }
 }

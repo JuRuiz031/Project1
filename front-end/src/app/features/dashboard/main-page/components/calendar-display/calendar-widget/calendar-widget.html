@@ -1,3 +1,14 @@
+<ng-template #eventTemplate let-event="event">
+  <div
+    (click)="handleEventClicked(event)"
+    [style.backgroundColor]="event.color?.primary"
+    [style.borderColor]="event.color?.primary"
+    style="color: white; padding: 2px 6px; border-radius: 6px; cursor: pointer;"
+  >
+    {{ event.title }}
+  </div>
+</ng-template>
+
 <div class="row text-center">
   <div class="col-md-4">
     <div class="btn-group">
@@ -79,6 +90,7 @@
         [events]="events"
         [refresh]="refresh"
         [activeDayIsOpen]="activeDayIsOpen"
+        [eventTemplate]="eventTemplate"
         (eventClicked)="handleEventClicked($event.event)"
       />
     }
@@ -87,6 +99,7 @@
         [viewDate]="viewDate"
         [events]="events"
         [refresh]="refresh"
+        [eventTemplate]="eventTemplate"
         (eventClicked)="handleEventClicked($event.event)"
       />
     }
@@ -95,8 +108,10 @@
         [viewDate]="viewDate"
         [events]="events"
         [refresh]="refresh"
+        [eventTemplate]="eventTemplate"
         (eventClicked)="handleEventClicked($event.event)"
       />
     }
   }
 </div>
+
