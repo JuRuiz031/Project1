@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { RouterLink } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -12,7 +11,7 @@ import {
 @Component({
   selector: 'app-create-calendar',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './create-calendar.html',
   styleUrl: './create-calendar.css',
 })
