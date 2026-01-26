@@ -1,9 +1,6 @@
 package com.example.calendario.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import org.springframework.cglib.core.Local;
 
 public class InviteLink {
     private String token; // UUID token
@@ -30,10 +27,14 @@ public class InviteLink {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof InviteLink) {
-            InviteLink other = (InviteLink) obj;
-            return this.token.equals(other.token);
-        }
-        return false;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        InviteLink other = (InviteLink) obj;
+        return token != null && token.equals(other.token);
+    }
+
+    @Override
+    public int hashCode() {
+        return token != null ? token.hashCode() : 0;
     }
 }
