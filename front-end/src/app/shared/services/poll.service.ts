@@ -65,7 +65,8 @@ export class PollService {
     return this.api.deletePoll(pollId, dto).pipe(map((r) => r.deleted));
   }
 
-  // POST /polls/{id}/vote: vote on a poll
+  // POST /polls/{id}/vote: submit vote(s) on a poll
+  // Requires JWT auth, user must have calendar access (admin not required)
   vote(pollId: string, dto: VotePollDTO): Observable<PollDTO> {
     return this.api.votePoll(pollId, dto).pipe(
       map((r) => ({

@@ -1,6 +1,7 @@
 package com.example.calendario.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -20,4 +21,5 @@ public interface PollRepository extends MongoRepository<Poll, String> {
 
     // Find polls that contain at least one of the specified tags
     List<Poll> findByTagsIn(List<String> tags);
+    Optional<Poll> findByInviteLinksToken(String token);
 }

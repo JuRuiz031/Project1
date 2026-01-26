@@ -2,7 +2,9 @@ package com.example.calendario.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,39 +27,12 @@ public class Event {
 
     private List<String> tags = new ArrayList<>();
 
-    private List<GuestLink> guestLinks = new ArrayList<>();
-
-    // GuestLink inner class
-    public static class GuestLink {
-        private String token; // UUID token
-
-        private String guestName;
-
-        private LocalDateTime createdAt;
-
-        // Constructors
-        public GuestLink() {} // Default constructor (used by Spring Data)
-        public GuestLink(String token, String guestName, LocalDateTime createdAt) {
-            this.token = token;
-            this.guestName = guestName;
-            this.createdAt = createdAt;
-        }
-
-        // Getters and Setters
-        public String getToken() { return token; }
-        public void setToken(String token) { this.token = token; }
-
-        public String getGuestName() { return guestName; }
-        public void setGuestName(String guestName) { this.guestName = guestName; }
-
-        public LocalDateTime getCreatedAt() { return createdAt; }
-        public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    }
+    private Set<InviteLink> inviteLinks = new HashSet<>();
 
     // Constructors
     public Event() {} // Default constructor (used by Spring Data)
     public Event(String calendarId, String title, LocalDateTime startTime, LocalDateTime endTime,
-                 String description, String notes, List<String> tags, List<GuestLink> guestLinks) {
+                 String description, String notes, List<String> tags, Set<InviteLink> inviteLinks) {
         this.calendarId = calendarId;
         this.title = title;
         this.startTime = startTime;
@@ -65,7 +40,7 @@ public class Event {
         this.description = description;
         this.notes = notes;
         this.tags = tags;
-        this.guestLinks = guestLinks;
+        this.inviteLinks = inviteLinks;
     }
 
     // Helper methods
@@ -73,12 +48,12 @@ public class Event {
         this.tags.add(tag);
     }
 
-    public void addGuestLink(String token, String guestName, LocalDateTime createdAt) {
-        this.guestLinks.add(new GuestLink(token, guestName, createdAt));
+    public void addInviteLink(String token, LocalDateTime createdAt, LocalDateTime expiresAt) {
+        this.inviteLinks.add(new InviteLink(token, createdAt, expiresAt));
     }
 
-    public void removeGuestLink(String token) {
-        this.guestLinks.removeIf(link -> link.getToken().equals(token));
+    public void removeInviteLink(String token) {
+        this.inviteLinks.removeIf(link -> link.getToken().equals(token));
     }
 
     // Getters and Setters
@@ -106,7 +81,7 @@ public class Event {
     public List<String> getTags() { return tags; }
     public void setTags(List<String> tags) { this.tags = tags; }
 
-    public List<GuestLink> getGuestLinks() { return guestLinks; }
-    public void setGuestLinks(List<GuestLink> guestLinks) { this.guestLinks = guestLinks; }
+    public Set<InviteLink> getInviteLinks() { return inviteLinks; }
+    public void setInviteLinks(Set<InviteLink> inviteLinks) { this.inviteLinks = inviteLinks; }
 
 }

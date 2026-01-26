@@ -59,11 +59,10 @@ export class PollApiService {
 
   /**
    * POST /polls/{poll_id}/vote
+   * Submits a vote for one or more options on a poll.
+   * Requires JWT auth. User must have access to the calendar (admin not required).
    */
-  votePoll(
-    pollId: string,
-    dto: VotePollDTO
-  ): Observable<VotePollResponseDTO> {
+  votePoll(pollId: string, dto: VotePollDTO): Observable<VotePollResponseDTO> {
     return this.http.post<VotePollResponseDTO>(
       `${this.baseUrl}/polls/${pollId}/vote`,
       dto

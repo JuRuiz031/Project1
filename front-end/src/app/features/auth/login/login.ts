@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { BRAND_CONFIG } from '../../../config/brand.config';
@@ -14,17 +14,17 @@ import { UserApiService } from '../../../shared/services/api/user-api.service';
   styleUrl: './login.css',
 })
 export class Login {
-  /** TEMP: set true to bypass backend auth while backend is being fixed */
   private readonly BYPASS_AUTH = false;
 
   form: FormGroup;
-  errorMessage: string = '';
+  errorMessage = '';
   readonly siteName = BRAND_CONFIG.siteName;
 
   constructor(
     private userApi: UserApiService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -34,26 +34,24 @@ export class Login {
 
   onLogin(event?: Event) {
     event?.preventDefault();
+
     this.errorMessage = '';
+    // make sure the clear shows immediately too
+    this.cdr.detectChanges();
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    // ✅ BYPASS MODE: skip API call, go straight to main page
     if (this.BYPASS_AUTH) {
       localStorage.setItem('token', 'dev-bypass-token');
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          user_id: 0,
-          username: String(this.form.value.username ?? 'dev'),
-          email: 'dev@example.com',
-          is_superuser: true,
-        })
-      );
-
+      localStorage.setItem('user', JSON.stringify({
+        user_id: 0,
+        username: String(this.form.value.username ?? 'dev'),
+        email: 'dev@example.com',
+        is_superuser: true,
+      }));
       this.router.navigateByUrl('/dashboard/main-page');
       return;
     }
@@ -70,12 +68,18 @@ export class Login {
         this.router.navigateByUrl('/dashboard/main-page');
       },
       error: (err) => {
-        const message =
-          (err?.error && typeof err.error === 'string' && err.error) ||
-          err?.error?.message ||
-          err?.message;
+        if ([401, 403].includes(err?.status)) {
+          this.errorMessage = 'Invalid username or password';
+        } else {
+          this.errorMessage =
+            err?.error?.message ||
+            (typeof err?.error === 'string' ? err.error : '') ||
+            err?.message ||
+            'Login failed';
+        }
 
-        this.errorMessage = message || 'Login failed';
+        // ✅ force UI update immediately
+        this.cdr.detectChanges();
       },
     });
   }

@@ -2,8 +2,10 @@ package com.example.calendario.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.LinkedHashMap;
 
 import org.springframework.data.annotation.Id;
@@ -32,6 +34,8 @@ public class Poll {
     private boolean allowMultipleVotes;
 
     private List<String> tags = new ArrayList<>();
+
+    private Set<InviteLink> inviteLinks = new HashSet<>();
 
     private Map<Integer, Option> options = new LinkedHashMap<>();
 
@@ -123,6 +127,12 @@ public class Poll {
 
     public List<String> getTags() { return tags; }
     public void setTags(List<String> tags) { this.tags = tags; }
+
+    public Set<InviteLink> getInviteLinks() { return inviteLinks; }
+    public void setInviteLinks(Set<InviteLink> inviteLinks) { this.inviteLinks = inviteLinks; }
+    public void addInviteLink(String token, LocalDateTime createdAt, LocalDateTime expiresAt) {
+        this.inviteLinks.add(new InviteLink(token, createdAt, expiresAt));
+    }
 
     // Return options as a list to preserve compatibility with existing code
     public List<Option> getOptions() { return new ArrayList<>(options.values()); }

@@ -21,8 +21,10 @@ export interface UpdatePollResponseDTO {
   allow_multiple_votes: boolean;
 
   options: Array<{
-    option_id: string;
+    option_id: number;
     description: string;
+    user_votes: string[] | null;
+    guest_votes: string[] | null;
   }>;
 
   tags: string[];
