@@ -16,7 +16,14 @@ export interface UpdatePollDTO {
   results_visible?: boolean;
   allow_multiple_votes?: boolean;
 
+  /**
+   * Options array for update:
+   * - option_id present: updates existing option's description
+   * - option_id absent: creates a new option
+   * - existing options not in array: will be deleted
+   */
   options?: {
+    option_id?: number;
     description: string;
   }[];
 

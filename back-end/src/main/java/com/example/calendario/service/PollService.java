@@ -1,29 +1,26 @@
 package com.example.calendario.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators.In;
 import org.springframework.stereotype.Service;
 
-import com.example.calendario.service.UserService;
-import com.example.calendario.service.CalendarService;
-import com.example.calendario.repository.PollRepository;
 import com.example.calendario.dto.poll.PollCreateRequestDTO;
 import com.example.calendario.dto.poll.PollDeleteRequestDTO;
 import com.example.calendario.dto.poll.PollDeleteResponseDTO;
+import com.example.calendario.dto.poll.PollOptionDTO;
 import com.example.calendario.dto.poll.PollResponseDTO;
 import com.example.calendario.dto.poll.PollUpdateRequestDTO;
 import com.example.calendario.dto.poll.PollVoteRequestDTO;
-import com.example.calendario.dto.poll.PollOptionDTO;
 import com.example.calendario.exception.AlreadyVotedException;
 import com.example.calendario.exception.ForbiddenException;
-import com.example.calendario.exception.ResourceNotFoundException;
 import com.example.calendario.exception.InvalidRequestException;
-import com.example.calendario.model.User;
+import com.example.calendario.exception.ResourceNotFoundException;
 import com.example.calendario.model.Poll;
+import com.example.calendario.model.User;
+import com.example.calendario.repository.PollRepository;
 
 @Service
 public class PollService {

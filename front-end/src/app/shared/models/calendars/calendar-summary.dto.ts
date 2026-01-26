@@ -4,4 +4,5 @@
 export interface CalendarSummaryDTO {
   calendar_id: string;
   name: string;
+  is_admin: boolean;
 }
