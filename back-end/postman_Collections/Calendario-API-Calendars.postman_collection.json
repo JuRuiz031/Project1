@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "7983422c-ef9e-4e46-bcdb-cca4e6b2949f",
+    "_postman_id": "ab3feda7-c467-4c1f-9d87-17a6b7031575",
     "name": "Calendario API v1 - Calendars",
     "description": "Calendar management endpoints - Create, update, delete calendars and manage invites with JWT authentication",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "51732412",
-    "_collection_link": "https://go.postman.co/collection/51732412-7983422c-ef9e-4e46-bcdb-cca4e6b2949f?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/51732412-ab3feda7-c467-4c1f-9d87-17a6b7031575?source=collection_link"
   },
   "item": [
     {
@@ -141,6 +141,16 @@
     {
       "name": "4. Get Events by Calendar IDs",
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
         "method": "GET",
         "header": [
           {
@@ -212,8 +222,8 @@
           {
             "key": "Authorization",
             "value": "Bearer {{superuser_jwt_token}}",
-            "type": "text",
-            "description": "JWT token for user with isSuperuser: true"
+            "description": "JWT token for user with isSuperuser: true",
+            "type": "text"
           }
         ],
         "url": {
