@@ -25,7 +25,6 @@ import com.example.calendario.dto.event.EventCreateRequestDTO;
 import com.example.calendario.dto.event.EventDeleteResponseDTO;
 import com.example.calendario.dto.event.EventResponseDTO;
 import com.example.calendario.dto.event.EventUpdateRequestDTO;
-import com.example.calendario.dto.invite.EventInviteResponseDTO;
 import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.exception.ResourceNotFoundException;
 import com.example.calendario.model.Calendar;
@@ -243,82 +242,4 @@ class EventServiceTest {
         assertEquals(1, result.size());
         assertEquals("event-123", result.get(0).getId());
     }
-
-    // @Test
-    // void testGenerateEventGuestLink_Success() {
-    //     // Arrange
-    //     when(userService.findByUsername("adminuser")).thenReturn(Optional.of(adminUser));
-    //     when(eventRepository.findById("event-123")).thenReturn(Optional.of(testEvent));
-    //     when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    //     // Act
-    //     EventInviteResponseDTO result = eventService.generateEventGuestLink("event-123", "John Doe", "adminuser");
-
-    //     // Assert
-    //     assertNotNull(result);
-    //     assertEquals("event-123", result.getEventId());
-    //     assertEquals("John Doe", result.getGuestName());
-    //     assertNotNull(result.getInviteLink());
-    //     assertTrue(result.getInviteLink().contains("/events/guest/"));
-    //     verify(eventRepository, times(1)).save(testEvent);
-    // }
-
-    // @Test
-    // void testGenerateEventGuestLink_NotAdmin() {
-    //     // Arrange
-    //     when(userService.findByUsername("testuser")).thenReturn(Optional.of(testUser));
-    //     when(eventRepository.findById("event-123")).thenReturn(Optional.of(testEvent));
-
-    //     // Act & Assert
-    //     ForbiddenException exception = assertThrows(ForbiddenException.class, () -> {
-    //         eventService.generateEventGuestLink("event-123", "John Doe", "testuser");
-    //     });
-    //     assertEquals("You do not have permission to create guest links for this event", exception.getMessage());
-    // }
-
-    // @Test
-    // void testGetEventByGuestToken_Success() {
-    //     // Arrange
-    //     String token = "guest-token-123";
-    //     testEvent.addGuestLink(token, "John Doe", LocalDateTime.now());
-
-    //     when(eventRepository.findByGuestLinksToken(token)).thenReturn(Optional.of(testEvent));
-
-    //     // Act
-    //     EventResponseDTO result = eventService.getEventByGuestToken(token, "John Doe");
-
-    //     // Assert
-    //     assertNotNull(result);
-    //     assertEquals("event-123", result.getEventId());
-    //     assertEquals("Test Event", result.getTitle());
-    // }
-
-    // @Test
-    // void testGetEventByGuestToken_InvalidToken() {
-    //     // Arrange
-    //     String token = "invalid-token";
-
-    //     when(eventRepository.findByGuestLinksToken(token)).thenReturn(Optional.empty());
-
-    //     // Act & Assert
-    //     ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-    //         eventService.getEventByGuestToken(token, "John Doe");
-    //     });
-    //     assertEquals("Invalid or expired invite link", exception.getMessage());
-    // }
-
-    // @Test
-    // void testGetEventByGuestToken_WrongGuestName() {
-    //     // Arrange
-    //     String token = "guest-token-123";
-    //     testEvent.addGuestLink(token, "John Doe", LocalDateTime.now());
-
-    //     when(eventRepository.findByGuestLinksToken(token)).thenReturn(Optional.of(testEvent));
-
-    //     // Act & Assert
-    //     ForbiddenException exception = assertThrows(ForbiddenException.class, () -> {
-    //         eventService.getEventByGuestToken(token, "Wrong Name");
-    //     });
-    //     assertEquals("Guest name does not match the invite", exception.getMessage());
-    // }
 }

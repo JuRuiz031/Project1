@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.calendario.dto.CalendarItemResponseDTO;
 import com.example.calendario.dto.invite.InviteRequestDTO;
 import com.example.calendario.dto.invite.InviteResponseDTO;
-import com.example.calendario.service.EventService;
 import com.example.calendario.service.InviteService;
 
 import jakarta.validation.Valid;

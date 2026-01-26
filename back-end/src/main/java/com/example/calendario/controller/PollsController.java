@@ -1,6 +1,5 @@
 package com.example.calendario.controller;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,10 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.calendario.dto.poll.PollCreateRequestDTO;
 import com.example.calendario.dto.poll.PollDeleteRequestDTO;
 import com.example.calendario.dto.poll.PollDeleteResponseDTO;
-// import com.example.calendario.dto.poll.PollDeleteRequestDTO;
-// import com.example.calendario.dto.poll.PollDeleteResponseDTO;
 import com.example.calendario.dto.poll.PollResponseDTO;
 import com.example.calendario.dto.poll.PollUpdateRequestDTO;
+import com.example.calendario.dto.poll.PollVoteRequestDTO;
 import com.example.calendario.service.PollService;
 
 import jakarta.validation.Valid;
@@ -72,7 +70,7 @@ public class PollsController {
     @PostMapping("/polls/{id}/vote")
     public ResponseEntity<PollResponseDTO> voteOnPoll(
             @PathVariable("id") String pollId,
-            @Valid @RequestBody com.example.calendario.dto.poll.PollVoteRequestDTO requestDTO) {
+            @Valid @RequestBody PollVoteRequestDTO requestDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String authenticatedUsername = authentication.getName();
 

@@ -47,6 +47,7 @@ public class CalendarController {
     public ResponseEntity<?> getCalendar(
             @RequestParam(required = false) String calendarIds,
             @RequestParam(required = false) String eventIds,
+            @RequestParam(required = false) String pollIds,
             @RequestParam(required = false) String tags) {
         // Get authenticated username from JWT
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -54,8 +55,9 @@ public class CalendarController {
 
         List<String> calendarIdList = java.util.Collections.emptyList();
         List<String> eventIdList = java.util.Collections.emptyList();
+        List<String> pollIdList = java.util.Collections.emptyList();
         List<String> tagList = java.util.Collections.emptyList();
-        if (calendarIds == null && eventIds == null && tags == null) {
+        if (calendarIds == null && eventIds == null && pollIds == null && tags == null) {
             // Homepage - return calendars and tags
             CalendarHomepageResponseDTO response = calendarService.getCalendarHomepage(authenticatedUsername);
             return ResponseEntity.ok(response);
@@ -66,13 +68,17 @@ public class CalendarController {
         if (eventIds != null) {
             eventIdList = java.util.Arrays.asList(eventIds.split(","));
         }
+        if (pollIds != null) {
+            pollIdList = java.util.Arrays.asList(pollIds.split(","));
+        }
         if (tags != null) {
             tagList = java.util.Arrays.asList(tags.split(","));
         }
-        // Filtered view - return events and users based on filters
+        // Filtered view - return events, polls, and users based on filters
         CalendarFilterResponseDTO response = calendarService.getFilteredCalendarView(
                 calendarIdList,
                 eventIdList,
+                pollIdList,
                 tagList,
                 authenticatedUsername);
         return ResponseEntity.ok(response);

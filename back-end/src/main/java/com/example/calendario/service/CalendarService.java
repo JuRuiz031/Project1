@@ -10,32 +10,41 @@ import org.springframework.stereotype.Service;
 
 import com.example.calendario.dto.calendar.CalendarCreateRequestDTO;
 import com.example.calendario.dto.calendar.CalendarDeleteResponseDTO;
+import com.example.calendario.dto.calendar.CalendarFilterResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteAcceptResponseDTO;
 import com.example.calendario.dto.calendar.CalendarInviteResponseDTO;
 import com.example.calendario.dto.calendar.CalendarResponseDTO;
 import com.example.calendario.dto.calendar.CalendarUpdateRequestDTO;
 import com.example.calendario.dto.calendar.CalendarUpdateResponseDTO;
+import com.example.calendario.dto.event.EventResponseDTO;
+import com.example.calendario.dto.poll.PollOptionDTO;
+import com.example.calendario.dto.poll.PollResponseDTO;
 import com.example.calendario.exception.ForbiddenException;
 import com.example.calendario.exception.ResourceNotFoundException;
 import com.example.calendario.model.Calendar;
+import com.example.calendario.model.Event;
+import com.example.calendario.model.Poll;
 import com.example.calendario.model.User;
 import com.example.calendario.repository.CalendarRepository;
+import com.example.calendario.repository.PollRepository;
 
 @Service
 public class CalendarService {
     private final CalendarRepository calendarRepository;
     private final UserService userService;
     private final com.example.calendario.repository.EventRepository eventRepository;
+    private final PollRepository pollRepository;
     
     @Value("${app.calendar.invite.base-url}")
     private String inviteBaseUrl;
 
     // Constructor
     public CalendarService(CalendarRepository calendarRepository, UserService userService, 
-                          com.example.calendario.repository.EventRepository eventRepository) {
+                          com.example.calendario.repository.EventRepository eventRepository, PollRepository pollRepository) {
         this.calendarRepository = calendarRepository;
         this.userService = userService;
         this.eventRepository = eventRepository;
+        this.pollRepository = pollRepository;
     }
 
     // Create a new calendar
@@ -285,7 +294,7 @@ public class CalendarService {
     }
 
     // Get events and users by calendar IDs
-    public com.example.calendario.dto.calendar.CalendarFilterResponseDTO getEventsByCalendarIds(
+    public List<EventResponseDTO> getEventsByCalendarIds(
             java.util.List<String> calendarIds, String authenticatedUsername) {
         // Get authenticated user
         User authenticatedUser = userService.findByUsername(authenticatedUsername)
@@ -316,24 +325,7 @@ public class CalendarService {
                 ))
                 .collect(java.util.stream.Collectors.toList());
 
-        // Get users for calendars where authenticated user is admin (or superuser sees all)
-        java.util.List<com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo> users = new java.util.ArrayList<>();
-        for (String calendarId : accessibleCalendarIds) {
-            if (authenticatedUser.isSuperuser() || authenticatedUser.isAdminOfCalendar(calendarId)) {
-                // Get all users in this calendar
-                for (User user : userService.getAllUsers()) {
-                    if (user.isMemberOfCalendar(calendarId) && !user.isSuperuser()) { // Don't include superusers in the list
-                        users.add(new com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo(
-                                calendarId,
-                                user.getId(),
-                                user.getUsername()
-                        ));
-                    }
-                }
-            }
-        }
-
-        return new com.example.calendario.dto.calendar.CalendarFilterResponseDTO(eventDTOs, users.isEmpty() ? null : users);
+        return eventDTOs;
     }
 
     // Get events by event IDs
@@ -403,6 +395,7 @@ public class CalendarService {
     public com.example.calendario.dto.calendar.CalendarFilterResponseDTO getFilteredCalendarView(
             java.util.List<String> calendarIds,
             java.util.List<String> eventIds,
+            java.util.List<String> pollIds,
             java.util.List<String> tags,
             String authenticatedUsername) {
         // Get authenticated user
@@ -421,29 +414,41 @@ public class CalendarService {
         }
 
         // Collect events from any of the provided criteria
-        java.util.List<com.example.calendario.model.Event> filteredEvents = new java.util.ArrayList<>();
+        List<Event> filteredEvents = new java.util.ArrayList<>();
+        List<Poll> filteredPolls = new java.util.ArrayList<>();
         if (!accessibleCalendarIds.isEmpty()) {
             filteredEvents.addAll(eventRepository.findByCalendarIdIn(accessibleCalendarIds));
+            filteredPolls.addAll(pollRepository.findByCalendarIdIn(accessibleCalendarIds));
         }
         if (eventIds != null && !eventIds.isEmpty()) {
             filteredEvents.addAll(eventRepository.findByIdIn(eventIds));
         }
+        if (pollIds != null && !pollIds.isEmpty()) {
+            filteredPolls.addAll(pollRepository.findByIdIn(pollIds));
+        }
         if (tags != null && !tags.isEmpty()) {
             filteredEvents.addAll(eventRepository.findByTagsIn(tags));
+            filteredPolls.addAll(pollRepository.findByTagsIn(tags));
         }
 
-        // Deduplicate events by id while preserving insertion order
+        // Deduplicate events, polls by id while preserving insertion order
         java.util.Map<String, com.example.calendario.model.Event> eventMap = new java.util.LinkedHashMap<>();
         for (com.example.calendario.model.Event event : filteredEvents) {
             if (event != null && event.getId() != null) {
                 eventMap.putIfAbsent(event.getId(), event);
             }
         }
+        java.util.Map<String, com.example.calendario.model.Poll> pollMap = new java.util.LinkedHashMap<>();
+        for (com.example.calendario.model.Poll poll : filteredPolls) {
+            if (poll != null && poll.getId() != null) {
+                pollMap.putIfAbsent(poll.getId(), poll);
+            }
+        }
 
-        // Filter events the authenticated user has access to and map to DTOs
-        java.util.List<com.example.calendario.dto.event.EventResponseDTO> eventDTOs = eventMap.values().stream()
+        // Filter events and polls the authenticated user has access to and map to DTOs
+        List<EventResponseDTO> eventDTOs = eventMap.values().stream()
                 .filter(event -> authenticatedUser.isSuperuser() || authenticatedUser.isMemberOfCalendar(event.getCalendarId()))
-                .map(event -> new com.example.calendario.dto.event.EventResponseDTO(
+                .map(event -> new EventResponseDTO(
                         event.getId(),
                         event.getCalendarId(),
                         event.getTitle(),
@@ -454,25 +459,46 @@ public class CalendarService {
                         event.getTags()
                 ))
                 .collect(java.util.stream.Collectors.toList());
+        List<PollResponseDTO> pollDTOs = pollMap.values().stream()
+                .filter(poll -> authenticatedUser.isSuperuser() || authenticatedUser.isMemberOfCalendar(poll.getCalendarId()))
+                .map(poll -> new PollResponseDTO(
+                        poll.getId(),
+                        poll.getCalendarId(),
+                        poll.getTitle(),
+                        poll.getDescription(),
+                        poll.getNotes(),
+                        poll.getStartTime(),
+                        poll.getEndTime(),
+                        poll.isResultsVisible(),
+                        poll.isAllowMultipleVotes(),
+                        poll.getOptions().stream()
+                                .map(option -> new PollOptionDTO(
+                                        option.getOptionId(),
+                                        option.getDescription(),
+                                        option.getUserVotes(),
+                                        option.getGuestVotes()
+                                ))
+                                .collect(java.util.stream.Collectors.toList()),
+                        poll.getTags()
+                ))
+                .collect(java.util.stream.Collectors.toList());
 
         // Build users list only for the supplied calendarIds where the authenticated user is admin (or superuser)
-        java.util.List<com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo> users = new java.util.ArrayList<>();
+        List<com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo> users = new java.util.ArrayList<>();
         if (calendarIds != null && !calendarIds.isEmpty()) {
             for (String calendarId : calendarIds) {
                 if (authenticatedUser.isSuperuser() || authenticatedUser.isAdminOfCalendar(calendarId)) {
-                    for (User user : userService.getAllUsers()) {
-                        if (user.isMemberOfCalendar(calendarId) && !user.isSuperuser()) {
-                            users.add(new com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo(
-                                    calendarId,
-                                    user.getId(),
-                                    user.getUsername()
-                            ));
-                        }
+                    for (User user : userService.getUsersByCalendarMembership(calendarId)) {
+                        users.add(new com.example.calendario.dto.calendar.CalendarFilterResponseDTO.CalendarUserInfo(
+                                calendarId,
+                                user.getId(),
+                                user.getUsername()
+                        ));
                     }
                 }
             }
         }
 
-        return new com.example.calendario.dto.calendar.CalendarFilterResponseDTO(eventDTOs, users.isEmpty() ? null : users);
+        return new CalendarFilterResponseDTO(eventDTOs, pollDTOs, users.isEmpty() ? null : users);
     }
 }
