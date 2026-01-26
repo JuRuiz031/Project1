@@ -4,15 +4,24 @@
   <div class="display-options__grid">
     <div class="display-options__panel" aria-label="Calendars list">
       <div class="display-options__panel-title">Calendars</div>
+
       <ul class="display-options__list">
         <li *ngFor="let c of calendars" class="display-options__list-item">
-          {{ c }}
+          <label class="display-options__checkbox">
+            <input
+              type="checkbox"
+              [checked]="isChecked(c.calendar_id)"
+              (change)="onToggle(c.calendar_id, $any($event.target).checked)"
+            />
+            <span>{{ c.name }}</span>
+          </label>
         </li>
       </ul>
     </div>
 
     <div class="display-options__panel" aria-label="Tags list">
       <div class="display-options__panel-title">Tags</div>
+
       <ul class="display-options__list">
         <li *ngFor="let t of tags" class="display-options__list-item">
           {{ t }}

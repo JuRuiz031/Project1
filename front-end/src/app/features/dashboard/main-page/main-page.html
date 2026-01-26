@@ -6,7 +6,14 @@
     <!-- RIGHT: Side panel stack -->
     <aside class="side">
       <app-calendar-options class="card"></app-calendar-options>
-      <app-display-options class="card"></app-display-options>
+
+      <app-display-options
+        class="card"
+        [calendars]="calendars"
+        [tags]="tags"
+        (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)">
+      </app-display-options>
+
       <app-polls-window class="card"></app-polls-window>
     </aside>
   </section>
