@@ -18,7 +18,7 @@
 
         <h2 class="text-center mb-3">Sign In</h2>
 
-        <form [formGroup]="form" (ngSubmit)="onLogin()">
+        <form [formGroup]="form" (ngSubmit)="onLogin($event)">
 
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
