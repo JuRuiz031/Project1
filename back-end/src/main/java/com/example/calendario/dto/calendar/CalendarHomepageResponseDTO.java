@@ -19,12 +19,16 @@ public class CalendarHomepageResponseDTO {
         
         @JsonProperty("name")
         private String name;
+
+        @JsonProperty("is_admin")
+        private Boolean isAdmin;
         
         public CalendarInfo() {}
         
-        public CalendarInfo(String calendarId, String name) {
+        public CalendarInfo(String calendarId, String name, Boolean isAdmin) {
             this.calendarId = calendarId;
             this.name = name;
+            this.isAdmin = isAdmin;
         }
         
         public String getCalendarId() { return calendarId; }
@@ -32,6 +36,9 @@ public class CalendarHomepageResponseDTO {
         
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
+
+        public Boolean getIsAdmin() { return isAdmin; }
+        public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
     }
     
     // Constructors

@@ -246,7 +246,8 @@ public class CalendarService {
             for (Calendar calendar : calendarRepository.findAll()) {
                 calendarInfos.add(new com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.CalendarInfo(
                         calendar.getId(),
-                        calendar.getName()
+                        calendar.getName(),
+                        true // Superusers are always admin
                 ));
             }
             // Get all events to collect tags
@@ -262,7 +263,8 @@ public class CalendarService {
                 Calendar calendar = getCalendarById(membership.getCalendarId());
                 calendarInfos.add(new com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.CalendarInfo(
                         calendar.getId(),
-                        calendar.getName()
+                        calendar.getName(),
+                        membership.getIsAdmin()
                 ));
             }
             // Get events from user's calendars to collect tags
