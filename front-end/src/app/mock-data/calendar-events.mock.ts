@@ -1,8 +1,8 @@
 export const MOCK_CALENDAR_EVENTS_RESPONSE = {
   events: [
     {
-      id: 1,
-      calendar_id: 1,
+      event_id: 'evt-001',
+      calendar_id: 'cal-001',
       title: 'Family Cookout',
       start_time: '2026-01-13T16:00:00Z',
       end_time: '2026-01-13T20:00:00Z',
@@ -11,8 +11,8 @@ export const MOCK_CALENDAR_EVENTS_RESPONSE = {
       tags: ['Family', 'Food'],
     },
     {
-      id: 2,
-      calendar_id: 1,
+      event_id: 'evt-002',
+      calendar_id: 'cal-001',
       title: 'Doctor Appointment',
       start_time: '2026-01-15T09:30:00Z',
       end_time: '2026-01-15T10:15:00Z',
@@ -21,8 +21,8 @@ export const MOCK_CALENDAR_EVENTS_RESPONSE = {
       tags: ['Health'],
     },
     {
-      id: 3,
-      calendar_id: 1,
+      event_id: 'evt-003',
+      calendar_id: 'cal-001',
       title: 'Work Team Sync',
       start_time: '2026-01-17T14:00:00Z',
       end_time: '2026-01-17T15:00:00Z',
@@ -31,15 +31,14 @@ export const MOCK_CALENDAR_EVENTS_RESPONSE = {
       tags: ['Work'],
     },
     {
-      id: 4,
-      calendar_id: 1,
+      event_id: 'evt-004',
+      calendar_id: 'cal-001',
       title: 'Weekend Trip',
       start_time: '2026-01-20T00:00:00Z',
       end_time: '2026-01-22T23:59:59Z',
       description: 'Short weekend getaway',
       notes: 'Book hotel',
       tags: ['Vacation'],
-      all_day: true,
     },
   ],
 };
