@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { CreateEvent } from './create-event';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
-import { EventApiService } from '../../../shared/services/api/event-api.service';
+import { EventService } from '../../../shared/services/event.service';
 import { CreateEventDTO } from '../../../shared/models/events/create-event.dto';
-import { CreateEventResponseDTO } from '../../../shared/models/events/create-event-response.dto';
+import { EventDTO } from '../../../shared/models/events/event.dto';
+
+import { vi } from 'vitest';
 
 describe('CreateEvent', () => {
-  let eventApiStub: { createEvent: any };
-
-  const createdResponse: CreateEventResponseDTO = {
+  const createdEvent: EventDTO = {
     event_id: 'e123',
     calendar_id: '1',
     title: 'Team Meeting',
@@ -22,22 +22,28 @@ describe('CreateEvent', () => {
     tags: [],
   };
 
-  beforeEach(async () => {
-    eventApiStub = {
-      createEvent: vi.fn(() => of(createdResponse)),
-    };
+  // ✅ Strongly-typed mock so mock.calls is indexable (fixes tuple [] error)
+  const createMock = vi.fn<(dto: CreateEventDTO) => ReturnType<EventService['create']>>(
+    () => of(createdEvent)
+  );
 
+  const eventServiceStub: Pick<EventService, 'create'> = {
+    create: createMock,
+  };
+
+  beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CreateEvent, RouterTestingModule],
-      providers: [{ provide: EventApiService, useValue: eventApiStub }],
+      providers: [{ provide: EventService, useValue: eventServiceStub }],
     }).compileComponents();
 
-    // provide a fake logged-in user (since create requires user_id)
+    // simulate logged-in user
     localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
   });
 
   afterEach(() => {
     localStorage.clear();
+    vi.clearAllMocks();
   });
 
   it('ngOnInit should set default calendarId to first admin calendar', () => {
@@ -49,41 +55,63 @@ describe('CreateEvent', () => {
     expect(component.form.get('calendarId')?.value).toBe('1');
   });
 
-  it('submit should NOT call api when form is invalid', () => {
+  it('submit should NOT call create when form is invalid', () => {
     const fixture = TestBed.createComponent(CreateEvent);
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
     component.submit();
 
-    expect(eventApiStub.createEvent).not.toHaveBeenCalled();
-    expect(component.isSubmitting).toBe(false);
+    expect(createMock).not.toHaveBeenCalled();
     expect(component.apiError).toBe('');
+    expect(component.isSubmitting).toBe(false);
   });
 
-  it('submit should set apiError when end <= start and NOT call api', () => {
+  it('submit should set apiError when missing user id and NOT call create', () => {
+    localStorage.removeItem('user');
+
     const fixture = TestBed.createComponent(CreateEvent);
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
     component.form.patchValue({
       calendarId: '1',
-      title: 'Xy',
+      title: 'OK',
+      startDate: '2026-01-26',
+      startTime: '12:00',
+      endDate: '2026-01-26',
+      endTime: '13:00',
+    });
+
+    component.submit();
+
+    expect(component.apiError).toContain('Not logged in');
+    expect(createMock).not.toHaveBeenCalled();
+    expect(component.isSubmitting).toBe(false);
+  });
+
+  it('submit should set apiError when end <= start and NOT call create', () => {
+    const fixture = TestBed.createComponent(CreateEvent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    component.form.patchValue({
+      calendarId: '1',
+      title: 'OK',
       startDate: '2026-01-26',
       startTime: '12:00',
       endDate: '2026-01-26',
       endTime: '12:00', // equal => invalid
-      description: '',
-      notes: '',
     });
 
     component.submit();
 
     expect(component.apiError).toBe('End must be after start.');
-    expect(eventApiStub.createEvent).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
+    expect(component.isSubmitting).toBe(false);
   });
 
-  it('submit should call api with CreateEventDTO and navigate to view page on success', () => {
+  it('submit should call EventService.create with CreateEventDTO and navigate to view page on success', () => {
     const fixture = TestBed.createComponent(CreateEvent);
     const component = fixture.componentInstance;
     const router = TestBed.inject(Router);
@@ -104,15 +132,15 @@ describe('CreateEvent', () => {
 
     component.submit();
 
-    expect(eventApiStub.createEvent).toHaveBeenCalledTimes(1);
+    expect(createMock).toHaveBeenCalledTimes(1);
 
-    const dto = eventApiStub.createEvent.mock.calls[0][0] as CreateEventDTO;
+    // ✅ Typed extraction (no unknown/optional chaining needed)
+    const dto = createMock.mock.calls[0][0];
 
     expect(dto.user_id).toBe('u1');
     expect(dto.calendar_id).toBe('1');
     expect(dto.title).toBe('Team Meeting');
 
-    // compare ISO using the same construction pattern as component
     const expectedStartIso = new Date('2026-01-26T12:00:00').toISOString();
     const expectedEndIso = new Date('2026-01-26T13:00:00').toISOString();
 
@@ -120,15 +148,13 @@ describe('CreateEvent', () => {
     expect(dto.end_time).toBe(expectedEndIso);
 
     expect(navSpy).toHaveBeenCalledWith('/view-event/e123');
-    expect(component.isSubmitting).toBe(false);
     expect(component.apiError).toBe('');
+    expect(component.isSubmitting).toBe(false);
   });
 
-  it('submit should show apiError when api call fails', () => {
-    eventApiStub.createEvent = vi.fn(() => throwError(() => new Error('boom')));
-
-    // override provider for this test
-    TestBed.overrideProvider(EventApiService, { useValue: eventApiStub });
+  it('submit should show apiError when create fails', () => {
+    // ✅ Make the NEXT call fail without rebuilding the TestBed
+    createMock.mockReturnValueOnce(throwError(() => ({})));
 
     const fixture = TestBed.createComponent(CreateEvent);
     const component = fixture.componentInstance;
@@ -141,13 +167,11 @@ describe('CreateEvent', () => {
       startTime: '12:00',
       endDate: '2026-01-26',
       endTime: '13:00',
-      description: '',
-      notes: '',
     });
 
     component.submit();
 
-    expect(component.isSubmitting).toBe(false);
     expect(component.apiError).toBe('Could not create event');
+    expect(component.isSubmitting).toBe(false);
   });
 });
