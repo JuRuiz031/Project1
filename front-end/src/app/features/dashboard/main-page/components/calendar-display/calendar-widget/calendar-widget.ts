@@ -62,6 +62,15 @@ export class CalendarWidget {
     this.eventClicked.emit(event);
   }
 
+  dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {
+    if (this.view === CalendarView.Month) {
+      this.viewDate = date;
+      this.viewDateChange.emit(date);
+      this.view = CalendarView.Day;
+      this.activeDayIsOpen = false;
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['events']) {
       this.refresh.next();

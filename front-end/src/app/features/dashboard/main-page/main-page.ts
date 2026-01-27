@@ -1,4 +1,6 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed, effect, inject } from '@angular/core';
+import { map, catchError, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 import { CalendarDisplay } from './components/calendar-display/calendar-display';
 import { CalendarOptions } from './components/calendar-options/calendar-options';
@@ -6,6 +8,8 @@ import { DisplayOptions } from './components/display-options/display-options';
 import { PollsWindow } from './components/polls-window/polls-window';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
+import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
+import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 type CalendarOptionDTO = { calendar_id: string; name: string };
 
@@ -17,141 +21,118 @@ type CalendarOptionDTO = { calendar_id: string; name: string };
   styleUrl: './main-page.css',
 })
 export class MainPageComponent implements OnInit {
-  // Session anchor
-  userId!: string;
+  private calendarService = inject(CalendarService);
 
-  // MainPage-owned data
-  calendars: CalendarOptionDTO[] = [];
-  events: any[] = [];
-  polls: any[] = [];
-  tags: string[] = [];
+  // Signals for reactive state
+  calendars = signal<CalendarOptionDTO[]>([]);
+  tags = signal<string[]>([]);
+  events = signal<any[]>([]);
+  polls = signal<any[]>([]);
+  selectedCalendarIds = signal<string[]>([]);
 
-  // MainPage-owned view state
-  selectedCalendarIds: string[] = [];
-  viewMode: 'week' | 'month' = 'week';
-  viewRange: { start: Date; end: Date } | null = null;
+  // User info
+  userId: string | null = null;
 
-  constructor(private calendarService: CalendarService, private cdr: ChangeDetectorRef) {}
+  constructor() {
+    // Effect: react to calendar selection changes
+    effect(() => {
+      const ids = this.selectedCalendarIds();
+      
+      if (!ids || ids.length === 0) {
+        console.log('[MainPage] No calendars selected -> cleared events/polls');
+        this.events.set([]);
+        this.polls.set([]);
+        return;
+      }
+
+      console.log('[MainPage] Fetching events for calendars:', ids);
+      this.calendarService.getByCalendarIds(ids).pipe(
+        map((filtered: CalendarFilterResponseDTO) => ({
+          events: filtered.events ?? [],
+          polls: filtered.polls ?? []
+        })),
+        tap(data => console.log('[MainPage] Filtered data loaded:', data)),
+        catchError(err => {
+          console.error('[MainPage] getByCalendarIds() FAILED', err);
+          return of({ events: [], polls: [] });
+        })
+      ).subscribe(data => {
+        this.events.set(data.events);
+        this.polls.set(data.polls);
+      });
+    });
+  }
 
   ngOnInit(): void {
     console.log('[MainPage] ngOnInit fired');
 
-    const token = localStorage.getItem('token');
-    const userString = localStorage.getItem('user');
-
-    if (token) console.log('[MainPage] Token exists in localStorage:', token);
-    else console.log('[MainPage] No token found in localStorage');
-
-    if (userString) console.log('[MainPage] User string in localStorage:', userString);
-    else console.log('[MainPage] No user string found in localStorage');
-
-    this.loadMainPage();
-  }
-
-  private loadMainPage(): void {
-    console.log('[MainPage] loadMainPage() invoked');
-
-    const userString = localStorage.getItem('user');
-    if (!userString) {
-      console.warn('[MainPage] loadMainPage(): no user string found');
+    // Parse user from localStorage
+    this.userId = this.parseUserId();
+    if (!this.userId) {
+      console.warn('[MainPage] No valid user found in localStorage');
       return;
     }
 
-    // Parse user safely and extract user_id (string OR number)
+    console.log('[MainPage] Active user_id:', this.userId);
+
+    // Load calendar home data
+    this.loadCalendarHome();
+  }
+
+  /**
+   * Load calendar home (calendars + tags)
+   */
+  private loadCalendarHome(): void {
+    console.log('[MainPage] Calling CalendarService.getHomepage()...');
+    
+    this.calendarService.getHomepage().pipe(
+      map((home: CalendarHomeDTO) => ({
+        calendars: this.mapCalendars(home.calendars ?? []),
+        tags: (home.tags ?? []).map(t => String(t))
+      })),
+      tap(data => console.log('[MainPage] Calendar home loaded:', data)),
+      catchError(err => {
+        console.error('[MainPage] getHomepage() FAILED', err);
+        return of({ calendars: [], tags: [] });
+      })
+    ).subscribe(data => {
+      this.calendars.set(data.calendars);
+      this.tags.set(data.tags);
+    });
+  }
+
+  /**
+   * Parse user ID from localStorage
+   */
+  private parseUserId(): string | null {
+    const userString = localStorage.getItem('user');
+    if (!userString) return null;
+
     try {
       const parsed = JSON.parse(userString) as { user_id?: string | number };
-
-      if (parsed.user_id === undefined || parsed.user_id === null) {
-        console.error('[MainPage] user_id missing in user string:', parsed);
-        return;
-      }
-
-      this.userId = String(parsed.user_id);
-      console.log('[MainPage] Active user_id set:', this.userId);
-    } catch (err) {
-      console.error('[MainPage] Failed to parse user JSON', err);
-      return;
+      return parsed.user_id ? String(parsed.user_id) : null;
+    } catch {
+      return null;
     }
-
-    // Initialize page-owned state
-    this.calendars = [];
-    this.events = [];
-    this.polls = [];
-    this.tags = [];
-
-    // Initialize view state defaults
-    this.selectedCalendarIds = [];
-    this.viewMode = 'week';
-    this.viewRange = null;
-
-    console.log('[MainPage] Initial main-page state set', {
-      userId: this.userId,
-      calendars: this.calendars,
-      events: this.events,
-      polls: this.polls,
-      tags: this.tags,
-      selectedCalendarIds: this.selectedCalendarIds,
-      viewMode: this.viewMode,
-      viewRange: this.viewRange,
-    });
-
-    // ✅ CALL: GET /calendar (calendar homepage)
-    console.log('[MainPage] Calling CalendarService.getHomepage() (GET /calendar)...');
-
-    this.calendarService.getHomepage().subscribe({
-      next: (home: any) => {
-        console.log('[MainPage] ✅ getHomepage() SUCCESS');
-        console.log('[MainPage] CalendarHomeDTO received:', home);
-
-        // ✅ Map whatever homepage returns into DisplayOptions shape
-        const rawCalendars = home.calendars ?? [];
-        this.calendars = rawCalendars.map((c: any) => ({
-          calendar_id: String(
-            c.calendar_id ?? c.id ?? c.calendarId ?? c._id ?? ''
-          ),
-          name: String(c.name ?? c.title ?? c.calendar_name ?? 'Untitled'),
-        })).filter((c: CalendarOptionDTO) => c.calendar_id);
-
-        this.tags = (home.tags ?? []).map((t: any) => String(t));
-
-        console.log('[MainPage] Stored state:', {
-          calendars: this.calendars,
-          tags: this.tags,
-        });
-
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('[MainPage] ❌ getHomepage() FAILED', err);
-      },
-    });
   }
 
+  /**
+   * Map backend calendar data to DisplayOptions format
+   */
+  private mapCalendars(rawCalendars: any[]): CalendarOptionDTO[] {
+    return rawCalendars
+      .map((c: any) => ({
+        calendar_id: String(c.calendar_id ?? c.id ?? c.calendarId ?? c._id ?? ''),
+        name: String(c.name ?? c.title ?? c.calendar_name ?? 'Untitled')
+      }))
+      .filter(c => c.calendar_id);
+  }
+
+  /**
+   * Handle calendar selection changes from DisplayOptions
+   */
   onSelectedCalendarIdsChange(ids: string[]): void {
     console.log('[MainPage] selectedCalendarIdsChange received:', ids);
-
-    this.selectedCalendarIds = ids;
-
-    // ✅ Guard: if nothing selected, clear and stop
-    if (!ids || ids.length === 0) {
-      this.events = [];
-      this.polls = [];
-      console.log('[MainPage] No calendars selected → cleared events/polls');
-      return;
-    }
-
-    // Optional: immediately fetch events/polls for selected calendars
-    this.calendarService.getByCalendarIds(ids).subscribe({
-      next: (filtered: any) => {
-        this.events = filtered.events ?? [];
-        this.polls = filtered.polls ?? [];
-
-        console.log('[MainPage] ✅ getByCalendarIds() SUCCESS');
-        console.log('[MainPage] Filtered calendar data received:', filtered);
-      },
-      error: (err: any) => {
-        console.error('[MainPage] ❌ getByCalendarIds() FAILED', err);
-      },
-    });
+    this.selectedCalendarIds.set(ids);
   }
 }

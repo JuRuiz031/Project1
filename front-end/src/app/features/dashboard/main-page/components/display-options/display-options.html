@@ -5,13 +5,12 @@
     <div class="display-options__panel" aria-label="Calendars list">
       <div class="display-options__panel-title">Calendars</div>
 
-      <ul class="display-options__list">
+      <ul class="display-options__list" [formGroup]="checkboxForm">
         <li *ngFor="let c of calendars" class="display-options__list-item">
           <label class="display-options__checkbox">
             <input
               type="checkbox"
-              [checked]="isChecked(c.calendar_id)"
-              (change)="onToggle(c.calendar_id, $any($event.target).checked)"
+              [formControlName]="c.calendar_id"
             />
             <span>{{ c.name }}</span>
           </label>

@@ -1,8 +1,9 @@
 <main class="page">
   <section class="layout">
     <!-- LEFT: Calendar display area -->
-    <app-calendar-display class="card card--calendar"
-      [selectedCalendarIds]="selectedCalendarIds">
+    <app-calendar-display 
+      class="card card--calendar"
+      [events]="events()">
     </app-calendar-display>
 
     <!-- RIGHT: Side panel stack -->
@@ -11,8 +12,8 @@
 
       <app-display-options
         class="card"
-        [calendars]="calendars"
-        [tags]="tags"
+        [calendars]="calendars()"
+        [tags]="tags()"
         (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)">
       </app-display-options>
 

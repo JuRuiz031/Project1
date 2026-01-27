@@ -79,6 +79,7 @@
         [events]="events"
         [refresh]="refresh"
         [activeDayIsOpen]="activeDayIsOpen"
+        (dayClicked)="dayClicked($event.day)"
         (eventClicked)="handleEventClicked($event.event)"
       />
     }
