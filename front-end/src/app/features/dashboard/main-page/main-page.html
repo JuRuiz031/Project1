@@ -1,12 +1,21 @@
 <main class="page">
   <section class="layout">
     <!-- LEFT: Calendar display area -->
-    <app-calendar-display class="card card--calendar"></app-calendar-display>
+    <app-calendar-display class="card card--calendar"
+      [selectedCalendarIds]="selectedCalendarIds">
+    </app-calendar-display>
 
     <!-- RIGHT: Side panel stack -->
     <aside class="side">
       <app-calendar-options class="card"></app-calendar-options>
-      <app-display-options class="card"></app-display-options>
+
+      <app-display-options
+        class="card"
+        [calendars]="calendars"
+        [tags]="tags"
+        (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)">
+      </app-display-options>
+
       <app-polls-window class="card"></app-polls-window>
     </aside>
   </section>
