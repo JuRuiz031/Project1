@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { BRAND_CONFIG } from '../../../config/brand.config';
@@ -15,29 +15,22 @@ import { UserApiService } from '../../../shared/services/api/user-api.service';
 })
 export class Login {
   private readonly BYPASS_AUTH = false;
+  private userApi = inject(UserApiService);
+  private router = inject(Router);
+  private fb = inject(FormBuilder);
 
-  form: FormGroup;
-  errorMessage = '';
+  form = this.fb.group({
+    username: ['', [Validators.required, Validators.minLength(3)]],
+    password: ['', [Validators.required, Validators.minLength(5)]],
+  });
+
+  errorMessage = signal('');
   readonly siteName = BRAND_CONFIG.siteName;
-
-  constructor(
-    private userApi: UserApiService,
-    private router: Router,
-    private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.form = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(5)]],
-    });
-  }
 
   onLogin(event?: Event) {
     event?.preventDefault();
 
-    this.errorMessage = '';
-    // make sure the clear shows immediately too
-    this.cdr.detectChanges();
+    this.errorMessage.set('');
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -69,17 +62,15 @@ export class Login {
       },
       error: (err) => {
         if ([401, 403].includes(err?.status)) {
-          this.errorMessage = 'Invalid username or password';
+          this.errorMessage.set('Invalid username or password');
         } else {
-          this.errorMessage =
+          this.errorMessage.set(
             err?.error?.message ||
             (typeof err?.error === 'string' ? err.error : '') ||
             err?.message ||
-            'Login failed';
+            'Login failed'
+          );
         }
-
-        // ✅ force UI update immediately
-        this.cdr.detectChanges();
       },
     });
   }

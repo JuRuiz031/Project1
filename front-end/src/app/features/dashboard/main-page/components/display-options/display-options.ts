@@ -6,18 +6,21 @@ import {
   Output,
   OnChanges,
   SimpleChanges,
+  OnDestroy,
 } from '@angular/core';
+import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 
 export type CalendarOptionDTO = { calendar_id: string; name: string };
 
 @Component({
   selector: 'app-display-options',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './display-options.html',
   styleUrl: './display-options.css',
 })
-export class DisplayOptions implements OnChanges {
+export class DisplayOptions implements OnChanges, OnDestroy {
   /** receive data from MainPage */
   @Input() calendars: CalendarOptionDTO[] = [];
   @Input() tags: string[] = [];
@@ -25,61 +28,49 @@ export class DisplayOptions implements OnChanges {
   /** emit selected calendar_ids back to MainPage */
   @Output() selectedCalendarIdsChange = new EventEmitter<string[]>();
 
-  /** local UI state */
-  private selectedIds = new Set<string>();
+  /** Reactive form to manage checkbox state */
+  checkboxForm = new FormGroup({});
 
-  /**
-   * Optional default behavior:
-   * - when calendars arrive the first time, select all
-   * - if the list changes later, auto-add any new calendars (keep user's existing selections)
-   */
+  /** Cleanup subscriptions */
+  private destroy$ = new Subject<void>();
+
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['calendars']) return;
 
+    // Rebuild form when calendars change
+    this.checkboxForm = new FormGroup({});
+
     if (!this.calendars?.length) {
-      this.selectedIds.clear();
       this.emitSelection();
       return;
     }
 
-    // If nothing selected yet, default to "all selected"
-    if (this.selectedIds.size === 0) {
-      this.calendars.forEach((c) => this.selectedIds.add(c.calendar_id));
-      this.emitSelection();
-      return;
-    }
+    // Create a FormControl for each calendar (all checked by default)
+    this.calendars.forEach((c) => {
+      this.checkboxForm.addControl(c.calendar_id, new FormControl(true));
+    });
 
-    // Keep selection in sync with incoming calendars:
-    // - remove ids that no longer exist
-    // - add ids for newly introduced calendars only if you want that behavior
-    const validIds = new Set(this.calendars.map((c) => c.calendar_id));
+    // Subscribe to value changes for instant updates
+    this.checkboxForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.emitSelection();
+      });
 
-    // remove no-longer-valid selections
-    for (const id of Array.from(this.selectedIds)) {
-      if (!validIds.has(id)) this.selectedIds.delete(id);
-    }
-
-    // OPTIONAL: auto-select newly added calendars
-    // (comment this loop out if you *don't* want that)
-    for (const id of Array.from(validIds)) {
-      if (!this.selectedIds.has(id)) this.selectedIds.add(id);
-    }
-
+    // Emit initial selection (all selected)
     this.emitSelection();
   }
 
-  isChecked(calendarId: string): boolean {
-    return this.selectedIds.has(calendarId);
-  }
-
-  onToggle(calendarId: string, checked: boolean): void {
-    if (checked) this.selectedIds.add(calendarId);
-    else this.selectedIds.delete(calendarId);
-
-    this.emitSelection();
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private emitSelection(): void {
-    this.selectedCalendarIdsChange.emit(Array.from(this.selectedIds));
+    const selectedIds = Object.entries(this.checkboxForm.value)
+      .filter(([_, isSelected]) => isSelected === true)
+      .map(([id]) => id);
+
+    this.selectedCalendarIdsChange.emit(selectedIds);
   }
 }

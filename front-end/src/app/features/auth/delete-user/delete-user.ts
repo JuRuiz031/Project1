@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 
 @Component({
   selector: 'app-delete-user',
@@ -11,24 +12,62 @@ import { Router } from '@angular/router';
 })
 export class DeleteUser {
   private router = inject(Router);
+  private userApi = inject(UserApiService);
 
-  // Placeholder (swap later when you load the real user profile data)
-  userName = 'Your Name';
+  userName = signal('');
+  userId = signal('');
+  apiError = signal('');
+  isDeleting = signal(false);
 
-  apiError = '';
-  isDeleting = false;
+  constructor() {
+    this.loadUserData();
+  }
+
+  private loadUserData(): void {
+    try {
+      const userString = localStorage.getItem('user');
+      if (!userString) {
+        this.apiError.set('No user found in session');
+        return;
+      }
+
+      const userData = JSON.parse(userString);
+      const userId = String(userData.user_id ?? '');
+      const username = String(userData.username ?? '');
+      
+      this.userId.set(userId);
+      this.userName.set(username);
+
+      if (!userId) {
+        this.apiError.set('Invalid user data');
+      }
+    } catch (err) {
+      this.apiError.set('Failed to load user data');
+    }
+  }
 
   confirmDelete(): void {
-    this.apiError = '';
-    this.isDeleting = true;
+    this.apiError.set('');
 
-    // Placeholder: replace with API call (e.g., UserService.deleteUser(id))
-    console.log('Deleting user profile:', { userName: this.userName });
+    const userId = this.userId();
+    if (!userId) {
+      this.apiError.set('Cannot delete: No user ID found');
+      return;
+    }
 
-    setTimeout(() => {
-      this.isDeleting = false;
-      this.router.navigateByUrl('/login');
-    }, 400);
+    this.isDeleting.set(true);
+
+    this.userApi.deleteUser(userId).subscribe({
+      next: () => {
+        localStorage.clear();
+        this.router.navigateByUrl('/login');
+      },
+      error: (err) => {
+        console.error('Failed to delete user:', err);
+        this.apiError.set('Failed to delete profile. Please try again.');
+        this.isDeleting.set(false);
+      },
+    });
   }
 
   cancelDelete(): void {

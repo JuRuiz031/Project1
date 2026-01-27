@@ -5,17 +5,17 @@
     <div class="card-body">
       <form [formGroup]="form" novalidate>
         <div class="d-flex flex-column gap-3">
-          <!-- Name -->
+          <!-- Username -->
           <div>
-            <label class="form-label">Name</label>
+            <label class="form-label">Username</label>
             <input
               type="text"
               class="form-control app-input"
               formControlName="name"
-              placeholder="Full name"
-              [ngClass]="{ 'is-invalid': hasError('name') }"
+              placeholder="Choose a username"
+              [class.is-invalid]="hasError('name')"
             />
-            <div class="invalid-feedback">Name is required.</div>
+            <div class="invalid-feedback">Username is required.</div>
           </div>
 
           <!-- Email -->
@@ -26,7 +26,7 @@
               class="form-control app-input"
               formControlName="email"
               placeholder="name@example.com"
-              [ngClass]="{ 'is-invalid': hasError('email') }"
+              [class.is-invalid]="hasError('email')"
             />
             <div class="invalid-feedback">Enter a valid email.</div>
           </div>
@@ -39,7 +39,7 @@
               class="form-control app-input"
               formControlName="password"
               placeholder="At least 8 characters"
-              [ngClass]="{ 'is-invalid': hasError('password') }"
+              [class.is-invalid]="hasError('password')"
             />
             <div class="invalid-feedback">
               Password must be at least 8 characters.
@@ -47,9 +47,9 @@
           </div>
         </div>
 
-        @if (apiError) {
+        @if (apiError()) {
           <div class="alert alert-danger mt-3 mb-0">
-            {{ apiError }}
+            {{ apiError() }}
           </div>
         }
       </form>
@@ -69,9 +69,9 @@
         class="btn btn-primary"
         type="button"
         (click)="createAccount()"
-        [disabled]="isSubmitting"
+        [disabled]="isSubmitting()"
       >
-        {{ isSubmitting ? 'Creating...' : 'Create Account' }}
+        {{ isSubmitting() ? 'Creating...' : 'Create Account' }}
       </button>
     </div>
   </div>

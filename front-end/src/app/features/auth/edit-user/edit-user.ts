@@ -1,5 +1,4 @@
-// edit-user.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,39 +13,58 @@ import { UserApiService, UpdateUserDTO } from '../../../shared/services/api/user
   templateUrl: './edit-user.html',
   styleUrl: './edit-user.css',
 })
-export class EditUser implements OnInit {
-  form!: FormGroup;
+export class EditUser {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private userApi = inject(UserApiService);
 
-  apiError = '';
-  isSubmitting = false;
+  form: FormGroup;
+  apiError = signal('');
+  isSubmitting = signal(false);
+  userId = signal('');
 
-  // TODO: replace with real user_id from auth/login status
-  private readonly userId = '3';
-
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private userApi: UserApiService
-  ) {}
-
-  ngOnInit(): void {
-    // TODO: Replace with real user data from auth/user service
-    const existingUser = {
-      name: 'Jane Doe',
-      email: 'jane@example.com',
-    };
-
+  constructor() {
     this.form = this.fb.group({
-      name: [
-        existingUser.name,
-        [Validators.required, Validators.minLength(2), Validators.maxLength(80)],
-      ],
-      email: [
-        existingUser.email,
-        [Validators.required, Validators.email, Validators.maxLength(120)],
-      ],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
       newPassword: ['', [Validators.minLength(8)]],
     });
+
+    this.loadUserData();
+  }
+
+  private loadUserData(): void {
+    try {
+      const userString = localStorage.getItem('user');
+      if (!userString) {
+        this.apiError.set('No user found in session');
+        return;
+      }
+
+      const userData = JSON.parse(userString);
+      const userId = String(userData.user_id ?? '');
+      this.userId.set(userId);
+
+      if (!userId) {
+        this.apiError.set('Invalid user data');
+        return;
+      }
+
+      this.userApi.getUserById(userId).subscribe({
+        next: (fullUser: any) => {
+          this.form.patchValue({
+            name: fullUser.username ?? '',
+            email: fullUser.email ?? '',
+          });
+        },
+        error: (err) => {
+          console.error('Failed to fetch user details:', err);
+          this.apiError.set('Failed to load user details');
+        },
+      });
+    } catch (err) {
+      this.apiError.set('Failed to load user data');
+    }
   }
 
   hasError(name: string): boolean {
@@ -55,33 +73,32 @@ export class EditUser implements OnInit {
   }
 
   save(): void {
-    this.apiError = '';
+    this.apiError.set('');
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.apiError = 'Please fix validation errors.';
+      this.apiError.set('Please fix validation errors.');
       return;
     }
 
     const { name, email, newPassword } = this.form.getRawValue();
 
-    // Map UI fields -> endpoint DTO fields (PATCH /users/{id})
     const dto: UpdateUserDTO = {
       username: name,
       email,
       ...(newPassword ? { password: newPassword } : {}),
     };
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true); // UI Updates immediately
 
     this.userApi
-      .updateUser(this.userId, dto)
+      .updateUser(this.userId(), dto)
       .pipe(
         catchError(() => {
-          this.apiError = 'Could not update profile. Please try again.';
+          this.apiError.set('Could not update profile. Please try again.');
           return of(null);
         }),
-        finalize(() => (this.isSubmitting = false))
+        finalize(() => this.isSubmitting.set(false))
       )
       .subscribe((res) => {
         if (res) this.router.navigate(['/account']);

@@ -7,22 +7,12 @@
           <div class="calendar-display__title">
             Calendar Display
           </div>
-        </header>s
+        </header>
 
         <div class="calendar-display__body">
-            <div *ngIf="loading">Loading events…</div>
-            <div *ngIf="errorMessage">{{ errorMessage }}</div>
-
-            <!--FOR TESTING REMOVE LATER-->
-            <div style="font-size:12px; opacity:.8;">
-              CalendarDisplay events.length = {{ events.length }} |
-              viewDate = {{ viewDate | date:'yyyy-MM-dd' }}
-            </div>
-            <!--END OF TESTING REMOVE SECTION-->
-
             <app-calendar-widget
               [viewDate]="viewDate"
-              [events]="events"
+              [events]="calendarEvents()"
               (viewDateChange)="viewDate = $event"
               (eventClicked)="onEventClicked($event)"
             ></app-calendar-widget>

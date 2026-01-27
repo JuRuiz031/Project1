@@ -5,14 +5,14 @@
     <div class="card-body">
       <div class="delete-user__message">
         Are you sure you want to delete your profile
-        <strong>"{{ userName }}"</strong>?
+        <strong>"{{ userName() }}"</strong>?
         <br />
         <span class="text-muted">This action cannot be undone.</span>
       </div>
 
-      @if (apiError) {
+      @if (apiError()) {
         <div class="alert alert-danger mt-3 mb-0">
-          {{ apiError }}
+          {{ apiError() }}
         </div>
       }
     </div>
@@ -22,16 +22,16 @@
         type="button"
         class="btn btn-danger"
         (click)="confirmDelete()"
-        [disabled]="isDeleting"
+        [disabled]="isDeleting()"
       >
-        @if (isDeleting) { Deleting... } @else { Confirm }
+        @if (isDeleting()) { Deleting... } @else { Confirm }
       </button>
 
       <button
         type="button"
         class="btn btn-outline-light"
         (click)="cancelDelete()"
-        [disabled]="isDeleting"
+        [disabled]="isDeleting()"
       >
         Cancel
       </button>

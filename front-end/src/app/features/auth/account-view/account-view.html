@@ -5,19 +5,19 @@
     <div class="card-body">
       <div class="row g-3">
         <div class="col-12">
-          <label class="form-label">Name</label>
-          <input class="form-control app-input" [value]="user.name" disabled />
+          <label class="form-label">Username</label>
+          <input class="form-control app-input" [value]="user().name" disabled />
         </div>
 
         <div class="col-12">
           <label class="form-label">Email</label>
-          <input class="form-control app-input" [value]="user.email" disabled />
+          <input class="form-control app-input" [value]="user().email" disabled />
         </div>
       </div>
 
-      @if (apiError) {
+      @if (apiError()) {
         <div class="alert alert-danger mt-3 mb-0">
-          {{ apiError }}
+          {{ apiError() }}
         </div>
       }
     </div>

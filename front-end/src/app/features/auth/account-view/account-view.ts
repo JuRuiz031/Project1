@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 
 type AccountViewModel = {
   id: string;
@@ -17,17 +18,55 @@ type AccountViewModel = {
   styleUrl: './account-view.css',
 })
 export class AccountView {
-  apiError = '';
+  private router = inject(Router);
+  private userApi = inject(UserApiService);
 
-  // TODO: Replace with real data from an Auth/User service.
-  user: AccountViewModel = {
-    id: 'u-001',
-    name: 'Jane Doe',
-    email: 'jane@example.com',
-    role: 'User',
-  };
+  apiError = signal('');
+  user = signal<AccountViewModel>({
+    id: '',
+    name: '',
+    email: '',
+    role: '',
+  });
 
-  constructor(private router: Router) {}
+  constructor() {
+    this.loadUserData();
+  }
+
+  private loadUserData(): void {
+    try {
+      const userString = localStorage.getItem('user');
+      if (!userString) {
+        this.apiError.set('No user found in session');
+        return;
+      }
+
+      const userData = JSON.parse(userString);
+      const userId = String(userData.user_id ?? '');
+
+      if (!userId) {
+        this.apiError.set('Invalid user data');
+        return;
+      }
+
+      this.userApi.getUserById(userId).subscribe({
+        next: (fullUser: any) => {
+          this.user.set({
+            id: String(fullUser.user_id ?? ''),
+            name: String(fullUser.username ?? ''),
+            email: String(fullUser.email ?? ''),
+            role: String(fullUser.role ?? 'User'),
+          });
+        },
+        error: (err) => {
+          console.error('Failed to fetch user details:', err);
+          this.apiError.set('Failed to load user details');
+        },
+      });
+    } catch (err) {
+      this.apiError.set('Failed to load user data');
+    }
+  }
 
   goToDashboard(): void {
     this.router.navigate(['/dashboard/main-page']);
@@ -38,6 +77,7 @@ export class AccountView {
   }
 
   logOut(): void {
+    localStorage.clear();
     this.router.navigate(['/login']);
   }
 }
