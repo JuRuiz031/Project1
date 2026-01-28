@@ -1,17 +1,18 @@
 import { Component, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-calendar-options',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule],
   templateUrl: './calendar-options.html',
   styleUrl: './calendar-options.css',
 })
 export class CalendarOptions {
-  createCalendar = output<void>();
+  viewCalendars = output<void>();
 
-  onCreateCalendar(): void {
-    this.createCalendar.emit();
+  onViewCalendars(): void {
+    console.log('[CalendarOptions] View Calendars clicked');
+    this.viewCalendars.emit();
   }
 }

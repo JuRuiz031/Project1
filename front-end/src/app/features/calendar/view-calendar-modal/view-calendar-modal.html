@@ -1,0 +1,18 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">View Calendar</h2>
+      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <p><strong>calendarId:</strong> {{ calendarId() }}</p>
+      <p>This is a stub modal. Replace with the real View Calendar UI.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" (click)="onBack()">Back</button>
+      <button class="btn btn-outline-secondary" (click)="onClose()">Close</button>
+    </div>
+  </div>
+</div>

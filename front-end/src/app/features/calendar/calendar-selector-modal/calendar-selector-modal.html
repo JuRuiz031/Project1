@@ -1,1 +1,56 @@
-<p>calendar-selector-modal works!</p>
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">View Calendars</h2>
+      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
+        ✕
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="modal-search">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search calendars..."
+        [(ngModel)]="searchQuery"
+        aria-label="Search calendars"
+      />
+    </div>
+
+    <!-- Calendars List -->
+    <div class="modal-body">
+      @if (filteredCalendars().length === 0) {
+        <div class="no-items">
+          @if (calendars().length === 0) {
+            <p>No calendars available</p>
+          } @else {
+            <p>No calendars match your search</p>
+          }
+        </div>
+      } @else {
+        <div class="items-list">
+          @for (cal of filteredCalendars(); track cal.calendar_id) {
+            <div
+              class="calendar-item"
+              [class.selected]="selectedCalendarId() === cal.calendar_id"
+              (click)="onSelect(cal.calendar_id)"
+              (dblclick)="onActivate(cal.calendar_id)"
+            >
+              <div class="calendar-title">{{ cal.name }}</div>
+              <div class="calendar-subtitle">Double-click to open</div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" (click)="onClose()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

@@ -35,6 +35,25 @@
     </app-create-calendar-modal>
   }
 
+  <!-- Calendar Selector Modal -->
+  @if (modalState() === 'calendar-selector') {
+    <app-calendar-selector-modal
+      [calendars]="calendars()"
+      (calendarActivated)="onCalendarActivated($event)"
+      (closeModal)="closeAllModals()">
+    </app-calendar-selector-modal>
+  }
+
+  <!-- View Calendar Modal (stub for now) -->
+  @if (modalState() === 'view-calendar') {
+    <app-view-calendar-modal
+      [calendarId]="selectedCalendarId()"
+      (back)="onViewCalendarBack()"
+      (close)="closeAllModals()">
+    </app-view-calendar-modal>
+  }
+
+
   <!-- Event Selector Modal -->
   @if (modalState() === 'event-selector') {
     <app-event-selector-modal

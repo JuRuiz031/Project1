@@ -12,6 +12,8 @@ import { CreateEventModal } from '../../event/create-event-modal/create-event-mo
 import { EditEventModal } from '../../event/edit-event-modal/edit-event-modal';
 import { DeleteEventModal } from '../../event/delete-event-modal/delete-event-modal';
 import { CreateCalendarModal } from '../../calendar/create-calendar-modal/create-calendar-modal';
+import { CalendarSelectorModal } from '../../calendar/calendar-selector-modal/calendar-selector-modal';
+import { ViewCalendarModal } from '../../calendar/view-calendar-modal/view-calendar-modal';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
@@ -25,7 +27,9 @@ type ModalState =
   | 'view-event'
   | 'create-event'
   | 'edit-event'
-  | 'delete-event';
+  | 'delete-event'
+  | 'calendar-selector'
+  | 'view-calendar';
 
 @Component({
   selector: 'app-main-page',
@@ -41,6 +45,8 @@ type ModalState =
     EditEventModal,
     DeleteEventModal,
     CreateCalendarModal,
+    CalendarSelectorModal,
+    ViewCalendarModal,
   ],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
@@ -54,6 +60,7 @@ export class MainPageComponent implements OnInit {
   events = signal<any[]>([]);
   polls = signal<any[]>([]);
   selectedCalendarIds = signal<string[]>([]);
+  selectedCalendarId = signal<string | null>(null);
 
   // Modal state machine
   modalState = signal<ModalState>('none');
@@ -190,6 +197,22 @@ export class MainPageComponent implements OnInit {
     }
   }
 
+  openCalendarSelector(): void {
+    console.log('[MainPage] Opening calendar selector modal');
+    this.modalState.set('calendar-selector');
+  }
+
+  onCalendarActivated(calendarId: string): void {
+    console.log('[MainPage] Calendar activated (double-click):', calendarId);
+    this.selectedCalendarId.set(calendarId);
+    this.modalState.set('view-calendar');
+  }
+
+  onViewCalendarBack(): void {
+    console.log('[MainPage] Back from view-calendar');
+    this.modalState.set('calendar-selector');
+  }
+
   /**
    * Open event selector modal
    */
@@ -230,6 +253,7 @@ export class MainPageComponent implements OnInit {
     console.log('[MainPage] Closing all modals');
     this.modalState.set('none');
     this.selectedEventId.set(null);
+    this.selectedCalendarId.set(null);
   }
 
   /**
