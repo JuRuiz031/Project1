@@ -5,7 +5,8 @@
       class="card card--calendar"
       [events]="events()"
       (openEventSelector)="openEventSelector()"
-      (eventClicked)="onEventClicked($event)">
+      (eventClicked)="onEventClicked($event)"
+      (createEvent)="openCreateEvent()">
     </app-calendar-display>
 
     <!-- RIGHT: Side panel stack -->
@@ -37,7 +38,35 @@
     <app-view-event-modal
       [eventId]="selectedEventId()"
       (back)="onViewEventBack()"
-      (close)="closeAllModals()">
+      (close)="closeAllModals()"
+      (editEvent)="openEditEvent(selectedEventId()!)">
     </app-view-event-modal>
+  }
+
+  <!-- Create Event Modal -->
+  @if (modalState() === 'create-event') {
+    <app-create-event-modal
+      (close)="closeAllModals()"
+      (eventCreated)="onEventCreated($event)">
+    </app-create-event-modal>
+  }
+
+  <!-- Edit Event Modal -->
+  @if (modalState() === 'edit-event') {
+    <app-edit-event-modal
+      [eventId]="selectedEventId()!"
+      (close)="closeAllModals()"
+      (eventUpdated)="onEventUpdated($event)"
+      (deleteRequested)="onDeleteRequested($event)">
+    </app-edit-event-modal>
+  }
+
+  <!-- Delete Event Modal -->
+  @if (modalState() === 'delete-event') {
+    <app-delete-event-modal
+      [eventId]="selectedEventId()!"
+      (close)="closeAllModals()"
+      (eventDeleted)="onEventDeleted($event)">
+    </app-delete-event-modal>
   }
 </main>

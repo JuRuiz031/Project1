@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { CalendarService } from '../../../shared/services/calendar.service';
-import { NavigationService } from '../../../shared/services/navigation.service';
-import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
-import { CalendarSummaryDTO } from '../../../shared/models/calendars/calendar-summary.dto';
-import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
+import { InviteService } from '../../../shared/services/invite.service';
 import { EventDTO } from '../../../shared/models/events/event.dto';
+import { isEventInvite } from '../../../shared/models/invites/invite-details-response.dto';
 
-type CalendarOption = { id: string; name: string; isAdmin: boolean };
-
+/**
+ * Guest-only event viewing component
+ * Used when guests click on invite links to view event details
+ * Authenticated users see events in modals instead
+ */
 @Component({
   selector: 'app-view-event',
   standalone: true,
@@ -22,17 +22,12 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 export class ViewEvent implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
-  private calendarService = inject(CalendarService);
-  private navigation = inject(NavigationService);
+  private inviteService = inject(InviteService);
 
-  calendars: CalendarOption[] = [];
   apiError = '';
   isLoading = false;
 
-  private eventId = '';
-
   form = this.fb.group({
-    calendarId: [{ value: '', disabled: true }],
     title: [{ value: '', disabled: true }],
     startDate: [{ value: '', disabled: true }],
     startTime: [{ value: '', disabled: true }],
@@ -45,59 +40,34 @@ export class ViewEvent implements OnInit {
   ngOnInit(): void {
     this.form.disable({ emitEvent: false });
 
-    const id = this.route.snapshot.paramMap.get('eventId');
-    if (!id) {
-      this.apiError = 'Missing event id';
-      return;
+    // Guest-only: expects invite token in query param
+    const token = this.route.snapshot.queryParamMap.get('token');
+
+    if (token) {
+      this.loadEventByToken(token);
+    } else {
+      this.apiError = 'Missing invite token. Please use the invite link provided.';
     }
-    this.eventId = id;
-
-    // Load calendars (for dropdown labels/admin status) + load event
-    this.loadCalendars();
-    this.loadEvent(id);
   }
 
-  get adminCalendars(): CalendarOption[] {
-    return this.calendars.filter(c => c.isAdmin);
-  }
-
-  goBack(): void {
-    this.navigation.goBack();
-  }
-
-  goToEditEvent(): void {
-    this.navigation.goToEditEvent(this.eventId);
-  }
-
-  private loadCalendars(): void {
-    this.calendarService.getHomepage().subscribe({
-      next: (home: CalendarHomeDTO) => {
-        this.calendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
-          id: c.calendar_id,
-          name: c.name,
-          isAdmin: c.is_admin,
-        }));
-      },
-      error: (err) => {
-        // not fatal for viewing an event; only affects dropdown names/admin filtering
-        console.warn('Could not load calendars', err);
-      },
-    });
-  }
-
-  private loadEvent(eventId: string): void {
+  private loadEventByToken(token: string): void {
     this.apiError = '';
     this.isLoading = true;
 
-    this.calendarService.getByEventIds([eventId]).subscribe({
-      next: (res: CalendarFilterResponseDTO) => {
+    // Call the public invite endpoint: GET /api/v1/invitelink?token=xyz
+    this.inviteService.getInviteDetails(token).subscribe({
+      next: (details) => {
         this.isLoading = false;
-        const event = res?.events?.[0];
-        if (!event) {
+        if (!details) {
           this.apiError = 'Event not found';
           return;
         }
-        this.displayEvent(event);
+        // Type guard: ensure this is an event invite, not a poll invite
+        if (isEventInvite(details)) {
+          this.displayEvent(details);
+        } else {
+          this.apiError = 'Invalid event invite link';
+        }
       },
       error: (err) => {
         this.isLoading = false;
@@ -110,13 +80,12 @@ export class ViewEvent implements OnInit {
     });
   }
 
-  displayEvent(event: EventDTO): void {
+  private displayEvent(event: EventDTO): void {
     const start = this.isoToDateTime(event.start_time);
     const end = this.isoToDateTime(event.end_time);
 
     this.form.patchValue(
       {
-        calendarId: event.calendar_id ?? '',
         title: event.title ?? '',
         startDate: start.date,
         startTime: start.time,

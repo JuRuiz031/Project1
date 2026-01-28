@@ -1,8 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, input, output, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
 
+import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { EventService } from '../../../shared/services/event.service';
 import { UpdateEventDTO } from '../../../shared/models/events/update-event.dto';
 
@@ -14,20 +14,24 @@ import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/cale
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
 @Component({
-  selector: 'app-edit-event',
+  selector: 'app-edit-event-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './edit-event.html',
-  styleUrls: ['./edit-event.css'],
+  imports: [CommonModule, ReactiveFormsModule, BaseModal],
+  templateUrl: './edit-event-modal.html',
+  styleUrls: ['./edit-event-modal.css'],
 })
-export class EditEvent implements OnInit {
+export class EditEventModal implements OnInit {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private eventService = inject(EventService);
   private calendarService = inject(CalendarService);
 
-  private eventId = '';
+  // Inputs/Outputs
+  eventId = input.required<string>();
+  close = output<void>();
+  eventUpdated = output<string>(); // emits event ID when updated
+  deleteRequested = output<string>(); // emits event ID to switch to delete modal
+
+  private eventIdValue = '';
 
   calendars: CalendarOption[] = [];
 
@@ -47,12 +51,12 @@ export class EditEvent implements OnInit {
   });
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('eventId');
+    const id = this.eventId();
     if (!id) {
       this.apiError = 'Missing event id';
       return;
     }
-    this.eventId = id;
+    this.eventIdValue = id;
 
     this.loadCalendars();
     this.loadEvent(id);
@@ -170,11 +174,11 @@ export class EditEvent implements OnInit {
 
     this.isSubmitting = true;
 
-    this.eventService.update(this.eventId, dto).subscribe({
+    this.eventService.update(this.eventIdValue, dto).subscribe({
       next: () => {
         this.isSubmitting = false;
-        // better UX: go back to the view page for this event
-        this.router.navigateByUrl(`/view-event/${this.eventId}`);
+        this.eventUpdated.emit(this.eventIdValue);
+        this.close.emit();
       },
       error: (err) => {
         this.isSubmitting = false;
@@ -188,11 +192,11 @@ export class EditEvent implements OnInit {
   }
 
   deleteEvent(): void {
-    this.router.navigateByUrl(`/delete-event/${this.eventId}`);
+    this.deleteRequested.emit(this.eventIdValue);
   }
 
-  cancelEdit(): void {
-    this.router.navigateByUrl(`/view-event/${this.eventId}`);
+  onClose(): void {
+    this.close.emit();
   }
 
   hasError(controlName: string): boolean {

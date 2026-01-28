@@ -1,7 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { CreateEvent } from './create-event';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CreateEventModal } from './create-event-modal';
 import { of, throwError } from 'rxjs';
 
 import { EventService } from '../../../shared/services/event.service';
@@ -10,7 +8,7 @@ import { EventDTO } from '../../../shared/models/events/event.dto';
 
 import { vi } from 'vitest';
 
-describe('CreateEvent', () => {
+describe('CreateEventModal', () => {
   const createdEvent: EventDTO = {
     event_id: 'e123',
     calendar_id: '1',
@@ -33,7 +31,7 @@ describe('CreateEvent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateEvent, RouterTestingModule],
+      imports: [CreateEventModal],
       providers: [{ provide: EventService, useValue: eventServiceStub }],
     }).compileComponents();
 
@@ -47,7 +45,7 @@ describe('CreateEvent', () => {
   });
 
   it('ngOnInit should set default calendarId to first admin calendar', () => {
-    const fixture = TestBed.createComponent(CreateEvent);
+    const fixture = TestBed.createComponent(CreateEventModal);
     const component = fixture.componentInstance;
 
     fixture.detectChanges();
@@ -56,7 +54,7 @@ describe('CreateEvent', () => {
   });
 
   it('submit should NOT call create when form is invalid', () => {
-    const fixture = TestBed.createComponent(CreateEvent);
+    const fixture = TestBed.createComponent(CreateEventModal);
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -70,7 +68,7 @@ describe('CreateEvent', () => {
   it('submit should set apiError when missing user id and NOT call create', () => {
     localStorage.removeItem('user');
 
-    const fixture = TestBed.createComponent(CreateEvent);
+    const fixture = TestBed.createComponent(CreateEventModal);
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -91,7 +89,7 @@ describe('CreateEvent', () => {
   });
 
   it('submit should set apiError when end <= start and NOT call create', () => {
-    const fixture = TestBed.createComponent(CreateEvent);
+    const fixture = TestBed.createComponent(CreateEventModal);
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -111,13 +109,15 @@ describe('CreateEvent', () => {
     expect(component.isSubmitting).toBe(false);
   });
 
-  it('submit should call EventService.create with CreateEventDTO and navigate to view page on success', () => {
-    const fixture = TestBed.createComponent(CreateEvent);
+  it('submit should call EventService.create with CreateEventDTO and emit eventCreated on success', () => {
+    const fixture = TestBed.createComponent(CreateEventModal);
     const component = fixture.componentInstance;
-    const router = TestBed.inject(Router);
     fixture.detectChanges();
 
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
+    const eventCreatedSpy = vi.fn();
+    const closeSpy = vi.fn();
+    component.eventCreated.subscribe(eventCreatedSpy);
+    component.close.subscribe(closeSpy);
 
     component.form.patchValue({
       calendarId: '1',
@@ -147,7 +147,8 @@ describe('CreateEvent', () => {
     expect(dto.start_time).toBe(expectedStartIso);
     expect(dto.end_time).toBe(expectedEndIso);
 
-    expect(navSpy).toHaveBeenCalledWith('/view-event/e123');
+    expect(eventCreatedSpy).toHaveBeenCalledWith('e123');
+    expect(closeSpy).toHaveBeenCalled();
     expect(component.apiError).toBe('');
     expect(component.isSubmitting).toBe(false);
   });
@@ -156,7 +157,7 @@ describe('CreateEvent', () => {
     // ✅ Make the NEXT call fail without rebuilding the TestBed
     createMock.mockReturnValueOnce(throwError(() => ({})));
 
-    const fixture = TestBed.createComponent(CreateEvent);
+    const fixture = TestBed.createComponent(CreateEventModal);
     const component = fixture.componentInstance;
     fixture.detectChanges();
 

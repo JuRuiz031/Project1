@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
 
+import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { EventService } from '../../../shared/services/event.service';
@@ -10,20 +10,22 @@ import { DeleteEventDTO } from '../../../shared/models/events/delete-event.dto';
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
 @Component({
-  selector: 'app-delete-event',
+  selector: 'app-delete-event-modal',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './delete-event.html',
-  styleUrls: ['./delete-event.css'],
+  imports: [CommonModule, BaseModal],
+  templateUrl: './delete-event-modal.html',
+  styleUrls: ['./delete-event-modal.css'],
 })
-export class DeleteEvent implements OnInit {
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+export class DeleteEventModal implements OnInit {
   private calendarService = inject(CalendarService);
   private eventService = inject(EventService);
 
-  // Used for API calls
-  private eventId = '';
+  // Inputs/Outputs
+  eventId = input.required<string>();
+  close = output<void>();
+  eventDeleted = output<string>(); // emits event ID when deleted
+
+  private eventIdValue = '';
   private calendarId = '';
 
   // Display values
@@ -42,12 +44,12 @@ export class DeleteEvent implements OnInit {
   ngOnInit(): void {
     this.apiError = '';
 
-    const id = this.route.snapshot.paramMap.get('eventId');
+    const id = this.eventId();
     if (!id) {
       this.apiError = 'Missing event id';
       return;
     }
-    this.eventId = id;
+    this.eventIdValue = id;
 
     // Load the event so the confirmation message is real
     this.calendarService.getByEventIds([id]).subscribe({
@@ -83,7 +85,7 @@ export class DeleteEvent implements OnInit {
   confirmDelete(): void {
     this.apiError = '';
 
-    if (!this.eventId) {
+    if (!this.eventIdValue) {
       this.apiError = 'Missing event id';
       return;
     }
@@ -106,7 +108,7 @@ export class DeleteEvent implements OnInit {
 
     this.isDeleting = true;
 
-    this.eventService.delete(this.eventId, dto).subscribe({
+    this.eventService.delete(this.eventIdValue, dto).subscribe({
       next: (deleted: boolean) => {
         this.isDeleting = false;
 
@@ -115,7 +117,8 @@ export class DeleteEvent implements OnInit {
           return;
         }
 
-        this.router.navigateByUrl('/main-page');
+        this.eventDeleted.emit(this.eventIdValue);
+        this.close.emit();
       },
       error: (err) => {
         this.isDeleting = false;
@@ -128,8 +131,7 @@ export class DeleteEvent implements OnInit {
     });
   }
 
-  cancel(): void {
-    // keep it simple; if you have /edit-event/:eventId route you can change this later
-    this.router.navigateByUrl('/edit-event');
+  onClose(): void {
+    this.close.emit();
   }
 }

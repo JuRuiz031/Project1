@@ -1,7 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { EditEvent } from './edit-event';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute, Router } from '@angular/router';
+import { EditEventModal } from './edit-event-modal';
 import { of, throwError } from 'rxjs';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
@@ -9,7 +7,7 @@ import { EventService } from '../../../shared/services/event.service';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
 
-describe('EditEvent', () => {
+describe('EditEventModal', () => {
   const mockEvent: EventDTO = {
     event_id: 'e1',
     calendar_id: '2',
@@ -19,14 +17,6 @@ describe('EditEvent', () => {
     description: 'Loaded desc',
     notes: 'Loaded notes',
     tags: ['work'],
-  };
-
-  const activatedRouteStub = {
-    snapshot: {
-      paramMap: {
-        get: (key: string) => (key === 'eventId' ? 'e1' : null),
-      },
-    },
   };
 
   const calendarServiceStub = {
@@ -46,9 +36,8 @@ describe('EditEvent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [EditEvent, RouterTestingModule],
+      imports: [EditEventModal],
       providers: [
-        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: CalendarService, useValue: calendarServiceStub },
         { provide: EventService, useValue: eventServiceStub },
       ],
@@ -57,7 +46,7 @@ describe('EditEvent', () => {
 
 
   it('ngOnInit should load the event via CalendarService and populate the form', () => {
-    const fixture = TestBed.createComponent(EditEvent);
+    const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
     fixture.detectChanges(); // triggers ngOnInit
@@ -82,7 +71,7 @@ describe('EditEvent', () => {
       useValue: { getByEventIds: () => of<CalendarFilterResponseDTO>({ events: [] }) },
     });
 
-    const fixture = TestBed.createComponent(EditEvent);
+    const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
     fixture.detectChanges();
@@ -95,7 +84,7 @@ describe('EditEvent', () => {
       useValue: { getByEventIds: () => throwError(() => new Error('boom')) },
     });
 
-    const fixture = TestBed.createComponent(EditEvent);
+    const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
     fixture.detectChanges();
@@ -103,16 +92,18 @@ describe('EditEvent', () => {
     expect(component.apiError).toBe('Could not load event');
   });
 
-  it('saveChanges should call EventService.update and navigate to /main-page on success', () => {
-    const fixture = TestBed.createComponent(EditEvent);
+  it('saveChanges should call EventService.update and emit eventUpdated on success', () => {
+    const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
-    const router = TestBed.inject(Router);
     const eventService = TestBed.inject(EventService) as any;
 
     fixture.detectChanges(); // ensures eventId is set from route & form populated
 
     const updateSpy = vi.spyOn(eventService, 'update').mockReturnValue(of(mockEvent));
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
+    const eventUpdatedSpy = vi.fn();
+    const closeSpy = vi.fn();
+    component.eventUpdated.subscribe(eventUpdatedSpy);
+    component.close.subscribe(closeSpy);
 
     component.form.patchValue({
       calendarId: '2',
@@ -154,11 +145,12 @@ describe('EditEvent', () => {
     expect(dto.end_time).toBe(expectedEndIso);
 
 
-    expect(navSpy).toHaveBeenCalledWith('/main-page');
+    expect(eventUpdatedSpy).toHaveBeenCalledWith('e1');
+    expect(closeSpy).toHaveBeenCalled();
   });
 
   it('saveChanges should set apiError and NOT call update when end <= start', () => {
-    const fixture = TestBed.createComponent(EditEvent);
+    const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
     fixture.detectChanges();

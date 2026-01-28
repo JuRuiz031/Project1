@@ -36,6 +36,7 @@ export class ViewEventModal implements OnDestroy {
   eventId = input<string | null>(null);
   back = output<void>();
   close = output<void>();
+  editEvent = output<string>();  // Emit eventId when user wants to edit
 
   // State
   calendars = signal<CalendarOption[]>([]);
@@ -146,7 +147,9 @@ export class ViewEventModal implements OnDestroy {
   }
 
   onEditEvent(): void {
-    // TODO: emit edit event or navigate to edit modal
-    console.log('[ViewEventModal] Edit event clicked');
+    const id = this.eventId();
+    if (id) {
+      this.editEvent.emit(id);
+    }
   }
 }

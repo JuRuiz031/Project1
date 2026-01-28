@@ -1,8 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 
+import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { EventService } from '../../../shared/services/event.service';
 import { CalendarService } from '../../../shared/services/calendar.service';
 
@@ -15,19 +15,23 @@ import { CalendarSummaryDTO } from '../../../shared/models/calendars/calendar-su
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
 @Component({
-  selector: 'app-create-event',
+  selector: 'app-create-event-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './create-event.html',
-  styleUrls: ['./create-event.css'],
+  imports: [CommonModule, ReactiveFormsModule, BaseModal],
+  templateUrl: './create-event-modal.html',
+  styleUrls: ['./create-event-modal.css'],
 })
-export class CreateEvent implements OnInit {
+export class CreateEventModal implements OnInit {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private eventService = inject(EventService);
   private calendarService = inject(CalendarService);
 
+  // Outputs
+  close = output<void>();
+  eventCreated = output<string>(); // emits event ID when created
+
   calendars: CalendarOption[] = [];
+  adminCalendars: CalendarOption[] = [];
 
   apiError = '';
   isSubmitting = false;
@@ -45,13 +49,7 @@ export class CreateEvent implements OnInit {
   });
 
   ngOnInit(): void {
-    // const firstAdmin = this.calendars.find(c => c.isAdmin);
-    // if (firstAdmin) this.form.patchValue({ calendarId: firstAdmin.id });
     this.loadCalendars();
-  }
-
-  get adminCalendars(): CalendarOption[] {
-    return this.calendars.filter(c => c.isAdmin);
   }
 
   private loadCalendars(): void {
@@ -68,8 +66,11 @@ export class CreateEvent implements OnInit {
           isAdmin: c.is_admin,
         }));
 
+        // Cache admin calendars to avoid expression changed error
+        this.adminCalendars = this.calendars.filter(c => c.isAdmin);
+
         // pick default: first admin if possible, else first calendar
-        const firstAdmin = this.calendars.find(c => c.isAdmin);
+        const firstAdmin = this.adminCalendars[0];
         const firstAny = this.calendars[0];
         const selected = firstAdmin ?? firstAny;
 
@@ -157,7 +158,8 @@ export class CreateEvent implements OnInit {
     this.eventService.create(dto).subscribe({
       next: (created: EventDTO) => {
         this.isSubmitting = false;
-        this.router.navigateByUrl(`/view-event/${created.event_id}`);
+        this.eventCreated.emit(created.event_id);
+        this.close.emit();
       },
       error: (err) => {
         this.isSubmitting = false;
@@ -175,7 +177,7 @@ export class CreateEvent implements OnInit {
     return !!c && c.touched && c.invalid;
   }
 
-  cancel(): void {
-    this.router.navigateByUrl('/main-page');
+  onClose(): void {
+    this.close.emit();
   }
 }

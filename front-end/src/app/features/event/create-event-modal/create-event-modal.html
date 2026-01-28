@@ -1,0 +1,141 @@
+<app-base-modal 
+  [title]="'Create Event'" 
+  (close)="onClose()">
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <!-- API error -->
+    @if (apiError) {
+      <div class="alert alert-danger mb-3">
+        {{ apiError }}
+      </div>
+    }
+
+    <!-- Loading calendars -->
+    @if (isLoadingCalendars) {
+      <div class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading calendars...</span>
+        </div>
+      </div>
+    } @else {
+      <!-- Calendar dropdown -->
+      <div class="mb-3">
+        <label class="form-label">Calendar (admin only)</label>
+        <select
+          class="form-select app-select"
+          formControlName="calendarId"
+          [ngClass]="{ 'is-invalid': hasError('calendarId') }"
+        >
+          <option value="" disabled>Select calendar (admin only)</option>
+          @for (c of adminCalendars; track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
+        </select>
+        <div class="invalid-feedback">Please select an admin calendar.</div>
+      </div>
+
+      <!-- Title -->
+      <div class="mb-3">
+        <label class="form-label">Event Title</label>
+        <input
+          type="text"
+          class="form-control app-input"
+          placeholder="Event Title"
+          formControlName="title"
+          [ngClass]="{ 'is-invalid': hasError('title') }"
+        />
+        <div class="invalid-feedback">Title is required (min 2 chars).</div>
+      </div>
+
+      <!-- Dates / times -->
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Start date</label>
+          <input
+            type="date"
+            class="form-control app-input"
+            formControlName="startDate"
+            [ngClass]="{ 'is-invalid': hasError('startDate') }"
+          />
+          <div class="invalid-feedback">Start date required.</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Start time</label>
+          <input
+            type="time"
+            class="form-control app-input"
+            formControlName="startTime"
+            [ngClass]="{ 'is-invalid': hasError('startTime') }"
+          />
+          <div class="invalid-feedback">Start time required.</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">End date</label>
+          <input
+            type="date"
+            class="form-control app-input"
+            formControlName="endDate"
+            [ngClass]="{ 'is-invalid': hasError('endDate') }"
+          />
+          <div class="invalid-feedback">End date required.</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">End time</label>
+          <input
+            type="time"
+            class="form-control app-input"
+            formControlName="endTime"
+            [ngClass]="{ 'is-invalid': hasError('endTime') }"
+          />
+          <div class="invalid-feedback">End time required.</div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="mt-3 mb-3">
+        <label class="form-label">Description</label>
+        <textarea
+          rows="4"
+          class="form-control app-textarea"
+          placeholder="Description"
+          formControlName="description"
+        ></textarea>
+      </div>
+
+      <!-- Notes -->
+      <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <textarea
+          rows="4"
+          class="form-control app-textarea"
+          placeholder="Notes"
+          formControlName="notes"
+        ></textarea>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="onClose()"
+          [disabled]="isSubmitting"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isSubmitting || form.invalid"
+        >
+          {{ isSubmitting ? 'Creating...' : 'Create Event' }}
+        </button>
+      </div>
+    }
+  </form>
+
+</app-base-modal>

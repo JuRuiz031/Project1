@@ -8,18 +8,21 @@ import { DisplayOptions } from './components/display-options/display-options';
 import { PollsWindow } from './components/polls-window/polls-window';
 import { EventSelectorModal } from './components/event-selector-modal/event-selector-modal';
 import { ViewEventModal } from '../../event/view-event-modal/view-event-modal';
+import { CreateEventModal } from '../../event/create-event-modal/create-event-modal';
+import { EditEventModal } from '../../event/edit-event-modal/edit-event-modal';
+import { DeleteEventModal } from '../../event/delete-event-modal/delete-event-modal';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 type CalendarOptionDTO = { calendar_id: string; name: string };
-type ModalState = 'none' | 'event-selector' | 'view-event';
+type ModalState = 'none' | 'event-selector' | 'view-event' | 'create-event' | 'edit-event' | 'delete-event';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CalendarDisplay, CalendarOptions, DisplayOptions, PollsWindow, EventSelectorModal, ViewEventModal],
+  imports: [CalendarDisplay, CalendarOptions, DisplayOptions, PollsWindow, EventSelectorModal, ViewEventModal, CreateEventModal, EditEventModal, DeleteEventModal],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
 })
@@ -188,5 +191,73 @@ export class MainPageComponent implements OnInit {
     console.log('[MainPage] Closing all modals');
     this.modalState.set('none');
     this.selectedEventId.set(null);
+  }
+
+  /**
+   * Open create event modal
+   */
+  openCreateEvent(): void {
+    console.log('[MainPage] Opening create event modal');
+    this.modalState.set('create-event');
+  }
+
+  /**
+   * Open edit event modal
+   */
+  openEditEvent(eventId: string): void {
+    console.log('[MainPage] Opening edit event modal:', eventId);
+    this.selectedEventId.set(eventId);
+    this.modalState.set('edit-event');
+  }
+
+  /**
+   * Open delete event modal
+   */
+  openDeleteEvent(eventId: string): void {
+    console.log('[MainPage] Opening delete event modal:', eventId);
+    this.selectedEventId.set(eventId);
+    this.modalState.set('delete-event');
+  }
+
+  /**
+   * Handle event created - refresh and close
+   */
+  onEventCreated(eventId: string): void {
+    console.log('[MainPage] Event created:', eventId);
+    this.refreshEvents();
+  }
+
+  /**
+   * Handle event updated - refresh and close
+   */
+  onEventUpdated(eventId: string): void {
+    console.log('[MainPage] Event updated:', eventId);
+    this.refreshEvents();
+  }
+
+  /**
+   * Handle event deleted - refresh and close
+   */
+  onEventDeleted(eventId: string): void {
+    console.log('[MainPage] Event deleted:', eventId);
+    this.refreshEvents();
+  }
+
+  /**
+   * Handle delete requested from edit modal
+   */
+  onDeleteRequested(eventId: string): void {
+    console.log('[MainPage] Delete requested from edit modal:', eventId);
+    this.openDeleteEvent(eventId);
+  }
+
+  /**
+   * Refresh events by triggering the effect that loads events
+   */
+  private refreshEvents(): void {
+    console.log('[MainPage] Refreshing events...');
+    // Trigger the effect by re-setting the selected calendar IDs
+    const currentIds = this.selectedCalendarIds();
+    this.selectedCalendarIds.set([...currentIds]);
   }
 }

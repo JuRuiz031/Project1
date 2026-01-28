@@ -14,7 +14,7 @@ export class NavigationService {
   private location = inject(Location);
 
   // Navigate to any route with optional query parameters
-  // example: this.navigation.navigateTo(['/view-event', eventId]
+  // example: this.navigation.navigateTo(['/edit-event', eventId])
   navigateTo(route: string | string[], queryParams?: any): void {
     if (Array.isArray(route)) {
       this.router.navigate(route, { queryParams });
@@ -57,20 +57,6 @@ export class NavigationService {
   // Navigate to delete user account page
   goToDeleteUser(): void {
     this.navigateTo('/delete-user');
-  }
-
-  // Navigate to view a specific event by ID
-  goToViewEvent(eventId: string): void {
-    this.navigateTo(['/view-event', eventId]);
-  }
-
-  // Navigate to edit event page (with optional eventId for pre-filled editing)
-  goToEditEvent(eventId?: string): void {
-    if (eventId) {
-      this.navigateTo(['/edit-event', eventId]);
-    } else {
-      this.navigateTo('/edit-event');
-    }
   }
 }
 

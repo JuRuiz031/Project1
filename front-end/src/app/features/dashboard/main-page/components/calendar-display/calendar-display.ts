@@ -20,7 +20,7 @@ type EventDTO = {
 @Component({
   selector: 'app-calendar-display',
   standalone: true,
-  imports: [CommonModule, RouterLink, CalendarWidget],
+  imports: [CommonModule, CalendarWidget],
   templateUrl: './calendar-display.html',
   styleUrl: './calendar-display.css',
 })
@@ -30,6 +30,7 @@ export class CalendarDisplay implements OnInit {
   events = input<EventDTO[]>([]);
   openEventSelector = output<void>();
   eventClicked = output<string>();  // Emit event ID when user clicks on event
+  createEvent = output<void>();  // Emit when user wants to create event
 
   private calendarColorMap = new Map<string, { primary: string; secondary: string }>();
   private readonly STORAGE_KEY = 'calendar_view_date';

@@ -1,37 +1,27 @@
 <div class="container py-4 app-page">
-  <h1 class="h3 mb-3">View Event</h1>
+  <h1 class="h3 mb-3">Event Details</h1>
 
   <div class="card app-card shadow-sm">
     <div class="card-body">
-      @if (apiError(); as err) {
+      @if (apiError) {
         <div class="alert alert-danger mb-3">
-          {{ err }}
+          {{ apiError }}
         </div>
       }
 
-      @if (event(); as e) {
-        <div>
-          <!-- Calendar dropdown -->
-          <div class="mb-3">
-            <label class="form-label">Calendar</label>
-            <select class="form-select app-select" disabled>
-              <option value="" disabled>Select calendar</option>
-              @for (c of adminCalendars(); track c.id) {
-                <option [value]="c.id" [selected]="c.id === e.calendarId">
-                  {{ c.name }}
-                </option>
-              }
-            </select>
-          </div>
+      @if (isLoading) {
+        <div class="alert alert-info">Loading event...</div>
+      }
 
+      @if (!isLoading && !apiError) {
+        <div [formGroup]="form">
           <!-- Title -->
           <div class="mb-3">
             <label class="form-label">Event Title</label>
             <input
               type="text"
               class="form-control app-input"
-              [value]="e.title"
-              disabled
+              formControlName="title"
             />
           </div>
 
@@ -42,8 +32,7 @@
               <input
                 type="date"
                 class="form-control app-input"
-                [value]="e.startDate"
-                disabled
+                formControlName="startDate"
               />
             </div>
 
@@ -52,8 +41,7 @@
               <input
                 type="time"
                 class="form-control app-input"
-                [value]="e.startTime"
-                disabled
+                formControlName="startTime"
               />
             </div>
 
@@ -62,8 +50,7 @@
               <input
                 type="date"
                 class="form-control app-input"
-                [value]="e.endDate"
-                disabled
+                formControlName="endDate"
               />
             </div>
 
@@ -72,8 +59,7 @@
               <input
                 type="time"
                 class="form-control app-input"
-                [value]="e.endTime"
-                disabled
+                formControlName="endTime"
               />
             </div>
           </div>
@@ -84,8 +70,8 @@
             <textarea
               rows="4"
               class="form-control app-textarea"
-              disabled
-            >{{ e.description }}</textarea>
+              formControlName="description"
+            ></textarea>
           </div>
 
           <!-- Notes -->
@@ -94,22 +80,10 @@
             <textarea
               rows="4"
               class="form-control app-textarea"
-              disabled
-            >{{ e.notes }}</textarea>
+              formControlName="notes"
+            ></textarea>
           </div>
         </div>
-      }
-    </div>
-
-    <div class="card-footer d-flex justify-content-end gap-2">
-      <!-- Back -->
-      <button class="btn btn-outline-light" (click)="goBack()">Back</button>
-
-      <!-- Edit (only if user has admin access to this calendar) -->
-      @if (canEdit()) {
-        <button class="btn btn-primary" (click)="goToEditEvent()">Edit Event</button>
-      } @else {
-        <button class="btn btn-primary" disabled title="You don't have permission to edit this event">Edit Event</button>
       }
     </div>
   </div>
