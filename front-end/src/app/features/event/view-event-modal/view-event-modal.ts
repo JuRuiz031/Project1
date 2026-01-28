@@ -1,11 +1,10 @@
 import { Component, input, output, signal, computed, effect, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
 import { CalendarService } from '../../../shared/services/calendar.service';
-import { InviteService } from '../../../shared/services/invite.service';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
@@ -33,24 +32,19 @@ type EventDisplay = {
 export class ViewEventModal implements OnDestroy {
   private calendarApi = inject(CalendarApiService);
   private calendarService = inject(CalendarService);
-  private inviteService = inject(InviteService);
 
   // Inputs & Outputs
   eventId = input<string | null>(null);
-  showSuccessMessage = input<boolean>(false);
   back = output<void>();
   close = output<void>();
   editEvent = output<string>();
+  showSuccessMessage = input<boolean>(false);
 
   // State
   calendars = signal<CalendarOption[]>([]);
   apiError = signal('');
   event = signal<EventDisplay | null>(null);
   showNotification = signal(false);
-  showSharePopup = signal(false);
-  shareLink = signal('');
-  isGeneratingLink = signal(false);
-  shareLinkError = signal('');
 
   // Computed
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
@@ -69,15 +63,12 @@ export class ViewEventModal implements OnDestroy {
         this.loadCalendars();
         this.loadEvent(id);
       }
-    });
-
-    // Show success notification when triggered
-    effect(() => {
-      if (this.showSuccessMessage()) {
+      
+      // Show notification if success message is true
+      const showSuccess = this.showSuccessMessage();
+      if (showSuccess) {
         this.showNotification.set(true);
-        setTimeout(() => {
-          this.showNotification.set(false);
-        }, 3000);
+        setTimeout(() => this.showNotification.set(false), 3000);
       }
     });
   }
@@ -90,6 +81,7 @@ export class ViewEventModal implements OnDestroy {
     this.calendarService
       .getHomepage()
       .pipe(
+        take(1),
         map((home: CalendarHomeDTO) => this.mapCalendars(home.calendars ?? [])),
         tap(calendars => console.log('[ViewEventModal] Calendars loaded:', calendars)),
         catchError(err => {
@@ -108,6 +100,7 @@ export class ViewEventModal implements OnDestroy {
     this.calendarApi
       .getByEventIds([eventId])
       .pipe(
+        take(1),
         map((res: CalendarFilterResponseDTO) => res?.events?.[0]),
         tap(ev => {
           if (!ev) this.apiError.set('Event not found');
@@ -152,7 +145,6 @@ export class ViewEventModal implements OnDestroy {
     });
   }
 
-  // ✅ SAME FIX AS YOUR OLD view-event.ts
   private parseServerInstant(iso: string): Date {
     // If server includes timezone (Z or ±hh:mm), Date can parse safely.
     // If not, assume server meant UTC and append 'Z'.
@@ -160,7 +152,6 @@ export class ViewEventModal implements OnDestroy {
     return new Date(hasTz ? iso : `${iso}Z`);
   }
 
-  // ✅ ISO -> Local date/time for display
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
 
@@ -174,14 +165,35 @@ export class ViewEventModal implements OnDestroy {
     return { date, time };
   }
 
-  /**
-   * Get user's timezone abbreviation (e.g., EST, PST, UTC)
-   */
   getTimezoneAbbr(): string {
-    const timezoneName = new Date().toLocaleDateString('en-US', { 
-      timeZoneName: 'short' 
-    }).split(', ')[1];
-    return timezoneName || 'Local';
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZoneName: 'short',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const parts = formatter.formatToParts(now);
+    const tzPart = parts.find(p => p.type === 'timeZoneName');
+    return tzPart?.value ?? 'UTC';
+  }
+
+  onShare(): void {
+    const event = this.event();
+    if (!event) return;
+
+    const shareText = `Event: ${event.title}\nDate: ${event.startDate} ${event.startTime} - ${event.endDate} ${event.endTime}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: event.title,
+        text: shareText,
+      }).catch(err => console.error('Share failed:', err));
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareText).then(() => {
+        this.showNotification.set(true);
+        setTimeout(() => this.showNotification.set(false), 2000);
+      });
+    }
   }
 
   onBack(): void {
@@ -196,47 +208,4 @@ export class ViewEventModal implements OnDestroy {
     const id = this.eventId();
     if (id) this.editEvent.emit(id);
   }
-  onShare(): void {
-    const id = this.eventId();
-    if (!id) return;
-
-    this.showSharePopup.set(true);
-    this.isGeneratingLink.set(true);
-    this.shareLinkError.set('');
-
-    // Generate invite link (expires in 7 days by default)
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 7);
-
-    this.inviteService.createEventInvite(id, expirationDate.toISOString()).subscribe({
-      next: (response) => {
-        this.isGeneratingLink.set(false);
-        this.shareLink.set(response.invite_link);
-      },
-      error: (err) => {
-        this.isGeneratingLink.set(false);
-        this.shareLinkError.set(
-          err?.error?.message ||
-          (typeof err?.error === 'string' ? err.error : '') ||
-          err?.message ||
-          'Failed to generate share link'
-        );
-      },
-    });
-  }
-
-  closeSharePopup(): void {
-    this.showSharePopup.set(false);
-    this.shareLink.set('');
-    this.shareLinkError.set('');
-  }
-
-  copyShareLink(): void {
-    const link = this.shareLink();
-    if (link) {
-      navigator.clipboard.writeText(link).then(() => {
-        // Could add a temporary "Copied!" message here if desired
-        console.log('Link copied to clipboard');
-      });
-    }
-  }}
+}

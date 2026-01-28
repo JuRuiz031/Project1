@@ -17,7 +17,7 @@
       <!-- Calendar dropdown -->
       <div class="mb-3">
         <label class="form-label">Calendar (admin only)</label>
-        <select class="form-select app-select" formControlName="calendarId" [ngClass]="{ 'is-invalid': hasError('calendarId') }">
+        <select class="form-select app-select" formControlName="calendarId" [class.is-invalid]="hasError('calendarId')">
           <option value="" disabled>Select calendar (admin only)</option>
           @for (c of adminCalendars(); track c.id) {
             <option [value]="c.id">{{ c.name }}</option>
@@ -29,7 +29,7 @@
       <!-- Title -->
       <div class="mb-3">
         <label class="form-label">Event Title</label>
-        <input type="text" class="form-control app-input" placeholder="Event Title" formControlName="title" [ngClass]="{ 'is-invalid': hasError('title') }" />
+        <input type="text" class="form-control app-input" placeholder="Event Title" formControlName="title" [class.is-invalid]="hasError('title')" />
         <div class="invalid-feedback">Title is required (min 2 chars).</div>
       </div>
 
@@ -37,22 +37,22 @@
       <div class="row g-3">
         <div class="col-12 col-md-6">
           <label class="form-label">Start date</label>
-          <input type="date" class="form-control app-input" formControlName="startDate" [ngClass]="{ 'is-invalid': hasError('startDate') }" />
+          <input type="date" class="form-control app-input" formControlName="startDate" [class.is-invalid]="hasError('startDate')" />
           <div class="invalid-feedback">Start date required.</div>
         </div>
         <div class="col-12 col-md-6">
           <label class="form-label">Start time ({{ getTimezoneAbbr() }})</label>
-          <input type="time" class="form-control app-input" formControlName="startTime" [ngClass]="{ 'is-invalid': hasError('startTime') }" />
+          <input type="time" class="form-control app-input" formControlName="startTime" [class.is-invalid]="hasError('startTime')" />
           <div class="invalid-feedback">Start time required.</div>
         </div>
         <div class="col-12 col-md-6">
           <label class="form-label">End date</label>
-          <input type="date" class="form-control app-input" formControlName="endDate" [ngClass]="{ 'is-invalid': hasError('endDate') }" />
+          <input type="date" class="form-control app-input" formControlName="endDate" [class.is-invalid]="hasError('endDate')" />
           <div class="invalid-feedback">End date required.</div>
         </div>
         <div class="col-12 col-md-6">
           <label class="form-label">End time ({{ getTimezoneAbbr() }})</label>
-          <input type="time" class="form-control app-input" formControlName="endTime" [ngClass]="{ 'is-invalid': hasError('endTime') }" />
+          <input type="time" class="form-control app-input" formControlName="endTime" [class.is-invalid]="hasError('endTime')" />
           <div class="invalid-feedback">End time required.</div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { Component, OnInit, output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { take } from 'rxjs/operators';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { EventService } from '../../../shared/services/event.service';
@@ -59,7 +60,9 @@ export class CreateEventModal implements OnInit {
   private loadCalendars(): void {
     this.apiError.set('');
 
-    this.calendarService.getHomepage().subscribe({
+    this.calendarService.getHomepage()
+      .pipe(take(1))
+      .subscribe({
       next: (home: CalendarHomeDTO) => {
         this.isLoadingCalendars.set(false);
 
@@ -168,7 +171,9 @@ export class CreateEventModal implements OnInit {
 
     this.isSubmitting.set(true);
 
-    this.eventService.create(dto).subscribe({
+    this.eventService.create(dto)
+      .pipe(take(1))
+      .subscribe({
       next: (created: EventDTO) => {
         this.isSubmitting.set(false);
         this.eventCreated.emit(created.event_id);

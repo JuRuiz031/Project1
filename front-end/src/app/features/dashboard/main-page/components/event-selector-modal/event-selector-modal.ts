@@ -177,9 +177,13 @@ export class EventSelectorModal implements OnDestroy {
    * Get user's timezone abbreviation (e.g., EST, PST, UTC)
    */
   getTimezoneAbbr(): string {
-    const timezoneName = new Date().toLocaleDateString('en-US', { 
-      timeZoneName: 'short' 
-    }).split(', ')[1];
-    return timezoneName || 'Local';
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZoneName: 'short',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const parts = formatter.formatToParts(now);
+    const tzPart = parts.find(p => p.type === 'timeZoneName');
+    return tzPart?.value ?? 'UTC';
   }
 }
