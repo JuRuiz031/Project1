@@ -95,8 +95,9 @@ public class InviteService {
     // get event or poll by invite token
     public CalendarItemResponseDTO getCalendarItemByToken(String token) {
         // Check events for the token
-        Event event = eventRepository.findByInviteLinksToken(token).get();
-        if (event != null) {
+        java.util.Optional<Event> eventOpt = eventRepository.findByInviteLinksToken(token);
+        if (eventOpt.isPresent()) {
+            Event event = eventOpt.get();
             // Verify token is not expired
             event.getInviteLinks().stream()
                 .filter(link -> link.getToken().equals(token))
@@ -121,8 +122,9 @@ public class InviteService {
         }
 
         // Check polls for the token
-        Poll poll = pollRepository.findByInviteLinksToken(token).get();
-        if (poll != null) {
+        java.util.Optional<Poll> pollOpt = pollRepository.findByInviteLinksToken(token);
+        if (pollOpt.isPresent()) {
+            Poll poll = pollOpt.get();
             // Verify token is not expired
             poll.getInviteLinks().stream()
                 .filter(link -> link.getToken().equals(token))
