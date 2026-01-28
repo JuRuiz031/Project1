@@ -1,120 +1,136 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
+
 import { DeleteUser } from './delete-user';
-
-class RouterStub {
-  calls: string[] = [];
-  navigateByUrl(url: string): Promise<boolean> | boolean {
-    this.calls.push(url);
-    return true;
-  }
-}
-
-type InitState = Partial<Pick<DeleteUser, 'userName' | 'apiError' | 'isDeleting'>>;
-
-async function create(init: InitState = {}): Promise<{
-  fixture: ComponentFixture<DeleteUser>;
-  component: DeleteUser;
-  router: RouterStub;
-}> {
-  const router = new RouterStub();
-
-  await TestBed.configureTestingModule({
-    imports: [DeleteUser],
-    providers: [{ provide: Router, useValue: router }],
-  }).compileComponents();
-
-  const fixture = TestBed.createComponent(DeleteUser);
-  const component = fixture.componentInstance;
-
-  // ✅ Set bound state BEFORE first render
-  Object.assign(component, init);
-
-  fixture.detectChanges();
-  await fixture.whenStable();
-  fixture.detectChanges();
-
-  return { fixture, component, router };
-}
+import { Router } from '@angular/router';
+import { UserApiService } from '../../../shared/services/api/user-api.service';
 
 describe('DeleteUser', () => {
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.clearAllTimers(); // important: prevent timer leakage across tests
-    TestBed.resetTestingModule();
+  let fixture: ComponentFixture<DeleteUser>;
+  let component: DeleteUser;
+
+  const routerMock = {
+    navigateByUrl: vi.fn(),
+  };
+
+  const userApiMock = {
+    deleteUser: vi.fn(),
+  };
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    localStorage.clear();
+
+    await TestBed.configureTestingModule({
+      imports: [DeleteUser],
+      providers: [
+        { provide: Router, useValue: routerMock },
+        { provide: UserApiService, useValue: userApiMock },
+      ],
+    }).compileComponents();
   });
 
-  it('should create', async () => {
-    const { component } = await create();
+  function createComponentWithUser(user: any) {
+    localStorage.setItem('user', JSON.stringify(user));
+    fixture = TestBed.createComponent(DeleteUser);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }
+
+  it('should create', () => {
+    createComponentWithUser({ user_id: 'u-1', username: 'Alice' });
     expect(component).toBeTruthy();
   });
 
-  it('should render the page title and username', async () => {
-    const { fixture } = await create({ userName: 'Alice' });
+  it('should load userName and userId from localStorage on construction', () => {
+    createComponentWithUser({ user_id: 'u-999', username: 'Alice' });
 
-    const h1 = fixture.debugElement.query(By.css('h1'))?.nativeElement as HTMLElement;
-    expect(h1?.textContent).toContain('Delete Profile');
-
-    const message = fixture.debugElement.query(By.css('.delete-user__message'))?.nativeElement as HTMLElement;
-    expect(message?.textContent).toContain('Alice');
-    expect(message?.textContent).toContain('cannot be undone');
+    expect(component.userId()).toBe('u-999');
+    expect(component.userName()).toBe('Alice');
+    expect(component.apiError()).toBe('');
   });
 
-  it('should NOT show the error alert when apiError is empty', async () => {
-    const { fixture } = await create({ apiError: '' });
+  it('should show "No user found in session" when localStorage has no user', () => {
+    // no localStorage user set
+    fixture = TestBed.createComponent(DeleteUser);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
 
-    const alert = fixture.debugElement.query(By.css('.alert.alert-danger'));
-    expect(alert).toBeNull();
+    expect(component.apiError()).toBe('No user found in session');
+
+    const alertEl = fixture.debugElement.query(By.css('.alert.alert-danger'));
+    expect(alertEl).not.toBeNull();
+    expect(alertEl.nativeElement.textContent).toContain('No user found in session');
   });
 
-  it('should show the error alert when apiError is set', async () => {
-    const { fixture } = await create({ apiError: 'Something went wrong' });
+  it('should render the username in the confirmation message', () => {
+    createComponentWithUser({ user_id: 'u-2', username: 'Ben' });
 
-    const alert = fixture.debugElement.query(By.css('.alert.alert-danger'))?.nativeElement as HTMLElement;
-    expect(alert).toBeTruthy();
-    expect(alert.textContent).toContain('Something went wrong');
+    const strongEl = fixture.debugElement.query(By.css('.delete-user__message strong'));
+    expect(strongEl).not.toBeNull();
+    expect(strongEl.nativeElement.textContent).toContain('"Ben"');
   });
 
-  it('cancelDelete() should navigate to /edit-user', async () => {
-      const { component, router } = await create();
+  it('confirmDelete should call deleteUser with userId and navigate to /login on success', () => {
+    createComponentWithUser({ user_id: 'u-123', username: 'Alice' });
 
-      component.cancelDelete();
+    // Keep a key to verify localStorage.clear() happened
+    localStorage.setItem('extra', 'value');
 
-      expect(router.calls).toContain('/edit-user');
-    });
-
-    it('confirmDelete() should set isDeleting, clear apiError, then navigate to /login after 400ms', async () => {
-    vi.useFakeTimers();
-
-    const { component, router } = await create({ apiError: 'Old error' });
+    userApiMock.deleteUser.mockReturnValue(of({}));
 
     component.confirmDelete();
 
-    // ✅ Assert state directly (no detectChanges here)
-    expect(component.apiError).toBe('');
-    expect(component.isDeleting).toBe(true);
+    expect(component.isDeleting()).toBe(true);
+    expect(userApiMock.deleteUser).toHaveBeenCalledTimes(1);
+    expect(userApiMock.deleteUser).toHaveBeenCalledWith('u-123');
 
-    // ✅ No navigation yet
-    expect(router.calls).not.toContain('/login');
-
-    // ✅ Timer fires
-    vi.advanceTimersByTime(400);
-
-    // After timer callback
-    expect(component.isDeleting).toBe(false);
-    expect(router.calls).toContain('/login');
+    expect(localStorage.getItem('user')).toBeNull();
+    expect(localStorage.getItem('extra')).toBeNull();
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/login');
   });
 
+  it('confirmDelete should set apiError if no userId exists', () => {
+    createComponentWithUser({ user_id: '', username: 'Alice' });
 
-  it('should disable the cancel button while deleting', async () => {
-    const { fixture } = await create({ isDeleting: true });
+    component.confirmDelete();
 
-    const cancelBtn = fixture.debugElement.query(
-      By.css('button.btn.btn-outline-light')
-    )?.nativeElement as HTMLButtonElement;
+    expect(userApiMock.deleteUser).not.toHaveBeenCalled();
+    expect(component.apiError()).toBe('Cannot delete: No user ID found');
+    expect(component.isDeleting()).toBe(false);
 
-    expect(cancelBtn.disabled).toBe(true);
+    fixture.detectChanges();
+    const alertEl = fixture.debugElement.query(By.css('.alert.alert-danger'));
+    expect(alertEl).not.toBeNull();
+    expect(alertEl.nativeElement.textContent).toContain('Cannot delete: No user ID found');
+  });
+
+  it('confirmDelete should show failure message and reset isDeleting on error', () => {
+    createComponentWithUser({ user_id: 'u-500', username: 'Alice' });
+
+    userApiMock.deleteUser.mockReturnValue(
+      throwError(() => new Error('boom'))
+    );
+
+    component.confirmDelete();
+
+    expect(userApiMock.deleteUser).toHaveBeenCalledWith('u-500');
+    expect(component.apiError()).toBe('Failed to delete profile. Please try again.');
+    expect(component.isDeleting()).toBe(false);
+
+    fixture.detectChanges();
+    const alertEl = fixture.debugElement.query(By.css('.alert.alert-danger'));
+    expect(alertEl).not.toBeNull();
+    expect(alertEl.nativeElement.textContent).toContain('Failed to delete profile. Please try again.');
+  });
+
+  it('cancelDelete should navigate to /edit-user', () => {
+    createComponentWithUser({ user_id: 'u-7', username: 'Alice' });
+
+    component.cancelDelete();
+
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/edit-user');
   });
 });
