@@ -13,7 +13,7 @@
             <app-calendar-widget
               [viewDate]="viewDate"
               [events]="calendarEvents()"
-              (viewDateChange)="viewDate = $event"
+              (viewDateChange)="onViewDateChange($event)"
               (eventClicked)="onEventClicked($event)"
             ></app-calendar-widget>
         </div>
@@ -23,7 +23,7 @@
           <button
             type="button"
             class="btn btn-primary"
-            routerLink="/create-event"
+            (click)="createEvent.emit()"
           >
             Add Event
           </button>
@@ -31,7 +31,7 @@
           <button
             type="button"
             class="btn btn-primary"
-            routerLink="/view-event"
+            (click)="onOpenEventSelector()"
           >
             View Event
           </button>

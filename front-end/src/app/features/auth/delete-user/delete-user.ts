@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 @Component({
   selector: 'app-delete-user',
@@ -11,7 +11,7 @@ import { UserApiService } from '../../../shared/services/api/user-api.service';
   styleUrls: ['./delete-user.css'],
 })
 export class DeleteUser {
-  private router = inject(Router);
+  private navigation = inject(NavigationService);
   private userApi = inject(UserApiService);
 
   userName = signal('');
@@ -60,7 +60,7 @@ export class DeleteUser {
     this.userApi.deleteUser(userId).subscribe({
       next: () => {
         localStorage.clear();
-        this.router.navigateByUrl('/login');
+        this.navigation.goToLogin();
       },
       error: (err) => {
         console.error('Failed to delete user:', err);
@@ -71,6 +71,6 @@ export class DeleteUser {
   }
 
   cancelDelete(): void {
-    this.router.navigateByUrl('/edit-user');
+    this.navigation.goToEditUser();
   }
 }

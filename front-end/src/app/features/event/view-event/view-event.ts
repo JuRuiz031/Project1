@@ -1,14 +1,17 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
-import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
-import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
+import { InviteService } from '../../../shared/services/invite.service';
 import { EventDTO } from '../../../shared/models/events/event.dto';
+import { isEventInvite } from '../../../shared/models/invites/invite-details-response.dto';
 
-type CalendarOption = { id: string; name: string; isAdmin: boolean };
-
+/**
+ * Guest-only event viewing component
+ * Used when guests click on invite links to view event details
+ * Authenticated users see events in modals instead
+ */
 @Component({
   selector: 'app-view-event',
   standalone: true,
@@ -18,19 +21,13 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 })
 export class ViewEvent implements OnInit {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private calendarApi = inject(CalendarApiService);
-
-  calendars: CalendarOption[] = [
-    { id: '1', name: 'My Admin Calendar', isAdmin: true },
-    { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
-  ];
+  private inviteService = inject(InviteService);
 
   apiError = '';
+  isLoading = false;
 
   form = this.fb.group({
-    calendarId: [{ value: '', disabled: true }],
     title: [{ value: '', disabled: true }],
     startDate: [{ value: '', disabled: true }],
     startTime: [{ value: '', disabled: true }],
@@ -43,47 +40,52 @@ export class ViewEvent implements OnInit {
   ngOnInit(): void {
     this.form.disable({ emitEvent: false });
 
-    const eventId = this.route.snapshot.paramMap.get('eventId');
-    if (!eventId) {
-      this.apiError = 'Missing event id';
-      return;
-    }
+    // Guest-only: expects invite token in query param
+    const token = this.route.snapshot.queryParamMap.get('token');
 
-    // Use team service: GET /calendar?eventIds=...
-    this.calendarApi.getByEventIds([eventId]).subscribe({
-      next: (res: CalendarFilterResponseDTO) => {
-        const event = res?.events?.[0];
-        if (!event) {
+    if (token) {
+      this.loadEventByToken(token);
+    } else {
+      this.apiError = 'Missing invite token. Please use the invite link provided.';
+    }
+  }
+
+  private loadEventByToken(token: string): void {
+    this.apiError = '';
+    this.isLoading = true;
+
+    // Call the public invite endpoint: GET /api/v1/invitelink?token=xyz
+    this.inviteService.getInviteDetails(token).subscribe({
+      next: (details) => {
+        this.isLoading = false;
+        if (!details) {
           this.apiError = 'Event not found';
           return;
         }
-        this.displayEvent(event);
+        // Type guard: ensure this is an event invite, not a poll invite
+        if (isEventInvite(details)) {
+          this.displayEvent(details);
+        } else {
+          this.apiError = 'Invalid event invite link';
+        }
       },
-      error: () => (this.apiError = 'Could not load event'),
+      error: (err) => {
+        this.isLoading = false;
+        this.apiError =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Could not load event';
+      },
     });
   }
 
-  get adminCalendars(): CalendarOption[] {
-    return this.calendars.filter(c => c.isAdmin);
-  }
-
-  goBack(): void {
-    this.router.navigateByUrl('/main-page');
-  }
-
-  goToEditEvent(): void {
-    this.router.navigateByUrl('/edit-event');
-  }
-
-  displayEvent(event: EventDTO): void {
-    this.apiError = '';
-
+  private displayEvent(event: EventDTO): void {
     const start = this.isoToDateTime(event.start_time);
     const end = this.isoToDateTime(event.end_time);
 
     this.form.patchValue(
       {
-        calendarId: event.calendar_id ?? '',
         title: event.title ?? '',
         startDate: start.date,
         startTime: start.time,
@@ -100,10 +102,8 @@ export class ViewEvent implements OnInit {
 
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
-
     const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
     if (!match) return { date: '', time: '' };
-
     return { date: match[1], time: match[2] };
   }
 }

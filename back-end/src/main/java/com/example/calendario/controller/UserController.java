@@ -61,6 +61,18 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // POST Refresh Token - extend user session
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginSuccessDTO> refreshToken() {
+        // Get authenticated username from JWT (current valid token required)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticatedUsername = authentication.getName();
+
+        // Generate new token for the authenticated user
+        LoginSuccessDTO response = userService.refreshUserToken(authenticatedUsername);
+        return ResponseEntity.ok(response);
+    }
+
     // GET View User by ID
     @GetMapping("/users/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable String id) {

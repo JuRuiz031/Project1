@@ -1,7 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { DeleteEvent } from './delete-event';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute, Router } from '@angular/router';
+import { DeleteEventModal } from './delete-event-modal';
 import { of, throwError } from 'rxjs';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
@@ -12,7 +10,7 @@ import { DeleteEventDTO } from '../../../shared/models/events/delete-event.dto';
 
 import { vi } from 'vitest';
 
-describe('DeleteEvent', () => {
+describe('DeleteEventModal', () => {
   const mockEvent: EventDTO = {
     event_id: 'e1',
     calendar_id: '1',
@@ -22,14 +20,6 @@ describe('DeleteEvent', () => {
     description: 'Loaded desc',
     notes: 'Loaded notes',
     tags: [],
-  };
-
-  const activatedRouteStub = {
-    snapshot: {
-      paramMap: {
-        get: (key: string) => (key === 'eventId' ? 'e1' : null),
-      },
-    },
   };
 
   const calendarServiceStub = {
@@ -44,9 +34,8 @@ describe('DeleteEvent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeleteEvent, RouterTestingModule],
+      imports: [DeleteEventModal],
       providers: [
-        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: CalendarService, useValue: calendarServiceStub },
         { provide: EventService, useValue: eventServiceStub },
       ],
@@ -61,7 +50,7 @@ describe('DeleteEvent', () => {
   });
 
   it('ngOnInit should load the event via CalendarService and populate eventName/calendarName', () => {
-    const fixture = TestBed.createComponent(DeleteEvent);
+    const fixture = TestBed.createComponent(DeleteEventModal);
     const component = fixture.componentInstance;
 
     fixture.detectChanges(); // triggers ngOnInit
@@ -78,7 +67,7 @@ describe('DeleteEvent', () => {
       of<CalendarFilterResponseDTO>({ events: [] })
     );
 
-    const fixture = TestBed.createComponent(DeleteEvent);
+    const fixture = TestBed.createComponent(DeleteEventModal);
     const component = fixture.componentInstance;
 
     fixture.detectChanges();
@@ -89,7 +78,7 @@ describe('DeleteEvent', () => {
   it('confirmDelete should set apiError when missing user id and NOT call delete', () => {
     localStorage.removeItem('user');
 
-    const fixture = TestBed.createComponent(DeleteEvent);
+    const fixture = TestBed.createComponent(DeleteEventModal);
     const component = fixture.componentInstance;
     fixture.detectChanges(); // loads eventId + calendarId
 
@@ -100,14 +89,16 @@ describe('DeleteEvent', () => {
     expect(component.isDeleting).toBe(false);
   });
 
-  it('confirmDelete should call EventService.delete with correct dto and navigate to /main-page on success', () => {
-    const fixture = TestBed.createComponent(DeleteEvent);
+  it('confirmDelete should call EventService.delete with correct dto and emit eventDeleted on success', () => {
+    const fixture = TestBed.createComponent(DeleteEventModal);
     const component = fixture.componentInstance;
-    const router = TestBed.inject(Router);
 
     fixture.detectChanges(); // loads event + sets calendarId, eventId
 
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
+    const eventDeletedSpy = vi.fn();
+    const closeSpy = vi.fn();
+    component.eventDeleted.subscribe(eventDeletedSpy);
+    component.close.subscribe(closeSpy);
 
     component.confirmDelete();
 
@@ -121,7 +112,8 @@ describe('DeleteEvent', () => {
     expect(dtoArg.user_id).toBe('u1');
     expect(dtoArg.calendar_id).toBe('1');
 
-    expect(navSpy).toHaveBeenCalledWith('/main-page');
+    expect(eventDeletedSpy).toHaveBeenCalledWith('e1');
+    expect(closeSpy).toHaveBeenCalled();
     expect(component.apiError).toBe('');
     expect(component.isDeleting).toBe(false);
   });
@@ -131,7 +123,7 @@ describe('DeleteEvent', () => {
       throwError(() => new Error('boom'))
     );
 
-    const fixture = TestBed.createComponent(DeleteEvent);
+    const fixture = TestBed.createComponent(DeleteEventModal);
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -142,15 +134,15 @@ describe('DeleteEvent', () => {
     expect(component.isDeleting).toBe(false);
   });
 
-  it('cancel should navigate to /edit-event', () => {
-    const fixture = TestBed.createComponent(DeleteEvent);
+  it('onClose should emit close event', () => {
+    const fixture = TestBed.createComponent(DeleteEventModal);
     const component = fixture.componentInstance;
-    const router = TestBed.inject(Router);
 
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
+    const closeSpy = vi.fn();
+    component.close.subscribe(closeSpy);
 
-    component.cancel();
+    component.onClose();
 
-    expect(navSpy).toHaveBeenCalledWith('/edit-event');
+    expect(closeSpy).toHaveBeenCalled();
   });
 });

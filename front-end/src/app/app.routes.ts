@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { AppLayout } from './layouts/app-layout/app-layout';
+import { authGuard } from './shared/guards/auth.guard';
+import { loginRedirectGuard } from './shared/guards/login-redirect.guard';
 
 import { Login } from './features/auth/login/login';
 import { CreateAccount } from './features/auth/create-account/create-account';
@@ -16,10 +18,7 @@ import { ViewCalendarGroup } from './features/calendar/view-calendar-group/view-
 import { EditCalendarGroup } from './features/calendar/edit-calendar-group/edit-calendar-group';
 import { DeleteCalendarGroup } from './features/calendar/delete-calendar-group/delete-calendar-group';
 
-import { CreateEvent } from './features/event/create-event/create-event';
 import { ViewEvent } from './features/event/view-event/view-event';
-import { EditEvent } from './features/event/edit-event/edit-event';
-import { DeleteEvent } from './features/event/delete-event/delete-event';
 
 import { CreatePoll } from './features/poll/create-poll/create-poll';
 import { ViewPoll } from './features/poll/view-poll/view-poll';
@@ -28,12 +27,24 @@ import { DeletePoll } from './features/poll/delete-poll/delete-poll';
 
 export const routes: Routes = [
   /**
+   * PUBLIC GUEST INVITE ROUTES
+   * No layout, no authentication required
+   * For guests viewing shared event/poll invite links
+   */
+  {
+    path: 'invitelink',
+    component: ViewEvent, // Guest-only event viewing
+  },
+
+  /**
    * AUTH / PUBLIC ROUTES
    * Header + footer, NO profile button
+   * loginRedirectGuard: if already logged in, redirect to main page
    */
   {
     path: '',
     component: AuthLayout,
+    canActivate: [loginRedirectGuard],
     children: [
       { path: '', component: Login }, // landing page
       { path: 'login', component: Login },
@@ -44,10 +55,12 @@ export const routes: Routes = [
   /**
    * APP / AUTHENTICATED ROUTES
    * Header + footer WITH profile button
+   * Protected by authGuard - requires valid token
    */
   {
     path: '',
     component: AppLayout,
+    canActivate: [authGuard],
     children: [
       {
         path: 'dashboard',
@@ -68,10 +81,7 @@ export const routes: Routes = [
       { path: 'edit-calendar-group', component: EditCalendarGroup },
       { path: 'delete-calendar-group', component: DeleteCalendarGroup },
 
-      { path: 'create-event', component: CreateEvent },
-      { path: 'view-event', component: ViewEvent },
-      { path: 'edit-event', component: EditEvent },
-      { path: 'delete-event', component: DeleteEvent },
+      // Event routes removed - now all modals from main-page
 
       { path: 'create-poll', component: CreatePoll },
       { path: 'view-poll', component: ViewPoll },

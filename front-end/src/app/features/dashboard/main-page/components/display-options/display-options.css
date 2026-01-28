@@ -34,6 +34,33 @@
   margin: 4px 0;
 }
 
+.display-options__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.display-options__checkbox input[type="checkbox"] {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.display-options__label-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.display-options__color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 @media (max-width: 900px) {
   .display-options__grid {
     grid-template-columns: 1fr;
