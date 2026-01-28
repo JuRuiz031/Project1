@@ -28,6 +28,7 @@ export class CalendarDisplay implements OnInit {
   viewDate = new Date();
 
   events = input<EventDTO[]>([]);
+  selectedTags = input<string[]>([]);
   openEventSelector = output<void>();
   eventClicked = output<string>();  // Emit event ID when user clicks on event
   createEvent = output<void>();  // Emit when user wants to create event
@@ -48,7 +49,17 @@ export class CalendarDisplay implements OnInit {
   }
 
   calendarEvents = computed(() => {
-    return this.events().map((e) => ({
+    let filteredEvents = this.events();
+    
+    // Filter by selected tags (events must have ALL selected tags)
+    const tags = this.selectedTags();
+    if (tags && tags.length > 0) {
+      filteredEvents = filteredEvents.filter(e =>
+        tags.every(tag => e.tags?.includes(tag))
+      );
+    }
+    
+    return filteredEvents.map((e) => ({
       title: e.title,
       start: new Date(e.start_time),
       end: new Date(e.end_time),

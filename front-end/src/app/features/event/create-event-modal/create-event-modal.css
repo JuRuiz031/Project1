@@ -2,3 +2,59 @@
   max-width: 900px;
   margin: 0 auto;
 }
+
+.tag-input-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tag-input-container input {
+  flex: 1;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tag-chip-editable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 12px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.tag-chip-editable:hover {
+  background-color: #bbdefb;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.tag-remove:hover {
+  background-color: #ef5350;
+  color: white;
+}

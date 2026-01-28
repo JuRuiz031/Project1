@@ -13,16 +13,47 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Search events by title, description, or calendar..."
+        placeholder="Search events by title, description, calendar, or tags..."
         [(ngModel)]="searchQuery"
         aria-label="Search events"
       />
     </div>
 
-    <!-- Events List -->
-    <div class="modal-body">
-      @if (filteredEvents().length === 0) {
-        <div class="no-events">
+    <!-- Main Content Area -->
+    <div class="modal-body-wrapper">
+      <!-- Left Sidebar: Calendar Filter -->
+      @if (calendars().length > 0) {
+        <div class="filter-sidebar left-sidebar">
+          <div class="sidebar-header">
+            <h3>Calendars</h3>
+            @if (selectedCalendarIds().length > 0) {
+              <button class="clear-btn" (click)="clearCalendarFilters()" title="Clear calendar filters">
+                Clear
+              </button>
+            }
+          </div>
+          <div class="filter-list">
+            @for (calendar of calendars(); track calendar.calendar_id) {
+              <button 
+                class="calendar-filter-chip" 
+                [class.active]="isCalendarSelected(calendar.calendar_id)"
+                [style.background-color]="isCalendarSelected(calendar.calendar_id) ? getCalendarColor(calendar.calendar_id).primary : 'white'"
+                [style.border-color]="getCalendarColor(calendar.calendar_id).primary"
+                [style.color]="isCalendarSelected(calendar.calendar_id) ? 'white' : getCalendarColor(calendar.calendar_id).primary"
+                (click)="toggleCalendar(calendar.calendar_id)"
+                title="Click to filter by {{ calendar.name }}">
+                <span class="calendar-color-dot" [style.background-color]="getCalendarColor(calendar.calendar_id).primary"></span>
+                {{ calendar.name }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Middle: Events List -->
+      <div class="modal-body">
+        @if (filteredEvents().length === 0) {
+          <div class="no-events">
           @if (events().length === 0) {
             <p>No events available</p>
           } @else {
@@ -40,13 +71,46 @@
                 }
               </div>
               <div class="event-time">
-                {{ event.start_time | date: 'short' }}
+                {{ formatEventTime(event.start_time) }} ({{ getTimezoneAbbr() }})
               </div>
               @if (event.description) {
                 <div class="event-description">{{ event.description }}</div>
               }
+              @if (event.tags && event.tags.length > 0) {
+                <div class="event-tags">
+                  @for (tag of event.tags; track tag) {
+                    <span class="tag-chip">{{ tag }}</span>
+                  }
+                </div>
+              }
             </div>
           }
+        </div>
+      }
+      </div>
+
+      <!-- Right Sidebar: Tag Filter -->
+      @if (allTags().length > 0) {
+        <div class="filter-sidebar right-sidebar">
+          <div class="sidebar-header">
+            <h3>Tags</h3>
+            @if (selectedTags().length > 0) {
+              <button class="clear-btn" (click)="clearTagFilters()" title="Clear tag filters">
+                Clear
+              </button>
+            }
+          </div>
+          <div class="filter-list">
+            @for (tag of allTags(); track tag) {
+              <button 
+                class="tag-filter-chip" 
+                [class.active]="isTagSelected(tag)"
+                (click)="toggleTag(tag)"
+                title="Click to filter by {{ tag }}">
+                {{ tag }}
+              </button>
+            }
+          </div>
         </div>
       }
     </div>
