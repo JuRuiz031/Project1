@@ -12,6 +12,8 @@ import { CreateEventModal } from '../../event/create-event-modal/create-event-mo
 import { EditEventModal } from '../../event/edit-event-modal/edit-event-modal';
 import { DeleteEventModal } from '../../event/delete-event-modal/delete-event-modal';
 import { CreateCalendarModal } from '../../calendar/create-calendar-modal/create-calendar-modal';
+import { CalendarSelectorModal } from '../../calendar/calendar-selector-modal/calendar-selector-modal';
+import { ViewCalendarModal } from '../../calendar/view-calendar-modal/view-calendar-modal';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
@@ -25,7 +27,9 @@ type ModalState =
   | 'view-event'
   | 'create-event'
   | 'edit-event'
-  | 'delete-event';
+  | 'delete-event'
+  | 'calendar-selector'
+  | 'view-calendar';
 
 @Component({
   selector: 'app-main-page',
@@ -41,6 +45,8 @@ type ModalState =
     EditEventModal,
     DeleteEventModal,
     CreateCalendarModal,
+    CalendarSelectorModal,
+    ViewCalendarModal,
   ],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
@@ -54,6 +60,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
   events = signal<any[]>([]);
   polls = signal<any[]>([]);
   selectedCalendarIds = signal<string[]>([]);
+  selectedCalendarId = signal<string | null>(null);
   selectedTags = signal<string[]>([]);
 
   // Modal state machine
@@ -204,6 +211,40 @@ export class MainPageComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle calendar created - reload calendar list
+   */
+  onCalendarCreated(calendarId: string): void {
+    console.log('[MainPage] Calendar created:', calendarId);
+
+    // refresh right-side options + tag list
+    this.loadCalendarHome();
+
+    // ensure new calendar is selected (keeps same "end state" as page redirect)
+    const current = this.selectedCalendarIds();
+    if (!current.includes(calendarId)) {
+      this.selectedCalendarIds.set([...current, calendarId]);
+    } else {
+      this.selectedCalendarIds.set([...current]);
+    }
+  }
+
+  openCalendarSelector(): void {
+    console.log('[MainPage] Opening calendar selector modal');
+    this.modalState.set('calendar-selector');
+  }
+
+  onCalendarActivated(calendarId: string): void {
+    console.log('[MainPage] Calendar activated (double-click):', calendarId);
+    this.selectedCalendarId.set(calendarId);
+    this.modalState.set('view-calendar');
+  }
+
+  onViewCalendarBack(): void {
+    console.log('[MainPage] Back from view-calendar');
+    this.modalState.set('calendar-selector');
+  }
+
+  /**
    * Handle tag selection changes from DisplayOptions
    */
   onSelectedTagsChange(tags: string[]): void {
@@ -251,6 +292,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     console.log('[MainPage] Closing all modals');
     this.modalState.set('none');
     this.selectedEventId.set(null);
+    this.selectedCalendarId.set(null);
     this.showEventSuccessMessage.set(false);
   }
 
@@ -323,14 +365,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
     this.openDeleteEvent(eventId);
   }
 
-  /**
-   * Handle calendar created - reload calendar list
-   */
-  onCalendarCreated(calendarId: string): void {
-    console.log('[MainPage] Calendar created:', calendarId);
-    this.loadCalendarHome();
-    this.closeAllModals();
-  }
 
   /**
    * Refresh events by triggering the effect that loads events

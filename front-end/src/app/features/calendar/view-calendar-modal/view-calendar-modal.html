@@ -1,0 +1,73 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2 class="modal-title">View Calendar</h2>
+      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">✕</button>
+    </div>
+
+    <div class="modal-body">
+      @if (apiError(); as err) {
+        <div class="alert alert-danger mb-3">
+          {{ err }}
+        </div>
+      }
+
+      @if (toast(); as msg) {
+        <div class="alert alert-warning mb-3">
+          {{ msg }}
+        </div>
+      }
+
+      @if (currentCalendar(); as cal) {
+        <div class="mb-3">
+          <label class="form-label">Calendar Name</label>
+          <input class="form-control" [value]="cal.name" disabled />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Invite Link</label>
+
+          @if (inviteLink()) {
+            <input class="form-control" [value]="inviteLink()" readonly />
+          } @else {
+            <input class="form-control" value="(Not generated yet)" disabled />
+          }
+
+          <div class="hint mt-2">
+            @if (isAdmin()) {
+              <span>Admins can generate an invite link for this calendar.</span>
+            } @else {
+              <span class="muted">Only admins can generate invite links.</span>
+            }
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <button
+            type="button"
+            class="btn btn-primary"
+            [class.btn-disabled]="!isAdmin()"
+            (click)="onEditCalendar()"
+          >
+            Edit Calendar
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            [class.btn-disabled]="!isAdmin()"
+            (click)="onGenerateInviteLink()"
+          >
+            Generate Invite Link
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" (click)="onBack()">← Back</button>
+      <button class="btn btn-outline-secondary" (click)="onClose()">Close</button>
+    </div>
+  </div>
+</div>

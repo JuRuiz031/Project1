@@ -1,0 +1,76 @@
+/* intentionally minimal; you can replace with the snapshot styling later */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  overflow: hidden;
+}
+
+.modal-header, .modal-footer {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-footer {
+  border-bottom: none;
+  border-top: 1px solid #e0e0e0;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+.btn-outline-secondary {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  filter: grayscale(0.4);
+}
+
+/* Important: allow click so we can show "not admin" message */
+.btn-disabled:hover {
+  cursor: not-allowed;
+}
+
+.hint {
+  font-size: 0.9rem;
+}
+
+.muted {
+  color: #777;
+}
