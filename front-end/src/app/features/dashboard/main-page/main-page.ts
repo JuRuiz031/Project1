@@ -210,11 +210,9 @@ export class MainPageComponent implements OnInit, OnDestroy {
     this.selectedCalendarIds.set(ids);
   }
 
-  openCreateCalendar(): void {
-    console.log('[MainPage] Opening create calendar modal');
-    this.modalState.set('create-calendar');
-  }
-
+  /**
+   * Handle calendar created - reload calendar list
+   */
   onCalendarCreated(calendarId: string): void {
     console.log('[MainPage] Calendar created:', calendarId);
 
@@ -367,14 +365,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
     this.openDeleteEvent(eventId);
   }
 
-  /**
-   * Handle calendar created - reload calendar list
-   */
-  onCalendarCreated(calendarId: string): void {
-    console.log('[MainPage] Calendar created:', calendarId);
-    this.loadCalendarHome();
-    this.closeAllModals();
-  }
 
   /**
    * Refresh events by triggering the effect that loads events
