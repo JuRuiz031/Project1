@@ -54,8 +54,14 @@
   transition: background-color 0.2s;
 }
 
-.btn-share:hover {
+.btn-share:hover:not(:disabled) {
   background: #0056b3;
+}
+
+.btn-share:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .btn-share svg {
@@ -170,6 +176,14 @@
 .btn-copy {
   padding: 10px 20px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-copy svg {
+  width: 16px;
+  height: 16px;
 }
 
 .share-note {

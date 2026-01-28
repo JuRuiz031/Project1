@@ -1,19 +1,32 @@
+<header class="app-navbar navbar" role="banner">
+  <div class="container-fluid px-3 py-2">
+    <span class="navbar-brand mb-0 h1">CalendarIO</span>
+
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-white me-2">Enjoying CalendarIO?</span>
+      <a class="btn btn-outline-light btn-sm" routerLink="/create-account">
+        Create account here
+      </a>
+    </div>
+  </div>
+</header>
+
 <div class="container py-4 app-page">
   <h1 class="h3 mb-3">Event Details</h1>
 
   <div class="card app-card shadow-sm">
     <div class="card-body">
-      @if (apiError) {
+      @if (apiError()) {
         <div class="alert alert-danger mb-3">
-          {{ apiError }}
+          {{ apiError() }}
         </div>
       }
 
-      @if (isLoading) {
+      @if (isLoading()) {
         <div class="alert alert-info">Loading event...</div>
       }
 
-      @if (!isLoading && !apiError) {
+      @if (!isLoading() && !apiError()) {
         <div [formGroup]="form">
           <!-- Title -->
           <div class="mb-3">
@@ -37,7 +50,7 @@
             </div>
 
             <div class="col-12 col-md-6">
-              <label class="form-label">Start time</label>
+              <label class="form-label">Start time ({{ getTimezoneAbbr() }})</label>
               <input
                 type="time"
                 class="form-control app-input"
@@ -55,7 +68,7 @@
             </div>
 
             <div class="col-12 col-md-6">
-              <label class="form-label">End time</label>
+              <label class="form-label">End time ({{ getTimezoneAbbr() }})</label>
               <input
                 type="time"
                 class="form-control app-input"
@@ -88,3 +101,5 @@
     </div>
   </div>
 </div>
+
+<app-main-footer></app-main-footer>
