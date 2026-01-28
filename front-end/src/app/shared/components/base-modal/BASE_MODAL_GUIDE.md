@@ -80,8 +80,8 @@ import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 
   <form [formGroup]="form" (ngSubmit)="submit()">
     <!-- Error message -->
-    @if (apiError) {
-      <div class="alert alert-danger mb-3">{{ apiError }}</div>
+    @if (apiError()) {
+      <div class="alert alert-danger mb-3">{{ apiError() }}</div>
     }
 
     <!-- Form fields -->
@@ -100,8 +100,8 @@ import { BaseModal } from '../../../shared/components/base-modal/base-modal';
       <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
         Cancel
       </button>
-      <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Creating...' : 'Create' }}
+      <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Creating...' : 'Create' }}
       </button>
     </div>
   </form>
@@ -139,7 +139,7 @@ Copy this template when creating a new modal:
 
 **my-modal.ts**
 ```typescript
-import { Component, input, output, inject } from '@angular/core';
+import { Component, input, output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
@@ -161,9 +161,9 @@ export class MyModal {
   close = output<void>();
   itemSaved = output<string>();
 
-  // State
-  apiError = '';
-  isSubmitting = false;
+  // State (modern Angular signals)
+  apiError = signal('');
+  isSubmitting = signal(false);
 
   form = this.fb.group({
     name: ['', [Validators.required]],
@@ -175,7 +175,7 @@ export class MyModal {
 
   submit(): void {
     if (this.form.invalid) return;
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
     // Call your service here...
   }
 }
@@ -251,10 +251,62 @@ onItemCreated(id: string): void {
 
 ---
 
+## Modern Angular (v17+) Best Practices
+
+### Use Signals for Reactive State
+
+```typescript
+// ✅ Modern Angular
+apiError = signal('');
+isSubmitting = signal(false);
+isLoading = signal(true);
+
+// Update with .set()
+this.apiError.set('Something went wrong');
+this.isSubmitting.set(true);
+```
+
+```html
+<!-- Template: Call signals with () -->
+@if (apiError()) {
+  <div class="alert alert-danger">{{ apiError() }}</div>
+}
+
+<button [disabled]="isSubmitting()">
+  {{ isSubmitting() ? 'Saving...' : 'Save' }}
+</button>
+```
+
+### Use Computed Signals for Derived State
+
+```typescript
+// ✅ Automatically recomputes when calendars changes
+calendars = signal<Calendar[]>([]);
+adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
+```
+
+```html
+<!-- Template -->
+@for (c of adminCalendars(); track c.id) {
+  <option [value]="c.id">{{ c.name }}</option>
+}
+```
+
+### Benefits of Signals
+
+- **No ExpressionChangedAfterItHasBeenCheckedError** - Proper change detection
+- **Better performance** - Angular only checks what changed
+- **More declarative** - Easier to understand data flow
+- **Reactive by default** - Changes propagate automatically
+
+---
+
 ## Tips
 
 1. **Use `size="small"`** for confirmations/deletions
 2. **Use `size="medium"`** for standard forms (default)
 3. **Use `size="large"`** for complex forms with lots of fields
 4. **Always handle `(close)`** to properly reset state
-5. **Show loading states** with `[disabled]="isSubmitting"` on buttons
+5. **Use signals (`signal()`)** for all reactive state instead of plain properties
+6. **Call signals with `()`** in templates to get their current value
+7. **Use `computed()`** for derived state that depends on other signals
