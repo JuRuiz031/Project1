@@ -36,7 +36,7 @@ export class ViewEventModal implements OnDestroy {
   eventId = input<string | null>(null);
   back = output<void>();
   close = output<void>();
-  editEvent = output<string>();  // Emit eventId when user wants to edit
+  editEvent = output<string>();
 
   // State
   calendars = signal<CalendarOption[]>([]);
@@ -52,7 +52,6 @@ export class ViewEventModal implements OnDestroy {
   });
 
   constructor() {
-    // Disable body scroll when modal opens
     document.body.style.overflow = 'hidden';
 
     effect(() => {
@@ -65,40 +64,44 @@ export class ViewEventModal implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Re-enable body scroll when modal closes
     document.body.style.overflow = '';
   }
 
   private loadCalendars(): void {
-    this.calendarService.getHomepage().pipe(
-      map((home: CalendarHomeDTO) => this.mapCalendars(home.calendars ?? [])),
-      tap(calendars => console.log('[ViewEventModal] Calendars loaded:', calendars)),
-      catchError(err => {
-        console.error('[ViewEventModal] Failed to load calendars:', err);
-        return of([]);
-      })
-    ).subscribe(calendars => {
-      this.calendars.set(calendars);
-    });
+    this.calendarService
+      .getHomepage()
+      .pipe(
+        map((home: CalendarHomeDTO) => this.mapCalendars(home.calendars ?? [])),
+        tap(calendars => console.log('[ViewEventModal] Calendars loaded:', calendars)),
+        catchError(err => {
+          console.error('[ViewEventModal] Failed to load calendars:', err);
+          return of([]);
+        })
+      )
+      .subscribe(calendars => {
+        this.calendars.set(calendars);
+      });
   }
 
   private loadEvent(eventId: string): void {
-    this.calendarApi.getByEventIds([eventId]).pipe(
-      map((res: CalendarFilterResponseDTO) => res?.events?.[0]),
-      tap(event => {
-        if (!event) {
-          this.apiError.set('Event not found');
-        }
-      }),
-      catchError(() => {
-        this.apiError.set('Could not load event');
-        return of(null);
-      })
-    ).subscribe(event => {
-      if (event) {
-        this.displayEvent(event);
-      }
-    });
+    this.apiError.set('');
+
+    this.calendarApi
+      .getByEventIds([eventId])
+      .pipe(
+        map((res: CalendarFilterResponseDTO) => res?.events?.[0]),
+        tap(ev => {
+          if (!ev) this.apiError.set('Event not found');
+        }),
+        catchError(err => {
+          console.error('[ViewEventModal] Failed to load event:', err);
+          this.apiError.set('Could not load event');
+          return of(null);
+        })
+      )
+      .subscribe(ev => {
+        if (ev) this.displayEvent(ev);
+      });
   }
 
   private mapCalendars(rawCalendars: any[]): CalendarOption[] {
@@ -111,31 +114,44 @@ export class ViewEventModal implements OnDestroy {
       .filter(c => c.id);
   }
 
-  private displayEvent(event: EventDTO): void {
+  private displayEvent(ev: EventDTO): void {
     this.apiError.set('');
 
-    const start = this.isoToDateTime(event.start_time);
-    const end = this.isoToDateTime(event.end_time);
+    const start = this.isoToDateTime(ev.start_time);
+    const end = this.isoToDateTime(ev.end_time);
 
     this.event.set({
-      calendarId: event.calendar_id ?? '',
-      title: event.title ?? '',
+      calendarId: ev.calendar_id ?? '',
+      title: ev.title ?? '',
       startDate: start.date,
       startTime: start.time,
       endDate: end.date,
       endTime: end.time,
-      description: event.description ?? '',
-      notes: event.notes ?? '',
+      description: ev.description ?? '',
+      notes: ev.notes ?? '',
     });
   }
 
+  // ✅ SAME FIX AS YOUR OLD view-event.ts
+  private parseServerInstant(iso: string): Date {
+    // If server includes timezone (Z or ±hh:mm), Date can parse safely.
+    // If not, assume server meant UTC and append 'Z'.
+    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
+    return new Date(hasTz ? iso : `${iso}Z`);
+  }
+
+  // ✅ ISO -> Local date/time for display
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
 
-    const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
-    if (!match) return { date: '', time: '' };
+    const d = this.parseServerInstant(iso);
+    if (isNaN(d.getTime())) return { date: '', time: '' };
 
-    return { date: match[1], time: match[2] };
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; // LOCAL time
+    return { date, time };
   }
 
   onBack(): void {
@@ -148,8 +164,6 @@ export class ViewEventModal implements OnDestroy {
 
   onEditEvent(): void {
     const id = this.eventId();
-    if (id) {
-      this.editEvent.emit(id);
-    }
+    if (id) this.editEvent.emit(id);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, input, output, inject, effect, signal, computed } from '@angular/core';
+import { Component, OnInit, input, output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -28,18 +28,17 @@ export class EditEventModal implements OnInit {
   // Inputs/Outputs
   eventId = input.required<string>();
   close = output<void>();
-  eventUpdated = output<string>(); // emits event ID when updated
-  deleteRequested = output<string>(); // emits event ID to switch to delete modal
+  eventUpdated = output<string>();       // emits event ID when updated
+  deleteRequested = output<string>();    // emits event ID to switch to delete modal
 
   private eventIdValue = '';
 
-  // Signals (modern Angular)
+  // Signals
   calendars = signal<CalendarOption[]>([]);
   apiError = signal('');
   isSubmitting = signal(false);
   isLoading = signal(true);
 
-  // Computed signal for admin calendars
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
 
   form = this.fb.group({
@@ -57,6 +56,7 @@ export class EditEventModal implements OnInit {
     const id = this.eventId();
     if (!id) {
       this.apiError.set('Missing event id');
+      this.isLoading.set(false);
       return;
     }
     this.eventIdValue = id;
@@ -68,7 +68,7 @@ export class EditEventModal implements OnInit {
   private loadCalendars(): void {
     this.calendarService.getHomepage().subscribe({
       next: (home: CalendarHomeDTO) => {
-        const mappedCalendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
+        const mappedCalendars: CalendarOption[] = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
           id: c.calendar_id,
           name: c.name,
           isAdmin: c.is_admin,
@@ -76,7 +76,7 @@ export class EditEventModal implements OnInit {
         this.calendars.set(mappedCalendars);
       },
       error: (err) => {
-        // not fatal to edit (but affects dropdown options)
+        // not fatal
         console.warn('Could not load calendars', err);
       },
     });
@@ -84,6 +84,7 @@ export class EditEventModal implements OnInit {
 
   private loadEvent(id: string): void {
     this.apiError.set('');
+    this.isLoading.set(true);
 
     this.calendarService.getByEventIds([id]).subscribe({
       next: (res: CalendarFilterResponseDTO) => {
@@ -97,47 +98,78 @@ export class EditEventModal implements OnInit {
         const start = this.isoToDateTime(ev.start_time);
         const end = this.isoToDateTime(ev.end_time);
 
-        this.form.patchValue({
-          calendarId: ev.calendar_id ?? '',
-          title: ev.title ?? '',
-          startDate: start.date,
-          startTime: start.time,
-          endDate: end.date,
-          endTime: end.time,
-          description: ev.description ?? '',
-          notes: ev.notes ?? '',
-        });
+        this.form.patchValue(
+          {
+            calendarId: ev.calendar_id ?? '',
+            title: ev.title ?? '',
+            startDate: start.date,
+            startTime: start.time,
+            endDate: end.date,
+            endTime: end.time,
+            description: ev.description ?? '',
+            notes: ev.notes ?? '',
+          },
+          { emitEvent: false }
+        );
       },
       error: (err) => {
         this.isLoading.set(false);
         this.apiError.set(
           err?.error?.message ||
-          (typeof err?.error === 'string' ? err.error : '') ||
-          err?.message ||
-          'Could not load event'
+            (typeof err?.error === 'string' ? err.error : '') ||
+            err?.message ||
+            'Could not load event'
         );
       },
     });
   }
 
-  private isoToDateTime(iso: string): { date: string; time: string } {
-    if (!iso) return { date: '', time: '' };
-    const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
-    if (!match) return { date: '', time: '' };
-    return { date: match[1], time: match[2] };
+  /**
+   * If backend sends timestamps without timezone (e.g. "2026-01-26T17:30:00"),
+   * JS will treat that as LOCAL time and you get a +6 hour drift.
+   * Fix: if no timezone suffix, assume UTC and append 'Z'.
+   */
+  private parseServerInstant(iso: string): Date {
+    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
+    return new Date(hasTz ? iso : `${iso}Z`);
   }
 
-  private isEndAfterStart(startDate: string, startTime: string, endDate: string, endTime: string): boolean {
-    return `${endDate}T${endTime}` > `${startDate}T${startTime}`; // strict
+  // ✅ ISO -> Local date/time for <input type="date"> and <input type="time">
+  private isoToDateTime(iso: string): { date: string; time: string } {
+    if (!iso) return { date: '', time: '' };
+
+    const d = this.parseServerInstant(iso);
+    if (isNaN(d.getTime())) return { date: '', time: '' };
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; // LOCAL time
+    return { date, time };
+  }
+
+  // ✅ Build a Date in LOCAL time (avoids "YYYY-MM-DDTHH:mm" parsing ambiguity)
+  private toLocalDate(date: string, time: string): Date | null {
+    if (!date || !time) return null;
+
+    const [y, m, d] = date.split('-').map(Number);
+    const [hh, mm] = time.split(':').map(Number);
+
+    if (![y, m, d, hh, mm].every(Number.isFinite)) return null;
+
+    const local = new Date(y, m - 1, d, hh, mm, 0, 0);
+    return isNaN(local.getTime()) ? null : local;
   }
 
   saveChanges(): void {
     this.apiError.set('');
 
-    if (!this.eventId) {
+    // NOTE: in modal code the input is a function; the id string lives in eventIdValue
+    if (!this.eventIdValue) {
       this.apiError.set('Missing event id');
       return;
     }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -145,30 +177,29 @@ export class EditEventModal implements OnInit {
 
     const v = this.form.getRawValue();
 
-    if (!this.isEndAfterStart(String(v.startDate), String(v.startTime), String(v.endDate), String(v.endTime))) {
+    const start = this.toLocalDate(String(v.startDate ?? ''), String(v.startTime ?? ''));
+    const end = this.toLocalDate(String(v.endDate ?? ''), String(v.endTime ?? ''));
+
+    if (!start) {
+      this.apiError.set('Start date/time is invalid.');
+      return;
+    }
+    if (!end) {
+      this.apiError.set('End date/time is invalid.');
+      return;
+    }
+    if (end.getTime() <= start.getTime()) {
       this.apiError.set('End must be after start.');
       return;
     }
 
-    const start = new Date(`${v.startDate}T${v.startTime}:00`);
-    const end = new Date(`${v.endDate}T${v.endTime}:00`);
-
-    if (isNaN(start.getTime())) {
-      this.apiError.set('Start date/time is invalid.');
-      return;
-    }
-    if (isNaN(end.getTime())) {
-      this.apiError.set('End date/time is invalid.');
-      return;
-    }
-
     const dto: UpdateEventDTO = {
-      calendar_id: String(v.calendarId),
-      title: String(v.title),
-      start_time: start.toISOString(),
+      calendar_id: String(v.calendarId ?? ''),
+      title: String(v.title ?? ''),
+      start_time: start.toISOString(), // store UTC instant
       end_time: end.toISOString(),
-      description: v.description ?? '',
-      notes: v.notes ?? '',
+      description: (v.description ?? '') as string,
+      notes: (v.notes ?? '') as string,
       tags: [],
     };
 
@@ -184,9 +215,9 @@ export class EditEventModal implements OnInit {
         this.isSubmitting.set(false);
         this.apiError.set(
           err?.error?.message ||
-          (typeof err?.error === 'string' ? err.error : '') ||
-          err?.message ||
-          'Could not save changes'
+            (typeof err?.error === 'string' ? err.error : '') ||
+            err?.message ||
+            'Could not save changes'
         );
       },
     });

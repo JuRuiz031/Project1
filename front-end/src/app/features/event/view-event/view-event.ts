@@ -100,10 +100,23 @@ export class ViewEvent implements OnInit {
     this.form.disable({ emitEvent: false });
   }
 
+   private parseServerInstant(iso: string): Date {
+      // If the server already sent a timezone (Z or ±hh:mm), Date can parse safely.
+      // If not, we assume the server meant UTC and append 'Z'.
+      const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
+      return new Date(hasTz ? iso : `${iso}Z`);
+    }
+
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
-    const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
-    if (!match) return { date: '', time: '' };
-    return { date: match[1], time: match[2] };
+
+    const d = this.parseServerInstant(iso);
+    if (isNaN(d.getTime())) return { date: '', time: '' };
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; // LOCAL time
+    return { date, time };
   }
 }
