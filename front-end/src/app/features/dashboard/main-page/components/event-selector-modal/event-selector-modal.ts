@@ -30,14 +30,15 @@ export class EventSelectorModal implements OnDestroy {
   // State
   searchQuery = signal('');
 
-  // Computed: filter events by search query (title, description, or calendar name)
+  // Computed: filter events by search query (title, description, calendar name, or tags)
   filteredEvents = computed(() => {
     const query = this.searchQuery().toLowerCase();
     if (!query) return this.events();
     return this.events().filter(e =>
       e.title.toLowerCase().includes(query) ||
       e.description?.toLowerCase().includes(query) ||
-      e.calendar_name?.toLowerCase().includes(query)
+      e.calendar_name?.toLowerCase().includes(query) ||
+      e.tags.some(tag => tag.toLowerCase().includes(query))
     );
   });
 

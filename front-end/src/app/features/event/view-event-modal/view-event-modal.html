@@ -104,6 +104,18 @@
               disabled
             >{{ e.notes }}</textarea>
           </div>
+
+          <!-- Tags -->
+          @if (e.tags && e.tags.length > 0) {
+            <div class="mb-3">
+              <label class="form-label">Tags</label>
+              <div class="tags-display">
+                @for (tag of e.tags; track tag) {
+                  <span class="tag-chip">{{ tag }}</span>
+                }
+              </div>
+            </div>
+          }
         </div>
       }
     </div>

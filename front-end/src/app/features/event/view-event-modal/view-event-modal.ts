@@ -19,6 +19,7 @@ type EventDisplay = {
   endTime: string;
   description: string;
   notes: string;
+  tags: string[];
 };
 
 @Component({
@@ -129,6 +130,7 @@ export class ViewEventModal implements OnDestroy {
       endTime: end.time,
       description: ev.description ?? '',
       notes: ev.notes ?? '',
+      tags: ev.tags ?? [],
     });
   }
 

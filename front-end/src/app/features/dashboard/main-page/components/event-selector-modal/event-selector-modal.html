@@ -45,6 +45,13 @@
               @if (event.description) {
                 <div class="event-description">{{ event.description }}</div>
               }
+              @if (event.tags && event.tags.length > 0) {
+                <div class="event-tags">
+                  @for (tag of event.tags; track tag) {
+                    <span class="tag-chip">{{ tag }}</span>
+                  }
+                </div>
+              }
             </div>
           }
         </div>

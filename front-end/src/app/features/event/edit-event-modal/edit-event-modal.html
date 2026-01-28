@@ -69,6 +69,32 @@
         <textarea rows="4" class="form-control app-textarea" placeholder="Notes" formControlName="notes"></textarea>
       </div>
 
+      <!-- Tags -->
+      <div class="mb-3">
+        <label class="form-label">Tags</label>
+        <div class="tag-input-container">
+          <input 
+            type="text" 
+            class="form-control app-input" 
+            placeholder="Add a tag..." 
+            [(ngModel)]="tagInput" 
+            [ngModelOptions]="{standalone: true}"
+            (keypress)="onTagKeyPress($event)" 
+          />
+          <button type="button" class="btn btn-outline-primary" (click)="addTag()">Add</button>
+        </div>
+        @if (tags().length > 0) {
+          <div class="tags-list">
+            @for (tag of tags(); track tag) {
+              <span class="tag-chip-editable">
+                {{ tag }}
+                <button type="button" class="tag-remove" (click)="removeTag(tag)" title="Remove tag">×</button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+
       <!-- Action buttons -->
       <div class="d-flex justify-content-between gap-2 mt-4">
         <button type="button" class="btn btn-outline-danger" (click)="deleteEvent()" [disabled]="isSubmitting()">

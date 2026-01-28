@@ -1,6 +1,6 @@
 import { Component, OnInit, input, output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { EventService } from '../../../shared/services/event.service';
@@ -16,7 +16,7 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 @Component({
   selector: 'app-edit-event-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BaseModal],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, BaseModal],
   templateUrl: './edit-event-modal.html',
   styleUrls: ['./edit-event-modal.css'],
 })
@@ -38,6 +38,8 @@ export class EditEventModal implements OnInit {
   apiError = signal('');
   isSubmitting = signal(false);
   isLoading = signal(true);
+  tags = signal<string[]>([]);
+  tagInput = signal('');
 
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
 
@@ -111,6 +113,9 @@ export class EditEventModal implements OnInit {
           },
           { emitEvent: false }
         );
+
+        // Load existing tags
+        this.tags.set(ev.tags ?? []);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -198,9 +203,9 @@ export class EditEventModal implements OnInit {
       title: String(v.title ?? ''),
       start_time: start.toISOString(), // store UTC instant
       end_time: end.toISOString(),
-      description: (v.description ?? '') as string,
-      notes: (v.notes ?? '') as string,
-      tags: [],
+      description: v.description ?? '',
+      notes: v.notes ?? '',
+      tags: this.tags(),
     };
 
     this.isSubmitting.set(true);
@@ -234,5 +239,24 @@ export class EditEventModal implements OnInit {
   hasError(controlName: string): boolean {
     const c = this.form.get(controlName);
     return !!c && c.touched && c.invalid;
+  }
+
+  addTag(): void {
+    const tag = this.tagInput().trim();
+    if (tag && !this.tags().includes(tag)) {
+      this.tags.update(current => [...current, tag]);
+      this.tagInput.set('');
+    }
+  }
+
+  removeTag(tag: string): void {
+    this.tags.update(current => current.filter(t => t !== tag));
+  }
+
+  onTagKeyPress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addTag();
+    }
   }
 }

@@ -116,6 +116,36 @@
         ></textarea>
       </div>
 
+      <!-- Tags -->
+      <div class="mb-3">
+        <label class="form-label">Tags</label>
+        <div class="tag-input-container">
+          <input
+            type="text"
+            class="form-control app-input"
+            placeholder="Type a tag and press Enter"
+            [(ngModel)]="tagInput"
+            [ngModelOptions]="{standalone: true}"
+            (keypress)="onTagKeyPress($event)"
+          />
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="addTag()">
+            Add
+          </button>
+        </div>
+        @if (tags().length > 0) {
+          <div class="tags-list">
+            @for (tag of tags(); track tag) {
+              <span class="tag-chip-editable">
+                {{ tag }}
+                <button type="button" class="tag-remove" (click)="removeTag(tag)" aria-label="Remove tag">
+                  ×
+                </button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+
       <!-- Action buttons -->
       <div class="d-flex justify-content-end gap-2 mt-4">
         <button

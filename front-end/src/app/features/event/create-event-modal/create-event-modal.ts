@@ -1,6 +1,6 @@
 import { Component, OnInit, output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { EventService } from '../../../shared/services/event.service';
@@ -17,7 +17,7 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 @Component({
   selector: 'app-create-event-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BaseModal],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, BaseModal],
   templateUrl: './create-event-modal.html',
   styleUrls: ['./create-event-modal.css'],
 })
@@ -35,6 +35,8 @@ export class CreateEventModal implements OnInit {
   apiError = signal('');
   isSubmitting = signal(false);
   isLoadingCalendars = signal(true);
+  tags = signal<string[]>([]);
+  tagInput = signal('');
 
   // Computed signal for derived state
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
@@ -150,7 +152,7 @@ export class CreateEventModal implements OnInit {
       end_time: end.toISOString(),
       description: v.description ?? '',
       notes: v.notes ?? '',
-      tags: [],
+      tags: this.tags(),
     };
 
     this.isSubmitting.set(true);
@@ -171,6 +173,25 @@ export class CreateEventModal implements OnInit {
         );
       },
     });
+  }
+
+  addTag(): void {
+    const tag = this.tagInput().trim();
+    if (tag && !this.tags().includes(tag)) {
+      this.tags.update(tags => [...tags, tag]);
+      this.tagInput.set('');
+    }
+  }
+
+  removeTag(tagToRemove: string): void {
+    this.tags.update(tags => tags.filter(t => t !== tagToRemove));
+  }
+
+  onTagKeyPress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addTag();
+    }
   }
 
   hasError(controlName: string): boolean {
