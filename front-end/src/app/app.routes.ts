@@ -77,8 +77,8 @@ export const routes: Routes = [
       { path: 'create-event', component: CreateEvent },
       { path: 'view-event/:eventId', component: ViewEvent },
       { path: 'view-event', component: ViewEvent },
-      { path: 'edit-event', component: EditEvent },
-      { path: 'delete-event', component: DeleteEvent },
+      { path: 'edit-event/:eventId', component: EditEvent },
+      { path: 'delete-event/:eventId', component: DeleteEvent },
 
       { path: 'create-poll', component: CreatePoll },
       { path: 'view-poll', component: ViewPoll },

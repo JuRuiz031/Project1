@@ -4,8 +4,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { EventService } from '../../../shared/services/event.service';
+import { CalendarService } from '../../../shared/services/calendar.service';
+
 import { CreateEventDTO } from '../../../shared/models/events/create-event.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
+
+import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
+import { CalendarSummaryDTO } from '../../../shared/models/calendars/calendar-summary.dto';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
@@ -20,14 +25,13 @@ export class CreateEvent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private eventService = inject(EventService);
+  private calendarService = inject(CalendarService);
 
-  calendars: CalendarOption[] = [
-    { id: '1', name: 'My Admin Calendar', isAdmin: true },
-    { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
-  ];
+  calendars: CalendarOption[] = [];
 
   apiError = '';
   isSubmitting = false;
+  isLoadingCalendars = false;
 
   form = this.fb.group({
     calendarId: ['', [Validators.required]],
@@ -41,12 +45,49 @@ export class CreateEvent implements OnInit {
   });
 
   ngOnInit(): void {
-    const firstAdmin = this.calendars.find(c => c.isAdmin);
-    if (firstAdmin) this.form.patchValue({ calendarId: firstAdmin.id });
+    // const firstAdmin = this.calendars.find(c => c.isAdmin);
+    // if (firstAdmin) this.form.patchValue({ calendarId: firstAdmin.id });
+    this.loadCalendars();
   }
 
   get adminCalendars(): CalendarOption[] {
     return this.calendars.filter(c => c.isAdmin);
+  }
+
+  private loadCalendars(): void {
+    this.apiError = '';
+    this.isLoadingCalendars = true;
+
+    this.calendarService.getHomepage().subscribe({
+      next: (home: CalendarHomeDTO) => {
+        this.isLoadingCalendars = false;
+
+        this.calendars = home.calendars.map((c: CalendarSummaryDTO) => ({
+          id: c.calendar_id,
+          name: c.name,
+          isAdmin: c.is_admin,
+        }));
+
+        // pick default: first admin if possible, else first calendar
+        const firstAdmin = this.calendars.find(c => c.isAdmin);
+        const firstAny = this.calendars[0];
+        const selected = firstAdmin ?? firstAny;
+
+        if (selected) {
+          this.form.patchValue({ calendarId: selected.id }, { emitEvent: false });
+        } else {
+          this.apiError = 'No calendars available. Create or join a calendar first.';
+        }
+      },
+      error: (err) => {
+        this.isLoadingCalendars = false;
+        this.apiError =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Could not load calendars';
+      },
+    });
   }
 
   private getUserIdFromStorage(): string | null {

@@ -5,21 +5,13 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import { EventService } from '../../../shared/services/event.service';
 import { UpdateEventDTO } from '../../../shared/models/events/update-event.dto';
+
 import { CalendarService } from '../../../shared/services/calendar.service';
+import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
+import { CalendarSummaryDTO } from '../../../shared/models/calendars/calendar-summary.dto';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
-
-type EventDTO = {
-  calendarId: string;
-  title: string;
-  startDate: string;
-  startTime: string;
-  endDate: string;
-  endTime: string;
-  description: string;
-  notes: string;
-};
 
 @Component({
   selector: 'app-edit-event',
@@ -35,27 +27,13 @@ export class EditEvent implements OnInit {
   private eventService = inject(EventService);
   private calendarService = inject(CalendarService);
 
-  private isEndAfterStart(
-    startDate: string,
-    startTime: string,
-    endDate: string,
-    endTime: string
-  ): boolean {
-  const startKey = `${startDate}T${startTime}`;
-  const endKey = `${endDate}T${endTime}`;
-  return endKey > startKey; // strict "after"
-  }
-
-
   private eventId = '';
 
-  calendars: CalendarOption[] = [
-    { id: '1', name: 'My Admin Calendar', isAdmin: true },
-    { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
-  ];
+  calendars: CalendarOption[] = [];
 
   apiError = '';
   isSubmitting = false;
+  isLoading = false;
 
   form = this.fb.group({
     calendarId: ['', [Validators.required]],
@@ -69,42 +47,73 @@ export class EditEvent implements OnInit {
   });
 
   ngOnInit(): void {
-  const id = this.route.snapshot.paramMap.get('eventId');
-  if (!id) {
-    this.apiError = 'Missing event id';
-    return;
+    const id = this.route.snapshot.paramMap.get('eventId');
+    if (!id) {
+      this.apiError = 'Missing event id';
+      return;
+    }
+    this.eventId = id;
+
+    this.loadCalendars();
+    this.loadEvent(id);
   }
-  this.eventId = id;
-
-  this.calendarService.getByEventIds([id]).subscribe({
-    next: (res: CalendarFilterResponseDTO) => {
-      const ev = res.events?.[0];
-      if (!ev) {
-        this.apiError = 'Event not found';
-        return;
-      }
-
-      const start = this.isoToDateTime(ev.start_time);
-      const end = this.isoToDateTime(ev.end_time);
-
-      this.form.patchValue({
-        calendarId: ev.calendar_id ?? '',
-        title: ev.title ?? '',
-        startDate: start.date,
-        startTime: start.time,
-        endDate: end.date,
-        endTime: end.time,
-        description: ev.description ?? '',
-        notes: ev.notes ?? '',
-      });
-    },
-    error: () => (this.apiError = 'Could not load event'),
-  });
-}
-
 
   get adminCalendars(): CalendarOption[] {
     return this.calendars.filter(c => c.isAdmin);
+  }
+
+  private loadCalendars(): void {
+    this.calendarService.getHomepage().subscribe({
+      next: (home: CalendarHomeDTO) => {
+        this.calendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
+          id: c.calendar_id,
+          name: c.name,
+          isAdmin: c.is_admin,
+        }));
+      },
+      error: (err) => {
+        // not fatal to edit (but affects dropdown options)
+        console.warn('Could not load calendars', err);
+      },
+    });
+  }
+
+  private loadEvent(id: string): void {
+    this.apiError = '';
+    this.isLoading = true;
+
+    this.calendarService.getByEventIds([id]).subscribe({
+      next: (res: CalendarFilterResponseDTO) => {
+        this.isLoading = false;
+        const ev = res.events?.[0];
+        if (!ev) {
+          this.apiError = 'Event not found';
+          return;
+        }
+
+        const start = this.isoToDateTime(ev.start_time);
+        const end = this.isoToDateTime(ev.end_time);
+
+        this.form.patchValue({
+          calendarId: ev.calendar_id ?? '',
+          title: ev.title ?? '',
+          startDate: start.date,
+          startTime: start.time,
+          endDate: end.date,
+          endTime: end.time,
+          description: ev.description ?? '',
+          notes: ev.notes ?? '',
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.apiError =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Could not load event';
+      },
+    });
   }
 
   private isoToDateTime(iso: string): { date: string; time: string } {
@@ -112,8 +121,11 @@ export class EditEvent implements OnInit {
     const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
     if (!match) return { date: '', time: '' };
     return { date: match[1], time: match[2] };
-}
+  }
 
+  private isEndAfterStart(startDate: string, startTime: string, endDate: string, endTime: string): boolean {
+    return `${endDate}T${endTime}` > `${startDate}T${startTime}`; // strict
+  }
 
   saveChanges(): void {
     this.apiError = '';
@@ -122,13 +134,17 @@ export class EditEvent implements OnInit {
       this.apiError = 'Missing event id';
       return;
     }
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     const v = this.form.getRawValue();
+
+    if (!this.isEndAfterStart(String(v.startDate), String(v.startTime), String(v.endDate), String(v.endTime))) {
+      this.apiError = 'End must be after start.';
+      return;
+    }
 
     const start = new Date(`${v.startDate}T${v.startTime}:00`);
     const end = new Date(`${v.endDate}T${v.endTime}:00`);
@@ -142,14 +158,6 @@ export class EditEvent implements OnInit {
       return;
     }
 
-
-
-    if (!this.isEndAfterStart(String(v.startDate), String(v.startTime), String(v.endDate), String(v.endTime))) {
-      this.apiError = 'End must be after start.';
-      return;
-    }
-
-
     const dto: UpdateEventDTO = {
       calendar_id: String(v.calendarId),
       title: String(v.title),
@@ -157,7 +165,7 @@ export class EditEvent implements OnInit {
       end_time: end.toISOString(),
       description: v.description ?? '',
       notes: v.notes ?? '',
-      tags: [], // keep consistent with your create flow; wire real tags later
+      tags: [],
     };
 
     this.isSubmitting = true;
@@ -165,7 +173,8 @@ export class EditEvent implements OnInit {
     this.eventService.update(this.eventId, dto).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.router.navigateByUrl('/main-page');
+        // better UX: go back to the view page for this event
+        this.router.navigateByUrl(`/view-event/${this.eventId}`);
       },
       error: (err) => {
         this.isSubmitting = false;
@@ -179,25 +188,11 @@ export class EditEvent implements OnInit {
   }
 
   deleteEvent(): void {
-    // Leaving placeholder behavior unchanged per your constraints.
-    this.apiError = '';
-    this.isSubmitting = true;
-
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.router.navigateByUrl('/delete-event');
-    }, 400);
+    this.router.navigateByUrl(`/delete-event/${this.eventId}`);
   }
 
   cancelEdit(): void {
-    // Leaving placeholder behavior unchanged per your constraints.
-    this.apiError = '';
-    this.isSubmitting = true;
-
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.router.navigateByUrl('/view-event');
-    }, 200);
+    this.router.navigateByUrl(`/view-event/${this.eventId}`);
   }
 
   hasError(controlName: string): boolean {

@@ -1,141 +1,140 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { map, catchError, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
 
-import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { NavigationService } from '../../../shared/services/navigation.service';
-import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
+import { CalendarSummaryDTO } from '../../../shared/models/calendars/calendar-summary.dto';
+import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
-type EventDisplay = {
-  calendarId: string;
-  title: string;
-  startDate: string;
-  startTime: string;
-  endDate: string;
-  endTime: string;
-  description: string;
-  notes: string;
-};
 
 @Component({
   selector: 'app-view-event',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './view-event.html',
   styleUrls: ['./view-event.css'],
 })
 export class ViewEvent implements OnInit {
+  private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
-  private calendarApi = inject(CalendarApiService);
   private calendarService = inject(CalendarService);
   private navigation = inject(NavigationService);
 
-  calendars = signal<CalendarOption[]>([]);
-  apiError = signal('');
-  event = signal<EventDisplay | null>(null);
-  adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
-  canEdit = computed(() => {
-    const e = this.event();
-    if (!e) return false;
-    return this.adminCalendars().some(c => c.id === e.calendarId);
+  calendars: CalendarOption[] = [];
+  apiError = '';
+  isLoading = false;
+
+  private eventId = '';
+
+  form = this.fb.group({
+    calendarId: [{ value: '', disabled: true }],
+    title: [{ value: '', disabled: true }],
+    startDate: [{ value: '', disabled: true }],
+    startTime: [{ value: '', disabled: true }],
+    endDate: [{ value: '', disabled: true }],
+    endTime: [{ value: '', disabled: true }],
+    description: [{ value: '', disabled: true }],
+    notes: [{ value: '', disabled: true }],
   });
 
   ngOnInit(): void {
-    // Load calendars first
-    this.loadCalendars();
+    this.form.disable({ emitEvent: false });
 
-    // Then load the event
-    const eventId = this.route.snapshot.paramMap.get('eventId');
-    if (!eventId) {
-      this.apiError.set('Missing event id');
+    const id = this.route.snapshot.paramMap.get('eventId');
+    if (!id) {
+      this.apiError = 'Missing event id';
       return;
     }
+    this.eventId = id;
 
-    this.loadEvent(eventId);
+    // Load calendars (for dropdown labels/admin status) + load event
+    this.loadCalendars();
+    this.loadEvent(id);
   }
 
-  private loadCalendars(): void {
-    this.calendarService.getHomepage().pipe(
-      map((home: CalendarHomeDTO) => this.mapCalendars(home.calendars ?? [])),
-      tap(calendars => console.log('[ViewEvent] Calendars loaded:', calendars)),
-      catchError(err => {
-        console.error('[ViewEvent] Failed to load calendars:', err);
-        return of([]);
-      })
-    ).subscribe(calendars => {
-      this.calendars.set(calendars);
-    });
+  get adminCalendars(): CalendarOption[] {
+    return this.calendars.filter(c => c.isAdmin);
   }
-
-  private loadEvent(eventId: string): void {
-    this.calendarApi.getByEventIds([eventId]).pipe(
-      map((res: CalendarFilterResponseDTO) => res?.events?.[0]),
-      tap(event => {
-        if (!event) {
-          this.apiError.set('Event not found');
-        }
-      }),
-      catchError(() => {
-        this.apiError.set('Could not load event');
-        return of(null);
-      })
-    ).subscribe(event => {
-      if (event) {
-        this.displayEvent(event);
-      }
-    });
-  }
-
-  private mapCalendars(rawCalendars: any[]): CalendarOption[] {
-    return rawCalendars
-      .map((c: any) => ({
-        id: String(c.calendar_id ?? c.id ?? c.calendarId ?? c._id ?? ''),
-        name: String(c.name ?? c.title ?? c.calendar_name ?? 'Untitled'),
-        isAdmin: c.isAdmin ?? c.is_admin ?? false
-      }))
-      .filter(c => c.id);
-  }
-
-
 
   goBack(): void {
     this.navigation.goBack();
   }
 
   goToEditEvent(): void {
-    this.navigation.goToEditEvent();
+    this.navigation.goToEditEvent(this.eventId);
   }
 
-  private displayEvent(event: EventDTO): void {
-    this.apiError.set('');
+  private loadCalendars(): void {
+    this.calendarService.getHomepage().subscribe({
+      next: (home: CalendarHomeDTO) => {
+        this.calendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
+          id: c.calendar_id,
+          name: c.name,
+          isAdmin: c.is_admin,
+        }));
+      },
+      error: (err) => {
+        // not fatal for viewing an event; only affects dropdown names/admin filtering
+        console.warn('Could not load calendars', err);
+      },
+    });
+  }
 
+  private loadEvent(eventId: string): void {
+    this.apiError = '';
+    this.isLoading = true;
+
+    this.calendarService.getByEventIds([eventId]).subscribe({
+      next: (res: CalendarFilterResponseDTO) => {
+        this.isLoading = false;
+        const event = res?.events?.[0];
+        if (!event) {
+          this.apiError = 'Event not found';
+          return;
+        }
+        this.displayEvent(event);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.apiError =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Could not load event';
+      },
+    });
+  }
+
+  displayEvent(event: EventDTO): void {
     const start = this.isoToDateTime(event.start_time);
     const end = this.isoToDateTime(event.end_time);
 
-    this.event.set({
-      calendarId: event.calendar_id ?? '',
-      title: event.title ?? '',
-      startDate: start.date,
-      startTime: start.time,
-      endDate: end.date,
-      endTime: end.time,
-      description: event.description ?? '',
-      notes: event.notes ?? '',
-    });
+    this.form.patchValue(
+      {
+        calendarId: event.calendar_id ?? '',
+        title: event.title ?? '',
+        startDate: start.date,
+        startTime: start.time,
+        endDate: end.date,
+        endTime: end.time,
+        description: event.description ?? '',
+        notes: event.notes ?? '',
+      },
+      { emitEvent: false }
+    );
+
+    this.form.disable({ emitEvent: false });
   }
 
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
-
     const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
     if (!match) return { date: '', time: '' };
-
     return { date: match[1], time: match[2] };
   }
 }

@@ -64,9 +64,13 @@ export class NavigationService {
     this.navigateTo(['/view-event', eventId]);
   }
 
-  // Navigate to edit event page
-  goToEditEvent(): void {
-    this.navigateTo('/edit-event');
+  // Navigate to edit event page (with optional eventId for pre-filled editing)
+  goToEditEvent(eventId?: string): void {
+    if (eventId) {
+      this.navigateTo(['/edit-event', eventId]);
+    } else {
+      this.navigateTo('/edit-event');
+    }
   }
 }
 
