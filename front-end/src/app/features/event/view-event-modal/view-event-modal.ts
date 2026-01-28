@@ -1,6 +1,6 @@
 import { Component, input, output, signal, computed, effect, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
@@ -19,6 +19,7 @@ type EventDisplay = {
   endTime: string;
   description: string;
   notes: string;
+  tags: string[];
 };
 
 @Component({
@@ -37,11 +38,13 @@ export class ViewEventModal implements OnDestroy {
   back = output<void>();
   close = output<void>();
   editEvent = output<string>();
+  showSuccessMessage = input<boolean>(false);
 
   // State
   calendars = signal<CalendarOption[]>([]);
   apiError = signal('');
   event = signal<EventDisplay | null>(null);
+  showNotification = signal(false);
 
   // Computed
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
@@ -60,6 +63,13 @@ export class ViewEventModal implements OnDestroy {
         this.loadCalendars();
         this.loadEvent(id);
       }
+      
+      // Show notification if success message is true
+      const showSuccess = this.showSuccessMessage();
+      if (showSuccess) {
+        this.showNotification.set(true);
+        setTimeout(() => this.showNotification.set(false), 3000);
+      }
     });
   }
 
@@ -71,6 +81,7 @@ export class ViewEventModal implements OnDestroy {
     this.calendarService
       .getHomepage()
       .pipe(
+        take(1),
         map((home: CalendarHomeDTO) => this.mapCalendars(home.calendars ?? [])),
         tap(calendars => console.log('[ViewEventModal] Calendars loaded:', calendars)),
         catchError(err => {
@@ -89,6 +100,7 @@ export class ViewEventModal implements OnDestroy {
     this.calendarApi
       .getByEventIds([eventId])
       .pipe(
+        take(1),
         map((res: CalendarFilterResponseDTO) => res?.events?.[0]),
         tap(ev => {
           if (!ev) this.apiError.set('Event not found');
@@ -129,10 +141,10 @@ export class ViewEventModal implements OnDestroy {
       endTime: end.time,
       description: ev.description ?? '',
       notes: ev.notes ?? '',
+      tags: ev.tags ?? [],
     });
   }
 
-  // ✅ SAME FIX AS YOUR OLD view-event.ts
   private parseServerInstant(iso: string): Date {
     // If server includes timezone (Z or ±hh:mm), Date can parse safely.
     // If not, assume server meant UTC and append 'Z'.
@@ -140,7 +152,6 @@ export class ViewEventModal implements OnDestroy {
     return new Date(hasTz ? iso : `${iso}Z`);
   }
 
-  // ✅ ISO -> Local date/time for display
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
 
@@ -152,6 +163,37 @@ export class ViewEventModal implements OnDestroy {
     const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; // LOCAL time
     return { date, time };
+  }
+
+  getTimezoneAbbr(): string {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZoneName: 'short',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const parts = formatter.formatToParts(now);
+    const tzPart = parts.find(p => p.type === 'timeZoneName');
+    return tzPart?.value ?? 'UTC';
+  }
+
+  onShare(): void {
+    const event = this.event();
+    if (!event) return;
+
+    const shareText = `Event: ${event.title}\nDate: ${event.startDate} ${event.startTime} - ${event.endDate} ${event.endTime}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: event.title,
+        text: shareText,
+      }).catch(err => console.error('Share failed:', err));
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareText).then(() => {
+        this.showNotification.set(true);
+        setTimeout(() => this.showNotification.set(false), 2000);
+      });
+    }
   }
 
   onBack(): void {

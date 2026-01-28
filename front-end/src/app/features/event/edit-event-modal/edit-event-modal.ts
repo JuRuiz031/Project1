@@ -1,6 +1,7 @@
 import { Component, OnInit, input, output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { take } from 'rxjs/operators';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { EventService } from '../../../shared/services/event.service';
@@ -16,7 +17,7 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
 @Component({
   selector: 'app-edit-event-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BaseModal],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, BaseModal],
   templateUrl: './edit-event-modal.html',
   styleUrls: ['./edit-event-modal.css'],
 })
@@ -38,6 +39,8 @@ export class EditEventModal implements OnInit {
   apiError = signal('');
   isSubmitting = signal(false);
   isLoading = signal(true);
+  tags = signal<string[]>([]);
+  tagInput = signal('');
 
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
 
@@ -66,27 +69,31 @@ export class EditEventModal implements OnInit {
   }
 
   private loadCalendars(): void {
-    this.calendarService.getHomepage().subscribe({
-      next: (home: CalendarHomeDTO) => {
-        const mappedCalendars: CalendarOption[] = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
-          id: c.calendar_id,
-          name: c.name,
-          isAdmin: c.is_admin,
-        }));
-        this.calendars.set(mappedCalendars);
-      },
-      error: (err) => {
-        // not fatal
-        console.warn('Could not load calendars', err);
-      },
-    });
+    this.calendarService.getHomepage()
+      .pipe(take(1))
+      .subscribe({
+        next: (home: CalendarHomeDTO) => {
+          const mappedCalendars: CalendarOption[] = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
+            id: c.calendar_id,
+            name: c.name,
+            isAdmin: c.is_admin,
+          }));
+          this.calendars.set(mappedCalendars);
+        },
+        error: (err) => {
+          // not fatal
+          console.warn('Could not load calendars', err);
+        },
+      });
   }
 
   private loadEvent(id: string): void {
     this.apiError.set('');
     this.isLoading.set(true);
 
-    this.calendarService.getByEventIds([id]).subscribe({
+    this.calendarService.getByEventIds([id])
+      .pipe(take(1))
+      .subscribe({
       next: (res: CalendarFilterResponseDTO) => {
         this.isLoading.set(false);
         const ev = res.events?.[0];
@@ -111,6 +118,9 @@ export class EditEventModal implements OnInit {
           },
           { emitEvent: false }
         );
+
+        // Load existing tags
+        this.tags.set(ev.tags ?? []);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -127,7 +137,7 @@ export class EditEventModal implements OnInit {
   /**
    * If backend sends timestamps without timezone (e.g. "2026-01-26T17:30:00"),
    * JS will treat that as LOCAL time and you get a +6 hour drift.
-   * Fix: if no timezone suffix, assume UTC and append 'Z'.
+   * Fix: if no timezone assume UTC and append 'Z'.
    */
   private parseServerInstant(iso: string): Date {
     const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
@@ -200,12 +210,14 @@ export class EditEventModal implements OnInit {
       end_time: end.toISOString(),
       description: (v.description ?? '') as string,
       notes: (v.notes ?? '') as string,
-      tags: [],
+      tags: this.tags(),
     };
 
     this.isSubmitting.set(true);
 
-    this.eventService.update(this.eventIdValue, dto).subscribe({
+    this.eventService.update(this.eventIdValue, dto)
+      .pipe(take(1))
+      .subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.eventUpdated.emit(this.eventIdValue);
@@ -234,5 +246,38 @@ export class EditEventModal implements OnInit {
   hasError(controlName: string): boolean {
     const c = this.form.get(controlName);
     return !!c && c.touched && c.invalid;
+  }
+
+  addTag(): void {
+    const tag = this.tagInput().trim();
+    if (tag && !this.tags().includes(tag)) {
+      this.tags.update(current => [...current, tag]);
+      this.tagInput.set('');
+    }
+  }
+
+  removeTag(tag: string): void {
+    this.tags.update(current => current.filter(t => t !== tag));
+  }
+
+  onTagKeyPress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addTag();
+    }
+  }
+
+  /**
+   * Get user's timezone abbreviation (e.g., EST, PST, UTC)
+   */
+  getTimezoneAbbr(): string {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZoneName: 'short',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const parts = formatter.formatToParts(now);
+    const tzPart = parts.find(p => p.type === 'timeZoneName');
+    return tzPart?.value ?? 'UTC';
   }
 }

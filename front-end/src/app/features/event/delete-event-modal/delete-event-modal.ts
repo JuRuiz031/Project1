@@ -1,5 +1,6 @@
 import { Component, OnInit, input, output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { take } from 'rxjs/operators';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
@@ -45,7 +46,9 @@ export class DeleteEventModal implements OnInit {
     this.eventIdValue = id;
 
     // Load the event and calendar name
-    this.calendarService.getByEventIds([id]).subscribe({
+    this.calendarService.getByEventIds([id])
+      .pipe(take(1))
+      .subscribe({
       next: (res: CalendarFilterResponseDTO) => {
         const ev = res.events?.[0];
         if (!ev) {
@@ -57,7 +60,9 @@ export class DeleteEventModal implements OnInit {
         this.eventName.set(ev.title ?? 'Event');
 
         // Load calendar to get friendly name
-        this.calendarService.getHomepage().subscribe({
+        this.calendarService.getHomepage()
+          .pipe(take(1))
+          .subscribe({
           next: (home) => {
             const calendar = home.calendars?.find(c => c.calendar_id === this.calendarId);
             this.calendarName.set(calendar?.name || this.calendarId || 'Calendar');
@@ -109,7 +114,9 @@ export class DeleteEventModal implements OnInit {
 
     this.isDeleting.set(true);
 
-    this.eventService.delete(this.eventIdValue, dto).subscribe({
+    this.eventService.delete(this.eventIdValue, dto)
+      .pipe(take(1))
+      .subscribe({
       next: (deleted: boolean) => {
         this.isDeleting.set(false);
 

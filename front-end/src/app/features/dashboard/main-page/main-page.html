@@ -4,6 +4,7 @@
     <app-calendar-display 
       class="card card--calendar"
       [events]="events()"
+      [selectedTags]="selectedTags()"
       (openEventSelector)="openEventSelector()"
       (eventClicked)="onEventClicked($event)"
       (createEvent)="openCreateEvent()">
@@ -21,7 +22,8 @@
         class="card"
         [calendars]="calendars()"
         [tags]="tags()"
-        (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)">
+        (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)"
+        (selectedTagsChange)="onSelectedTagsChange($event)">
       </app-display-options>
 
       <app-polls-window class="card"></app-polls-window>
@@ -59,6 +61,7 @@
   @if (modalState() === 'event-selector') {
     <app-event-selector-modal
       [events]="events()"
+      [calendars]="calendars()"
       (eventSelected)="onEventSelected($event)"
       (closeModal)="closeAllModals()">
     </app-event-selector-modal>
@@ -68,6 +71,7 @@
   @if (modalState() === 'view-event') {
     <app-view-event-modal
       [eventId]="selectedEventId()"
+      [showSuccessMessage]="showEventSuccessMessage()"
       (back)="onViewEventBack()"
       (close)="closeAllModals()"
       (editEvent)="openEditEvent(selectedEventId()!)">

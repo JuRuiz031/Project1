@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, effect, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, effect, inject } from '@angular/core';
 import { map, catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -51,7 +51,7 @@ type ModalState =
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
 })
-export class MainPageComponent implements OnInit {
+export class MainPageComponent implements OnInit, OnDestroy {
   private calendarService = inject(CalendarService);
 
   // Signals for reactive state
@@ -61,13 +61,18 @@ export class MainPageComponent implements OnInit {
   polls = signal<any[]>([]);
   selectedCalendarIds = signal<string[]>([]);
   selectedCalendarId = signal<string | null>(null);
+  selectedTags = signal<string[]>([]);
 
   // Modal state machine
   modalState = signal<ModalState>('none');
   selectedEventId = signal<string | null>(null);
+  showEventSuccessMessage = signal(false);
 
   // User info
   userId: string | null = null;
+
+  // Refresh interval
+  private refreshInterval?: number;
 
   constructor() {
     // Effect: react to calendar selection changes
@@ -118,7 +123,35 @@ export class MainPageComponent implements OnInit {
 
     // Load calendar home data
     this.loadCalendarHome();
+
+    // Refresh events when user returns to tab (prevents stale data)
+    window.addEventListener('focus', this.handleWindowFocus);
+
+    // Poll every 30 seconds while page is active (keeps data fresh)
+    this.refreshInterval = window.setInterval(() => {
+      if (this.selectedCalendarIds().length > 0) {
+        console.log('[MainPage] Auto-refresh (30s polling)');
+        this.refreshEvents();
+      }
+    }, 30000);
   }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('focus', this.handleWindowFocus);
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+  }
+
+  /**
+   * Refresh events when user returns to the tab
+   */
+  private handleWindowFocus = (): void => {
+    if (this.selectedCalendarIds().length > 0) {
+      console.log('[MainPage] Window focused - refreshing events');
+      this.refreshEvents();
+    }
+  };
 
   /**
    * Load calendar home (calendars + tags)
@@ -214,6 +247,14 @@ export class MainPageComponent implements OnInit {
   }
 
   /**
+   * Handle tag selection changes from DisplayOptions
+   */
+  onSelectedTagsChange(tags: string[]): void {
+    console.log('[MainPage] selectedTagsChange received:', tags);
+    this.selectedTags.set(tags);
+  }
+
+  /**
    * Open event selector modal
    */
   openEventSelector(): void {
@@ -254,6 +295,15 @@ export class MainPageComponent implements OnInit {
     this.modalState.set('none');
     this.selectedEventId.set(null);
     this.selectedCalendarId.set(null);
+    this.showEventSuccessMessage.set(false);
+  }
+
+  /**
+   * Open create calendar modal
+   */
+  openCreateCalendar(): void {
+    console.log('[MainPage] Opening create calendar modal');
+    this.modalState.set('create-calendar');
   }
 
   /**
@@ -291,11 +341,14 @@ export class MainPageComponent implements OnInit {
   }
 
   /**
-   * Handle event updated - refresh and close
+   * Handle event updated - refresh and show view modal
    */
   onEventUpdated(eventId: string): void {
     console.log('[MainPage] Event updated:', eventId);
     this.refreshEvents();
+    this.selectedEventId.set(eventId);
+    this.showEventSuccessMessage.set(true);
+    this.modalState.set('view-event');
   }
 
   /**
@@ -312,6 +365,15 @@ export class MainPageComponent implements OnInit {
   onDeleteRequested(eventId: string): void {
     console.log('[MainPage] Delete requested from edit modal:', eventId);
     this.openDeleteEvent(eventId);
+  }
+
+  /**
+   * Handle calendar created - reload calendar list
+   */
+  onCalendarCreated(calendarId: string): void {
+    console.log('[MainPage] Calendar created:', calendarId);
+    this.loadCalendarHome();
+    this.closeAllModals();
   }
 
   /**
