@@ -11,7 +11,10 @@
 
     <!-- RIGHT: Side panel stack -->
     <aside class="side">
-      <app-calendar-options class="card"></app-calendar-options>
+      <app-calendar-options
+        class="card"
+        (createCalendar)="openCreateCalendar()">
+      </app-calendar-options>
 
       <app-display-options
         class="card"

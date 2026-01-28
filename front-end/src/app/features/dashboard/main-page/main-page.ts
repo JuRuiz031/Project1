@@ -170,6 +170,26 @@ export class MainPageComponent implements OnInit {
     this.selectedCalendarIds.set(ids);
   }
 
+  openCreateCalendar(): void {
+    console.log('[MainPage] Opening create calendar modal');
+    this.modalState.set('create-calendar');
+  }
+
+  onCalendarCreated(calendarId: string): void {
+    console.log('[MainPage] Calendar created:', calendarId);
+
+    // refresh right-side options + tag list
+    this.loadCalendarHome();
+
+    // ensure new calendar is selected (keeps same "end state" as page redirect)
+    const current = this.selectedCalendarIds();
+    if (!current.includes(calendarId)) {
+      this.selectedCalendarIds.set([...current, calendarId]);
+    } else {
+      this.selectedCalendarIds.set([...current]);
+    }
+  }
+
   /**
    * Open event selector modal
    */
