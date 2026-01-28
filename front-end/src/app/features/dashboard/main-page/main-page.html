@@ -3,7 +3,9 @@
     <!-- LEFT: Calendar display area -->
     <app-calendar-display 
       class="card card--calendar"
-      [events]="events()">
+      [events]="events()"
+      (openEventSelector)="openEventSelector()"
+      (eventClicked)="onEventClicked($event)">
     </app-calendar-display>
 
     <!-- RIGHT: Side panel stack -->
@@ -20,4 +22,22 @@
       <app-polls-window class="card"></app-polls-window>
     </aside>
   </section>
+
+  <!-- Event Selector Modal -->
+  @if (modalState() === 'event-selector') {
+    <app-event-selector-modal
+      [events]="events()"
+      (eventSelected)="onEventSelected($event)"
+      (closeModal)="closeAllModals()">
+    </app-event-selector-modal>
+  }
+
+  <!-- View Event Modal -->
+  @if (modalState() === 'view-event') {
+    <app-view-event-modal
+      [eventId]="selectedEventId()"
+      (back)="onViewEventBack()"
+      (close)="closeAllModals()">
+    </app-view-event-modal>
+  }
 </main>

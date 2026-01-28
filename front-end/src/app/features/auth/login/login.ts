@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { BRAND_CONFIG } from '../../../config/brand.config';
 import { LoginRequestDTO } from '../../../shared/models/auth/login-request.dto';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,7 @@ import { UserApiService } from '../../../shared/services/api/user-api.service';
 export class Login {
   private readonly BYPASS_AUTH = false;
   private userApi = inject(UserApiService);
-  private router = inject(Router);
+  private navigation = inject(NavigationService);
   private fb = inject(FormBuilder);
 
   form = this.fb.group({
@@ -45,7 +46,7 @@ export class Login {
         email: 'dev@example.com',
         is_superuser: true,
       }));
-      this.router.navigateByUrl('/dashboard/main-page');
+      this.navigation.goToHome();
       return;
     }
 
@@ -58,7 +59,7 @@ export class Login {
       next: (response) => {
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
-        this.router.navigateByUrl('/dashboard/main-page');
+        this.navigation.goToHome();
       },
       error: (err) => {
         if ([401, 403].includes(err?.status)) {

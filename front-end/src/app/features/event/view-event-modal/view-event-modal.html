@@ -1,8 +1,15 @@
-<div class="container py-4 app-page">
-  <h1 class="h3 mb-3">View Event</h1>
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">View Event</h2>
+      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
+        ✕
+      </button>
+    </div>
 
-  <div class="card app-card shadow-sm">
-    <div class="card-body">
+    <!-- Body -->
+    <div class="modal-body">
       @if (apiError(); as err) {
         <div class="alert alert-danger mb-3">
           {{ err }}
@@ -101,15 +108,20 @@
       }
     </div>
 
-    <div class="card-footer d-flex justify-content-end gap-2">
-      <!-- Back -->
-      <button class="btn btn-outline-light" (click)="goBack()">Back</button>
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" (click)="onBack()">
+        ← Back to Events
+      </button>
 
-      <!-- Edit (only if user has admin access to this calendar) -->
       @if (canEdit()) {
-        <button class="btn btn-primary" (click)="goToEditEvent()">Edit Event</button>
+        <button class="btn btn-primary" (click)="onEditEvent()">
+          Edit Event
+        </button>
       } @else {
-        <button class="btn btn-primary" disabled title="You don't have permission to edit this event">Edit Event</button>
+        <button class="btn btn-primary" disabled title="You don't have permission to edit this event">
+          Edit Event
+        </button>
       }
     </div>
   </div>

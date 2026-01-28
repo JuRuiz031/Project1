@@ -1,0 +1,61 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Select Event</h2>
+      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
+        ✕
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="modal-search">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search events by title, description, or calendar..."
+        [(ngModel)]="searchQuery"
+        aria-label="Search events"
+      />
+    </div>
+
+    <!-- Events List -->
+    <div class="modal-body">
+      @if (filteredEvents().length === 0) {
+        <div class="no-events">
+          @if (events().length === 0) {
+            <p>No events available</p>
+          } @else {
+            <p>No events match your search</p>
+          }
+        </div>
+      } @else {
+        <div class="events-list">
+          @for (event of filteredEvents(); track event.event_id) {
+            <div class="event-item" (click)="onEventSelect(event.event_id)">
+              <div class="event-header">
+                <div class="event-title">{{ event.title }}</div>
+                @if (event.calendar_name) {
+                  <div class="event-calendar">{{ event.calendar_name }}</div>
+                }
+              </div>
+              <div class="event-time">
+                {{ event.start_time | date: 'short' }}
+              </div>
+              @if (event.description) {
+                <div class="event-description">{{ event.description }}</div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" (click)="onClose()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

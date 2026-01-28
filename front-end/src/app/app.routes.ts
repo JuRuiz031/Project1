@@ -69,6 +69,7 @@ export const routes: Routes = [
       { path: 'delete-calendar-group', component: DeleteCalendarGroup },
 
       { path: 'create-event', component: CreateEvent },
+      { path: 'view-event/:eventId', component: ViewEvent },
       { path: 'view-event', component: ViewEvent },
       { path: 'edit-event', component: EditEvent },
       { path: 'delete-event', component: DeleteEvent },

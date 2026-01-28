@@ -6,17 +6,20 @@ import { CalendarDisplay } from './components/calendar-display/calendar-display'
 import { CalendarOptions } from './components/calendar-options/calendar-options';
 import { DisplayOptions } from './components/display-options/display-options';
 import { PollsWindow } from './components/polls-window/polls-window';
+import { EventSelectorModal } from './components/event-selector-modal/event-selector-modal';
+import { ViewEventModal } from '../../event/view-event-modal/view-event-modal';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 type CalendarOptionDTO = { calendar_id: string; name: string };
+type ModalState = 'none' | 'event-selector' | 'view-event';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CalendarDisplay, CalendarOptions, DisplayOptions, PollsWindow],
+  imports: [CalendarDisplay, CalendarOptions, DisplayOptions, PollsWindow, EventSelectorModal, ViewEventModal],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
 })
@@ -30,6 +33,10 @@ export class MainPageComponent implements OnInit {
   polls = signal<any[]>([]);
   selectedCalendarIds = signal<string[]>([]);
 
+  // Modal state machine
+  modalState = signal<ModalState>('none');
+  selectedEventId = signal<string | null>(null);
+
   // User info
   userId: string | null = null;
 
@@ -37,6 +44,7 @@ export class MainPageComponent implements OnInit {
     // Effect: react to calendar selection changes
     effect(() => {
       const ids = this.selectedCalendarIds();
+      const calendars = this.calendars();
       
       if (!ids || ids.length === 0) {
         console.log('[MainPage] No calendars selected -> cleared events/polls');
@@ -48,7 +56,11 @@ export class MainPageComponent implements OnInit {
       console.log('[MainPage] Fetching events for calendars:', ids);
       this.calendarService.getByCalendarIds(ids).pipe(
         map((filtered: CalendarFilterResponseDTO) => ({
-          events: filtered.events ?? [],
+          events: (filtered.events ?? []).map(e => {
+            // Add calendar name to event based on calendar_id
+            const calendar = calendars.find(c => c.calendar_id === e.calendar_id);
+            return { ...e, calendar_name: calendar?.name || 'Unknown' };
+          }),
           polls: filtered.polls ?? []
         })),
         tap(data => console.log('[MainPage] Filtered data loaded:', data)),
@@ -134,5 +146,47 @@ export class MainPageComponent implements OnInit {
   onSelectedCalendarIdsChange(ids: string[]): void {
     console.log('[MainPage] selectedCalendarIdsChange received:', ids);
     this.selectedCalendarIds.set(ids);
+  }
+
+  /**
+   * Open event selector modal
+   */
+  openEventSelector(): void {
+    this.modalState.set('event-selector');
+  }
+
+  /**
+   * When user clicks on event directly in calendar (not from selector)
+   */
+  onEventClicked(eventId: string): void {
+    console.log('[MainPage] Event clicked from calendar:', eventId);
+    this.selectedEventId.set(eventId);
+    this.modalState.set('view-event');
+  }
+
+  /**
+   * When user selects an event from the selector
+   */
+  onEventSelected(eventId: string): void {
+    console.log('[MainPage] Event selected from modal:', eventId);
+    this.selectedEventId.set(eventId);
+    this.modalState.set('view-event');
+  }
+
+  /**
+   * Back button in view-event modal
+   */
+  onViewEventBack(): void {
+    console.log('[MainPage] Back from view-event');
+    this.modalState.set('event-selector');
+  }
+
+  /**
+   * Close all modals
+   */
+  closeAllModals(): void {
+    console.log('[MainPage] Closing all modals');
+    this.modalState.set('none');
+    this.selectedEventId.set(null);
   }
 }

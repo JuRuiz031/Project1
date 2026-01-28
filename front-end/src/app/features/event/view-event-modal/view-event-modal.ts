@@ -1,12 +1,10 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, input, output, signal, computed, effect, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
 import { map, catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
 import { CalendarService } from '../../../shared/services/calendar.service';
-import { NavigationService } from '../../../shared/services/navigation.service';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
@@ -24,21 +22,27 @@ type EventDisplay = {
 };
 
 @Component({
-  selector: 'app-view-event',
+  selector: 'app-view-event-modal',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './view-event.html',
-  styleUrls: ['./view-event.css'],
+  templateUrl: './view-event-modal.html',
+  styleUrls: ['./view-event-modal.css'],
 })
-export class ViewEvent implements OnInit {
-  private route = inject(ActivatedRoute);
+export class ViewEventModal implements OnDestroy {
   private calendarApi = inject(CalendarApiService);
   private calendarService = inject(CalendarService);
-  private navigation = inject(NavigationService);
 
+  // Inputs & Outputs
+  eventId = input<string | null>(null);
+  back = output<void>();
+  close = output<void>();
+
+  // State
   calendars = signal<CalendarOption[]>([]);
   apiError = signal('');
   event = signal<EventDisplay | null>(null);
+
+  // Computed
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
   canEdit = computed(() => {
     const e = this.event();
@@ -46,26 +50,30 @@ export class ViewEvent implements OnInit {
     return this.adminCalendars().some(c => c.id === e.calendarId);
   });
 
-  ngOnInit(): void {
-    // Load calendars first
-    this.loadCalendars();
+  constructor() {
+    // Disable body scroll when modal opens
+    document.body.style.overflow = 'hidden';
 
-    // Then load the event
-    const eventId = this.route.snapshot.paramMap.get('eventId');
-    if (!eventId) {
-      this.apiError.set('Missing event id');
-      return;
-    }
+    effect(() => {
+      const id = this.eventId();
+      if (id) {
+        this.loadCalendars();
+        this.loadEvent(id);
+      }
+    });
+  }
 
-    this.loadEvent(eventId);
+  ngOnDestroy(): void {
+    // Re-enable body scroll when modal closes
+    document.body.style.overflow = '';
   }
 
   private loadCalendars(): void {
     this.calendarService.getHomepage().pipe(
       map((home: CalendarHomeDTO) => this.mapCalendars(home.calendars ?? [])),
-      tap(calendars => console.log('[ViewEvent] Calendars loaded:', calendars)),
+      tap(calendars => console.log('[ViewEventModal] Calendars loaded:', calendars)),
       catchError(err => {
-        console.error('[ViewEvent] Failed to load calendars:', err);
+        console.error('[ViewEventModal] Failed to load calendars:', err);
         return of([]);
       })
     ).subscribe(calendars => {
@@ -97,19 +105,9 @@ export class ViewEvent implements OnInit {
       .map((c: any) => ({
         id: String(c.calendar_id ?? c.id ?? c.calendarId ?? c._id ?? ''),
         name: String(c.name ?? c.title ?? c.calendar_name ?? 'Untitled'),
-        isAdmin: c.isAdmin ?? c.is_admin ?? false
+        isAdmin: c.isAdmin ?? c.is_admin ?? false,
       }))
       .filter(c => c.id);
-  }
-
-
-
-  goBack(): void {
-    this.navigation.goBack();
-  }
-
-  goToEditEvent(): void {
-    this.navigation.goToEditEvent();
   }
 
   private displayEvent(event: EventDTO): void {
@@ -137,5 +135,18 @@ export class ViewEvent implements OnInit {
     if (!match) return { date: '', time: '' };
 
     return { date: match[1], time: match[2] };
+  }
+
+  onBack(): void {
+    this.back.emit();
+  }
+
+  onClose(): void {
+    this.close.emit();
+  }
+
+  onEditEvent(): void {
+    // TODO: emit edit event or navigate to edit modal
+    console.log('[ViewEventModal] Edit event clicked');
   }
 }

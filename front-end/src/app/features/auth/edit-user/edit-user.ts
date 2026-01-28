@@ -1,10 +1,10 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 
 import { UserApiService, UpdateUserDTO } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 @Component({
   selector: 'app-edit-user',
@@ -15,7 +15,7 @@ import { UserApiService, UpdateUserDTO } from '../../../shared/services/api/user
 })
 export class EditUser {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
+  private navigation = inject(NavigationService);
   private userApi = inject(UserApiService);
 
   form: FormGroup;
@@ -101,15 +101,15 @@ export class EditUser {
         finalize(() => this.isSubmitting.set(false))
       )
       .subscribe((res) => {
-        if (res) this.router.navigate(['/account']);
+        if (res) this.navigation.goToAccount();
       });
   }
 
   cancel(): void {
-    this.router.navigate(['/account']);
+    this.navigation.goToAccount();
   }
 
   deleteProfile(): void {
-    this.router.navigate(['/delete-user']);
+    this.navigation.goToDeleteUser();
   }
 }

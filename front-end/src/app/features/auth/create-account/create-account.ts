@@ -1,10 +1,10 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 @Component({
   selector: 'app-create-account',
@@ -15,7 +15,7 @@ import { UserApiService } from '../../../shared/services/api/user-api.service';
 })
 export class CreateAccount {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
+  private navigation = inject(NavigationService);
   private userApi = inject(UserApiService);
 
   form = this.fb.group({
@@ -56,7 +56,7 @@ export class CreateAccount {
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: () => {
-          this.router.navigate(['/login']);
+          this.navigation.goToLogin();
         },
         error: (err) => {
           const message =
@@ -70,6 +70,6 @@ export class CreateAccount {
   }
 
   cancel(): void {
-    this.router.navigate(['/login']);
+    this.navigation.goToLogin();
   }
 }

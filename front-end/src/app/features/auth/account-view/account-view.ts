@@ -1,7 +1,7 @@
 import { Component, signal, inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 type AccountViewModel = {
   id: string;
@@ -18,7 +18,7 @@ type AccountViewModel = {
   styleUrl: './account-view.css',
 })
 export class AccountView {
-  private router = inject(Router);
+  private navigation = inject(NavigationService);
   private userApi = inject(UserApiService);
 
   apiError = signal('');
@@ -69,15 +69,15 @@ export class AccountView {
   }
 
   goToDashboard(): void {
-    this.router.navigate(['/dashboard/main-page']);
+    this.navigation.goToHome();
   }
 
   goToEditUser(): void {
-    this.router.navigate(['/edit-user']);
+    this.navigation.goToEditUser();
   }
 
   logOut(): void {
     localStorage.clear();
-    this.router.navigate(['/login']);
+    this.navigation.goToLogin();
   }
 }

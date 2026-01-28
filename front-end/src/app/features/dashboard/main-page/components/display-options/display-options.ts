@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  EventEmitter,
-  Input,
-  Output,
-  OnChanges,
-  SimpleChanges,
+  input,
+  output,
+  signal,
+  computed,
+  effect,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
+import { CALENDAR_COLOR_PALETTE } from '../calendar-display/calendar-colors';
 
 export type CalendarOptionDTO = { calendar_id: string; name: string };
 
@@ -20,34 +22,48 @@ export type CalendarOptionDTO = { calendar_id: string; name: string };
   templateUrl: './display-options.html',
   styleUrl: './display-options.css',
 })
-export class DisplayOptions implements OnChanges, OnDestroy {
+export class DisplayOptions implements OnDestroy {
   /** receive data from MainPage */
-  @Input() calendars: CalendarOptionDTO[] = [];
-  @Input() tags: string[] = [];
+  calendars = input<CalendarOptionDTO[]>([]);
+  tags = input<string[]>([]);
 
   /** emit selected calendar_ids back to MainPage */
-  @Output() selectedCalendarIdsChange = new EventEmitter<string[]>();
+  selectedCalendarIdsChange = output<string[]>();
 
   /** Reactive form to manage checkbox state */
   checkboxForm = new FormGroup({});
 
+  /** Map of calendar_id to color for displaying colored dots */
+  colorMap = new Map<string, { primary: string; secondary: string }>();
+
   /** Cleanup subscriptions */
   private destroy$ = new Subject<void>();
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['calendars']) return;
+  constructor() {
+    effect(() => {
+      this.rebuildForm(this.calendars());
+    });
+  }
 
-    // Rebuild form when calendars change
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private rebuildForm(calendars: CalendarOptionDTO[]): void {
     this.checkboxForm = new FormGroup({});
+    this.colorMap.clear();
 
-    if (!this.calendars?.length) {
+    if (!calendars?.length) {
       this.emitSelection();
       return;
     }
 
     // Create a FormControl for each calendar (all checked by default)
-    this.calendars.forEach((c) => {
+    calendars.forEach((c, index) => {
       this.checkboxForm.addControl(c.calendar_id, new FormControl(true));
+      // Assign color based on index in palette
+      this.colorMap.set(c.calendar_id, CALENDAR_COLOR_PALETTE[index % CALENDAR_COLOR_PALETTE.length]);
     });
 
     // Subscribe to value changes for instant updates
@@ -61,16 +77,15 @@ export class DisplayOptions implements OnChanges, OnDestroy {
     this.emitSelection();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   private emitSelection(): void {
     const selectedIds = Object.entries(this.checkboxForm.value)
       .filter(([_, isSelected]) => isSelected === true)
       .map(([id]) => id);
 
     this.selectedCalendarIdsChange.emit(selectedIds);
+  }
+
+  getCalendarColor(calendarId: string): string {
+    return this.colorMap.get(calendarId)?.primary || '#cccccc';
   }
 }
