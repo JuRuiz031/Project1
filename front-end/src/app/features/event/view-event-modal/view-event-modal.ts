@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
 import { CalendarService } from '../../../shared/services/calendar.service';
+import { InviteService } from '../../../shared/services/invite.service';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
@@ -32,9 +33,11 @@ type EventDisplay = {
 export class ViewEventModal implements OnDestroy {
   private calendarApi = inject(CalendarApiService);
   private calendarService = inject(CalendarService);
+  private inviteService = inject(InviteService);
 
   // Inputs & Outputs
   eventId = input<string | null>(null);
+  showSuccessMessage = input<boolean>(false);
   back = output<void>();
   close = output<void>();
   editEvent = output<string>();
@@ -43,6 +46,11 @@ export class ViewEventModal implements OnDestroy {
   calendars = signal<CalendarOption[]>([]);
   apiError = signal('');
   event = signal<EventDisplay | null>(null);
+  showNotification = signal(false);
+  showSharePopup = signal(false);
+  shareLink = signal('');
+  isGeneratingLink = signal(false);
+  shareLinkError = signal('');
 
   // Computed
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
@@ -60,6 +68,16 @@ export class ViewEventModal implements OnDestroy {
       if (id) {
         this.loadCalendars();
         this.loadEvent(id);
+      }
+    });
+
+    // Show success notification when triggered
+    effect(() => {
+      if (this.showSuccessMessage()) {
+        this.showNotification.set(true);
+        setTimeout(() => {
+          this.showNotification.set(false);
+        }, 3000);
       }
     });
   }
@@ -168,4 +186,47 @@ export class ViewEventModal implements OnDestroy {
     const id = this.eventId();
     if (id) this.editEvent.emit(id);
   }
-}
+  onShare(): void {
+    const id = this.eventId();
+    if (!id) return;
+
+    this.showSharePopup.set(true);
+    this.isGeneratingLink.set(true);
+    this.shareLinkError.set('');
+
+    // Generate invite link (expires in 7 days by default)
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7);
+
+    this.inviteService.createEventInvite(id, expirationDate.toISOString()).subscribe({
+      next: (response) => {
+        this.isGeneratingLink.set(false);
+        this.shareLink.set(response.invite_link);
+      },
+      error: (err) => {
+        this.isGeneratingLink.set(false);
+        this.shareLinkError.set(
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Failed to generate share link'
+        );
+      },
+    });
+  }
+
+  closeSharePopup(): void {
+    this.showSharePopup.set(false);
+    this.shareLink.set('');
+    this.shareLinkError.set('');
+  }
+
+  copyShareLink(): void {
+    const link = this.shareLink();
+    if (link) {
+      navigator.clipboard.writeText(link).then(() => {
+        // Could add a temporary "Copied!" message here if desired
+        console.log('Link copied to clipboard');
+      });
+    }
+  }}

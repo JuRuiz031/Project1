@@ -58,6 +58,7 @@ export class MainPageComponent implements OnInit {
   // Modal state machine
   modalState = signal<ModalState>('none');
   selectedEventId = signal<string | null>(null);
+  showEventSuccessMessage = signal(false);
 
   // User info
   userId: string | null = null;
@@ -210,6 +211,7 @@ export class MainPageComponent implements OnInit {
     console.log('[MainPage] Closing all modals');
     this.modalState.set('none');
     this.selectedEventId.set(null);
+    this.showEventSuccessMessage.set(false);
   }
 
   /**
@@ -247,11 +249,14 @@ export class MainPageComponent implements OnInit {
   }
 
   /**
-   * Handle event updated - refresh and close
+   * Handle event updated - refresh and show view modal
    */
   onEventUpdated(eventId: string): void {
     console.log('[MainPage] Event updated:', eventId);
     this.refreshEvents();
+    this.selectedEventId.set(eventId);
+    this.showEventSuccessMessage.set(true);
+    this.modalState.set('view-event');
   }
 
   /**

@@ -214,7 +214,6 @@ export class EditEventModal implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.eventUpdated.emit(this.eventIdValue);
-        this.close.emit();
       },
       error: (err) => {
         this.isSubmitting.set(false);

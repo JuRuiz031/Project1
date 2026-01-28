@@ -36,6 +36,7 @@
   @if (modalState() === 'event-selector') {
     <app-event-selector-modal
       [events]="events()"
+      [calendars]="calendars()"
       (eventSelected)="onEventSelected($event)"
       (closeModal)="closeAllModals()">
     </app-event-selector-modal>
@@ -45,6 +46,7 @@
   @if (modalState() === 'view-event') {
     <app-view-event-modal
       [eventId]="selectedEventId()"
+      [showSuccessMessage]="showEventSuccessMessage()"
       (back)="onViewEventBack()"
       (close)="closeAllModals()"
       (editEvent)="openEditEvent(selectedEventId()!)">
