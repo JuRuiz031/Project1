@@ -69,9 +69,9 @@ export const routes: Routes = [
       { path: 'delete-calendar-group', component: DeleteCalendarGroup },
 
       { path: 'create-event', component: CreateEvent },
-      { path: 'view-event', component: ViewEvent },
-      { path: 'edit-event', component: EditEvent },
-      { path: 'delete-event', component: DeleteEvent },
+      { path: 'view-event/:eventId', component: ViewEvent },
+      { path: 'edit-event/:eventId', component: EditEvent },
+      { path: 'delete-event/:eventId', component: DeleteEvent },
 
       { path: 'create-poll', component: CreatePoll },
       { path: 'view-poll', component: ViewPoll },

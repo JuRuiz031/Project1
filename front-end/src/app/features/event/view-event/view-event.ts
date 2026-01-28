@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
+import { CalendarService } from '../../../shared/services/calendar.service';
+import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
+import { CalendarSummaryDTO } from '../../../shared/models/calendars/calendar-summary.dto';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
 
@@ -20,14 +22,13 @@ export class ViewEvent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private calendarApi = inject(CalendarApiService);
+  private calendarService = inject(CalendarService);
 
-  calendars: CalendarOption[] = [
-    { id: '1', name: 'My Admin Calendar', isAdmin: true },
-    { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
-  ];
-
+  calendars: CalendarOption[] = [];
   apiError = '';
+  isLoading = false;
+
+  private eventId = '';
 
   form = this.fb.group({
     calendarId: [{ value: '', disabled: true }],
@@ -43,24 +44,16 @@ export class ViewEvent implements OnInit {
   ngOnInit(): void {
     this.form.disable({ emitEvent: false });
 
-    const eventId = this.route.snapshot.paramMap.get('eventId');
-    if (!eventId) {
+    const id = this.route.snapshot.paramMap.get('eventId');
+    if (!id) {
       this.apiError = 'Missing event id';
       return;
     }
+    this.eventId = id;
 
-    // Use team service: GET /calendar?eventIds=...
-    this.calendarApi.getByEventIds([eventId]).subscribe({
-      next: (res: CalendarFilterResponseDTO) => {
-        const event = res?.events?.[0];
-        if (!event) {
-          this.apiError = 'Event not found';
-          return;
-        }
-        this.displayEvent(event);
-      },
-      error: () => (this.apiError = 'Could not load event'),
-    });
+    // Load calendars (for dropdown labels/admin status) + load event
+    this.loadCalendars();
+    this.loadEvent(id);
   }
 
   get adminCalendars(): CalendarOption[] {
@@ -72,12 +65,51 @@ export class ViewEvent implements OnInit {
   }
 
   goToEditEvent(): void {
-    this.router.navigateByUrl('/edit-event');
+    this.router.navigateByUrl(`/edit-event/${this.eventId}`);
+  }
+
+  private loadCalendars(): void {
+    this.calendarService.getHomepage().subscribe({
+      next: (home: CalendarHomeDTO) => {
+        this.calendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
+          id: c.calendar_id,
+          name: c.name,
+          isAdmin: c.is_admin,
+        }));
+      },
+      error: (err) => {
+        // not fatal for viewing an event; only affects dropdown names/admin filtering
+        console.warn('Could not load calendars', err);
+      },
+    });
+  }
+
+  private loadEvent(eventId: string): void {
+    this.apiError = '';
+    this.isLoading = true;
+
+    this.calendarService.getByEventIds([eventId]).subscribe({
+      next: (res: CalendarFilterResponseDTO) => {
+        this.isLoading = false;
+        const event = res?.events?.[0];
+        if (!event) {
+          this.apiError = 'Event not found';
+          return;
+        }
+        this.displayEvent(event);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.apiError =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Could not load event';
+      },
+    });
   }
 
   displayEvent(event: EventDTO): void {
-    this.apiError = '';
-
     const start = this.isoToDateTime(event.start_time);
     const end = this.isoToDateTime(event.end_time);
 
@@ -100,10 +132,8 @@ export class ViewEvent implements OnInit {
 
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
-
     const match = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
     if (!match) return { date: '', time: '' };
-
     return { date: match[1], time: match[2] };
   }
 }
