@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -8,4 +8,10 @@ import { RouterLink } from '@angular/router';
   templateUrl: './calendar-options.html',
   styleUrl: './calendar-options.css',
 })
-export class CalendarOptions {}
+export class CalendarOptions {
+  createCalendar = output<void>();
+
+  onCreateCalendar(): void {
+    this.createCalendar.emit();
+  }
+}

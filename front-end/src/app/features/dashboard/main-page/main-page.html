@@ -24,6 +24,14 @@
     </aside>
   </section>
 
+  <!-- Create Calendar Modal -->
+  @if (modalState() === 'create-calendar') {
+    <app-create-calendar-modal
+      (close)="closeAllModals()"
+      (calendarCreated)="onCalendarCreated($event)">
+    </app-create-calendar-modal>
+  }
+
   <!-- Event Selector Modal -->
   @if (modalState() === 'event-selector') {
     <app-event-selector-modal

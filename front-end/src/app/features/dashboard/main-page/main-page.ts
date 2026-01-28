@@ -11,18 +11,37 @@ import { ViewEventModal } from '../../event/view-event-modal/view-event-modal';
 import { CreateEventModal } from '../../event/create-event-modal/create-event-modal';
 import { EditEventModal } from '../../event/edit-event-modal/edit-event-modal';
 import { DeleteEventModal } from '../../event/delete-event-modal/delete-event-modal';
+import { CreateCalendarModal } from '../../calendar/create-calendar-modal/create-calendar-modal';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 type CalendarOptionDTO = { calendar_id: string; name: string };
-type ModalState = 'none' | 'event-selector' | 'view-event' | 'create-event' | 'edit-event' | 'delete-event';
+type ModalState =
+  | 'none'
+  | 'create-calendar'
+  | 'event-selector'
+  | 'view-event'
+  | 'create-event'
+  | 'edit-event'
+  | 'delete-event';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CalendarDisplay, CalendarOptions, DisplayOptions, PollsWindow, EventSelectorModal, ViewEventModal, CreateEventModal, EditEventModal, DeleteEventModal],
+    imports: [
+    CalendarDisplay,
+    CalendarOptions,
+    DisplayOptions,
+    PollsWindow,
+    EventSelectorModal,
+    ViewEventModal,
+    CreateEventModal,
+    EditEventModal,
+    DeleteEventModal,
+    CreateCalendarModal,
+  ],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
 })
