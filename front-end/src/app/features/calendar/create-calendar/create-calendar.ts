@@ -8,7 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 
-// intial commit comment
+// Initial commit comment
 
 @Component({
   selector: 'app-create-calendar',
