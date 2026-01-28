@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { AppLayout } from './layouts/app-layout/app-layout';
+import { authGuard } from './shared/guards/auth.guard';
+import { loginRedirectGuard } from './shared/guards/login-redirect.guard';
 
 import { Login } from './features/auth/login/login';
 import { CreateAccount } from './features/auth/create-account/create-account';
@@ -30,10 +32,12 @@ export const routes: Routes = [
   /**
    * AUTH / PUBLIC ROUTES
    * Header + footer, NO profile button
+   * loginRedirectGuard: if already logged in, redirect to main page
    */
   {
     path: '',
     component: AuthLayout,
+    canActivate: [loginRedirectGuard],
     children: [
       { path: '', component: Login }, // landing page
       { path: 'login', component: Login },
@@ -44,10 +48,12 @@ export const routes: Routes = [
   /**
    * APP / AUTHENTICATED ROUTES
    * Header + footer WITH profile button
+   * Protected by authGuard - requires valid token
    */
   {
     path: '',
     component: AppLayout,
+    canActivate: [authGuard],
     children: [
       {
         path: 'dashboard',

@@ -81,6 +81,25 @@ public class UserService {
     );
    }
 
+   // Refresh user token - generate new token for authenticated user
+   public LoginSuccessDTO refreshUserToken(String username) {
+       // Find user by username
+       User user = userRepository.findByUsername(username)
+               .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+       // Generate new JWT token
+       String token = jwtUtil.generateToken(user.getUsername());
+       Date expiration = jwtUtil.extractExpiration(token);
+       String expiresAt = expiration.toInstant().toString();
+
+       // Return clean DTO with new token and user info
+       return new LoginSuccessDTO(
+               token,
+               new LoginUserDTO(user),
+               expiresAt
+       );
+   }
+
    // Check login status - validate JWT and return auth info
    public LoginStatusDTO checkLoginStatus(String username) {
     // If we got here, the JWT was valid (Spring Security verified it)

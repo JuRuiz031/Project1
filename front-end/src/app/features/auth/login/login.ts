@@ -59,6 +59,7 @@ export class Login {
       next: (response) => {
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('expiresAt', response.expires_at);
         this.navigation.goToHome();
       },
       error: (err) => {
