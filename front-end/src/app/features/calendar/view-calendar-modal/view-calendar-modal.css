@@ -49,3 +49,28 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+.actions-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  filter: grayscale(0.4);
+}
+
+/* Important: allow click so we can show "not admin" message */
+.btn-disabled:hover {
+  cursor: not-allowed;
+}
+
+.hint {
+  font-size: 0.9rem;
+}
+
+.muted {
+  color: #777;
+}
