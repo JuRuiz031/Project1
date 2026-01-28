@@ -1,4 +1,4 @@
-import { Component, OnInit, output, inject } from '@angular/core';
+import { Component, OnInit, output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -30,12 +30,14 @@ export class CreateEventModal implements OnInit {
   close = output<void>();
   eventCreated = output<string>(); // emits event ID when created
 
-  calendars: CalendarOption[] = [];
-  adminCalendars: CalendarOption[] = [];
+  // Signals (modern Angular)
+  calendars = signal<CalendarOption[]>([]);
+  apiError = signal('');
+  isSubmitting = signal(false);
+  isLoadingCalendars = signal(true);
 
-  apiError = '';
-  isSubmitting = false;
-  isLoadingCalendars = false;
+  // Computed signal for derived state
+  adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
 
   form = this.fb.group({
     calendarId: ['', [Validators.required]],
@@ -53,40 +55,38 @@ export class CreateEventModal implements OnInit {
   }
 
   private loadCalendars(): void {
-    this.apiError = '';
-    this.isLoadingCalendars = true;
+    this.apiError.set('');
 
     this.calendarService.getHomepage().subscribe({
       next: (home: CalendarHomeDTO) => {
-        this.isLoadingCalendars = false;
+        this.isLoadingCalendars.set(false);
 
-        this.calendars = home.calendars.map((c: CalendarSummaryDTO) => ({
+        const mappedCalendars = home.calendars.map((c: CalendarSummaryDTO) => ({
           id: c.calendar_id,
           name: c.name,
           isAdmin: c.is_admin,
         }));
-
-        // Cache admin calendars to avoid expression changed error
-        this.adminCalendars = this.calendars.filter(c => c.isAdmin);
+        this.calendars.set(mappedCalendars);
 
         // pick default: first admin if possible, else first calendar
-        const firstAdmin = this.adminCalendars[0];
-        const firstAny = this.calendars[0];
+        const firstAdmin = this.adminCalendars()[0];
+        const firstAny = mappedCalendars[0];
         const selected = firstAdmin ?? firstAny;
 
         if (selected) {
           this.form.patchValue({ calendarId: selected.id }, { emitEvent: false });
         } else {
-          this.apiError = 'No calendars available. Create or join a calendar first.';
+          this.apiError.set('No calendars available. Create or join a calendar first.');
         }
       },
       error: (err) => {
-        this.isLoadingCalendars = false;
-        this.apiError =
+        this.isLoadingCalendars.set(false);
+        this.apiError.set(
           err?.error?.message ||
           (typeof err?.error === 'string' ? err.error : '') ||
           err?.message ||
-          'Could not load calendars';
+          'Could not load calendars'
+        );
       },
     });
   }
@@ -110,7 +110,7 @@ export class CreateEventModal implements OnInit {
   }
 
   submit(): void {
-    this.apiError = '';
+    this.apiError.set('');
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -123,22 +123,22 @@ export class CreateEventModal implements OnInit {
     const end = new Date(`${v.endDate}T${v.endTime}:00`);
 
     if (isNaN(start.getTime())) {
-      this.apiError = 'Start date/time is invalid.';
+      this.apiError.set('Start date/time is invalid.');
       return;
     }
     if (isNaN(end.getTime())) {
-      this.apiError = 'End date/time is invalid.';
+      this.apiError.set('End date/time is invalid.');
       return;
     }
 
     if (!this.isEndAfterStart(String(v.startDate), String(v.startTime), String(v.endDate), String(v.endTime))) {
-      this.apiError = 'End must be after start.';
+      this.apiError.set('End must be after start.');
       return;
     }
 
     const userId = this.getUserIdFromStorage();
     if (!userId) {
-      this.apiError = 'Not logged in (missing user id). Please sign in again.';
+      this.apiError.set('Not logged in (missing user id). Please sign in again.');
       return;
     }
 
@@ -153,21 +153,22 @@ export class CreateEventModal implements OnInit {
       tags: [],
     };
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     this.eventService.create(dto).subscribe({
       next: (created: EventDTO) => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         this.eventCreated.emit(created.event_id);
         this.close.emit();
       },
       error: (err) => {
-        this.isSubmitting = false;
-        this.apiError =
+        this.isSubmitting.set(false);
+        this.apiError.set(
           err?.error?.message ||
           (typeof err?.error === 'string' ? err.error : '') ||
           err?.message ||
-          'Could not create event';
+          'Could not create event'
+        );
       },
     });
   }

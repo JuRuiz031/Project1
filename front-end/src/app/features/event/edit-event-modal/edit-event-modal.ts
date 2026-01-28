@@ -1,4 +1,4 @@
-import { Component, OnInit, input, output, inject, effect } from '@angular/core';
+import { Component, OnInit, input, output, inject, effect, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -33,11 +33,14 @@ export class EditEventModal implements OnInit {
 
   private eventIdValue = '';
 
-  calendars: CalendarOption[] = [];
+  // Signals (modern Angular)
+  calendars = signal<CalendarOption[]>([]);
+  apiError = signal('');
+  isSubmitting = signal(false);
+  isLoading = signal(true);
 
-  apiError = '';
-  isSubmitting = false;
-  isLoading = false;
+  // Computed signal for admin calendars
+  adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
 
   form = this.fb.group({
     calendarId: ['', [Validators.required]],
@@ -53,7 +56,7 @@ export class EditEventModal implements OnInit {
   ngOnInit(): void {
     const id = this.eventId();
     if (!id) {
-      this.apiError = 'Missing event id';
+      this.apiError.set('Missing event id');
       return;
     }
     this.eventIdValue = id;
@@ -62,18 +65,15 @@ export class EditEventModal implements OnInit {
     this.loadEvent(id);
   }
 
-  get adminCalendars(): CalendarOption[] {
-    return this.calendars.filter(c => c.isAdmin);
-  }
-
   private loadCalendars(): void {
     this.calendarService.getHomepage().subscribe({
       next: (home: CalendarHomeDTO) => {
-        this.calendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
+        const mappedCalendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
           id: c.calendar_id,
           name: c.name,
           isAdmin: c.is_admin,
         }));
+        this.calendars.set(mappedCalendars);
       },
       error: (err) => {
         // not fatal to edit (but affects dropdown options)
@@ -83,15 +83,14 @@ export class EditEventModal implements OnInit {
   }
 
   private loadEvent(id: string): void {
-    this.apiError = '';
-    this.isLoading = true;
+    this.apiError.set('');
 
     this.calendarService.getByEventIds([id]).subscribe({
       next: (res: CalendarFilterResponseDTO) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         const ev = res.events?.[0];
         if (!ev) {
-          this.apiError = 'Event not found';
+          this.apiError.set('Event not found');
           return;
         }
 
@@ -110,12 +109,13 @@ export class EditEventModal implements OnInit {
         });
       },
       error: (err) => {
-        this.isLoading = false;
-        this.apiError =
+        this.isLoading.set(false);
+        this.apiError.set(
           err?.error?.message ||
           (typeof err?.error === 'string' ? err.error : '') ||
           err?.message ||
-          'Could not load event';
+          'Could not load event'
+        );
       },
     });
   }
@@ -132,10 +132,10 @@ export class EditEventModal implements OnInit {
   }
 
   saveChanges(): void {
-    this.apiError = '';
+    this.apiError.set('');
 
     if (!this.eventId) {
-      this.apiError = 'Missing event id';
+      this.apiError.set('Missing event id');
       return;
     }
     if (this.form.invalid) {
@@ -146,7 +146,7 @@ export class EditEventModal implements OnInit {
     const v = this.form.getRawValue();
 
     if (!this.isEndAfterStart(String(v.startDate), String(v.startTime), String(v.endDate), String(v.endTime))) {
-      this.apiError = 'End must be after start.';
+      this.apiError.set('End must be after start.');
       return;
     }
 
@@ -154,11 +154,11 @@ export class EditEventModal implements OnInit {
     const end = new Date(`${v.endDate}T${v.endTime}:00`);
 
     if (isNaN(start.getTime())) {
-      this.apiError = 'Start date/time is invalid.';
+      this.apiError.set('Start date/time is invalid.');
       return;
     }
     if (isNaN(end.getTime())) {
-      this.apiError = 'End date/time is invalid.';
+      this.apiError.set('End date/time is invalid.');
       return;
     }
 
@@ -172,21 +172,22 @@ export class EditEventModal implements OnInit {
       tags: [],
     };
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     this.eventService.update(this.eventIdValue, dto).subscribe({
       next: () => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         this.eventUpdated.emit(this.eventIdValue);
         this.close.emit();
       },
       error: (err) => {
-        this.isSubmitting = false;
-        this.apiError =
+        this.isSubmitting.set(false);
+        this.apiError.set(
           err?.error?.message ||
           (typeof err?.error === 'string' ? err.error : '') ||
           err?.message ||
-          'Could not save changes';
+          'Could not save changes'
+        );
       },
     });
   }

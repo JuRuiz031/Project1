@@ -4,14 +4,14 @@
 
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <!-- API error -->
-    @if (apiError) {
+    @if (apiError()) {
       <div class="alert alert-danger mb-3">
-        {{ apiError }}
+        {{ apiError() }}
       </div>
     }
 
     <!-- Loading calendars -->
-    @if (isLoadingCalendars) {
+    @if (isLoadingCalendars()) {
       <div class="text-center py-3">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading calendars...</span>
@@ -27,7 +27,7 @@
           [ngClass]="{ 'is-invalid': hasError('calendarId') }"
         >
           <option value="" disabled>Select calendar (admin only)</option>
-          @for (c of adminCalendars; track c.id) {
+          @for (c of adminCalendars(); track c.id) {
             <option [value]="c.id">{{ c.name }}</option>
           }
         </select>
@@ -122,7 +122,7 @@
           type="button"
           class="btn btn-outline-secondary"
           (click)="onClose()"
-          [disabled]="isSubmitting"
+          [disabled]="isSubmitting()"
         >
           Cancel
         </button>
@@ -130,9 +130,9 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="isSubmitting || form.invalid"
+          [disabled]="isSubmitting() || form.invalid"
         >
-          {{ isSubmitting ? 'Creating...' : 'Create Event' }}
+          {{ isSubmitting() ? 'Creating...' : 'Create Event' }}
         </button>
       </div>
     }

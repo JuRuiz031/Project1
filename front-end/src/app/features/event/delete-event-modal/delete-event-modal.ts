@@ -1,4 +1,4 @@
-import { Component, OnInit, input, output, inject } from '@angular/core';
+import { Component, OnInit, input, output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
@@ -28,46 +28,47 @@ export class DeleteEventModal implements OnInit {
   private eventIdValue = '';
   private calendarId = '';
 
-  // Display values
-  eventName = '';
-  calendarName = '';
-
-  // Optional display mapping (same as your other pages)
-  calendars: CalendarOption[] = [
-    { id: '1', name: 'My Admin Calendar', isAdmin: true },
-    { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
-  ];
-
-  apiError = '';
-  isDeleting = false;
+  // Signals (modern Angular)
+  eventName = signal('');
+  calendarName = signal('');
+  apiError = signal('');
+  isDeleting = signal(false);
 
   ngOnInit(): void {
-    this.apiError = '';
+    this.apiError.set('');
 
     const id = this.eventId();
     if (!id) {
-      this.apiError = 'Missing event id';
+      this.apiError.set('Missing event id');
       return;
     }
     this.eventIdValue = id;
 
-    // Load the event so the confirmation message is real
+    // Load the event and calendar name
     this.calendarService.getByEventIds([id]).subscribe({
       next: (res: CalendarFilterResponseDTO) => {
         const ev = res.events?.[0];
         if (!ev) {
-          this.apiError = 'Event not found';
+          this.apiError.set('Event not found');
           return;
         }
 
         this.calendarId = ev.calendar_id ?? '';
-        this.eventName = ev.title ?? 'Event';
+        this.eventName.set(ev.title ?? 'Event');
 
-        // Show friendly calendar name if we have it; otherwise show the id
-        const match = this.calendars.find((c) => c.id === this.calendarId);
-        this.calendarName = match?.name ?? this.calendarId ?? 'Calendar';
+        // Load calendar to get friendly name
+        this.calendarService.getHomepage().subscribe({
+          next: (home) => {
+            const calendar = home.calendars?.find(c => c.calendar_id === this.calendarId);
+            this.calendarName.set(calendar?.name || this.calendarId || 'Calendar');
+          },
+          error: () => {
+            // Fallback to calendar ID if loading calendar fails
+            this.calendarName.set(this.calendarId || 'Calendar');
+          },
+        });
       },
-      error: () => (this.apiError = 'Could not load event'),
+      error: () => this.apiError.set('Could not load event'),
     });
   }
 
@@ -83,21 +84,21 @@ export class DeleteEventModal implements OnInit {
   }
 
   confirmDelete(): void {
-    this.apiError = '';
+    this.apiError.set('');
 
     if (!this.eventIdValue) {
-      this.apiError = 'Missing event id';
+      this.apiError.set('Missing event id');
       return;
     }
 
     const userId = this.getUserIdFromStorage();
     if (!userId) {
-      this.apiError = 'Not logged in (missing user id). Please sign in again.';
+      this.apiError.set('Not logged in (missing user id). Please sign in again.');
       return;
     }
 
     if (!this.calendarId) {
-      this.apiError = 'Missing calendar id';
+      this.apiError.set('Missing calendar id');
       return;
     }
 
@@ -106,14 +107,14 @@ export class DeleteEventModal implements OnInit {
       calendar_id: String(this.calendarId),
     };
 
-    this.isDeleting = true;
+    this.isDeleting.set(true);
 
     this.eventService.delete(this.eventIdValue, dto).subscribe({
       next: (deleted: boolean) => {
-        this.isDeleting = false;
+        this.isDeleting.set(false);
 
         if (!deleted) {
-          this.apiError = 'Could not delete event';
+          this.apiError.set('Could not delete event');
           return;
         }
 
@@ -121,12 +122,13 @@ export class DeleteEventModal implements OnInit {
         this.close.emit();
       },
       error: (err) => {
-        this.isDeleting = false;
-        this.apiError =
+        this.isDeleting.set(false);
+        this.apiError.set(
           err?.error?.message ||
           (typeof err?.error === 'string' ? err.error : '') ||
           err?.message ||
-          'Could not delete event';
+          'Could not delete event'
+        );
       },
     });
   }
