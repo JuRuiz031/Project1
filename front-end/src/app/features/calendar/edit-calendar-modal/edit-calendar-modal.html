@@ -1,0 +1,86 @@
+<app-base-modal (close)="onClose()">
+  <header class="modal__header">
+    <h2>Edit Calendar</h2>
+  </header>
+
+  <section class="modal__body">
+    @if (isLoading()) {
+      <p class="muted">Loading…</p>
+    } @else {
+      @if (apiError()) {
+        <div class="error">{{ apiError() }}</div>
+      }
+
+      <form [formGroup]="form" class="form">
+        <label class="label">
+          Calendar name
+          <input
+            class="input"
+            type="text"
+            formControlName="name"
+            placeholder="Calendar name"
+            [class.input--error]="hasError('name')"
+          />
+        </label>
+
+        @if (hasError('name')) {
+          <p class="field-error">Name must be 2–100 characters.</p>
+        }
+      </form>
+
+      <div class="section">
+        <h3>Users</h3>
+
+        @if (users().length === 0) {
+          <p class="muted">No users returned for this calendar.</p>
+        } @else {
+          <ul class="user-list">
+            @for (u of users(); track u.user_id) {
+                <li
+                    class="user-row"
+                    [class.user-row--selected]="selectedUserId() === u.user_id"
+                    (click)="selectUser(u.user_id)"
+                >
+                <span class="user-name">{{ u.username }}</span>
+
+                <span class="badge" [class.badge--admin]="isRequesterAdmin(u.user_id)">
+                    @if (isRequesterAdmin(u.user_id)) {
+                    Admin (you)
+                    } @else {
+                    Non-admin
+                    }
+                </span>
+                </li>
+            }
+          </ul>
+
+          <div class="actions-row">
+            <button
+              type="button"
+              class="btn"
+              (click)="promoteSelectedToAdmin()"
+              [disabled]="!selectedUserId() || isSubmitting()"
+            >
+              Promote selected to admin
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <footer class="modal__footer">
+    <button type="button" class="btn btn--danger" (click)="deleteCalendarGroup()">
+      Delete calendar group
+    </button>
+
+    <div class="spacer"></div>
+
+    <button type="button" class="btn" (click)="onClose()" [disabled]="isSubmitting()">
+      Cancel
+    </button>
+    <button type="button" class="btn btn--primary" (click)="saveChanges()" [disabled]="isSubmitting()">
+      Save
+    </button>
+  </footer>
+</app-base-modal>

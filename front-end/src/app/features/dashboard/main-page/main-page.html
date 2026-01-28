@@ -98,10 +98,12 @@
 
   <!-- Delete Event Modal -->
   @if (modalState() === 'delete-event') {
-    <app-delete-event-modal
-      [eventId]="selectedEventId()!"
+    <app-edit-calendar-modal
+      [calendarId]="selectedCalendarId()!"
+      [currentUserId]="currentUserId()"
       (close)="closeAllModals()"
-      (eventDeleted)="onEventDeleted($event)">
-    </app-delete-event-modal>
+      (calendarUpdated)="onCalendarUpdated($event)"
+      (deleteRequested)="onDeleteCalendarRequested($event)"
+    />
   }
 </main>
