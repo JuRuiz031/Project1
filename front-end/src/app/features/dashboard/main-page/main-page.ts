@@ -255,6 +255,14 @@ export class MainPageComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Open create calendar modal
+   */
+  openCreateCalendar(): void {
+    console.log('[MainPage] Opening create calendar modal');
+    this.modalState.set('create-calendar');
+  }
+
+  /**
    * Open create event modal
    */
   openCreateEvent(): void {
