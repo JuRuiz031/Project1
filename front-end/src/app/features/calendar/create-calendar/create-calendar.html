@@ -3,7 +3,7 @@
 
   <div class="card app-card shadow-sm">
     <div class="card-body">
-      <form [formGroup]="form" (ngSubmit)="sendData()" novalidate>
+      <form [formGroup]="form" (ngSubmit)="createCalendar()" novalidate>
         <div class="mb-3">
           <label class="form-label" for="calendar-name">Calendar name:</label>
 
@@ -13,45 +13,45 @@
             class="form-control app-input"
             formControlName="name"
             placeholder="Calendar name"
-            required
-            minlength="1"
-            maxlength="50"
             autocomplete="off"
+            [class.is-invalid]="hasError('name')"
           />
+
+          <div class="invalid-feedback">
+            Calendar name is required (1–50 characters).
+          </div>
 
           <div class="form-text">
             Choose a short, recognizable name (1–50 characters).
           </div>
         </div>
 
-        <!-- Backend response -->
-        @if (response) {
+        @if (apiError()) {
           <div class="alert alert-danger mt-3 mb-0">
-            Backend response:
-            <strong>{{ response }}</strong>
+            <strong>{{ apiError() }}</strong>
           </div>
         }
+
+        <!-- buttons should be inside the form so submit actually fires -->
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button
+            type="button"
+            class="btn btn-outline-light"
+            (click)="cancel()"
+            [disabled]="isSubmitting()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="form.invalid || isSubmitting()"
+          >
+            {{ isSubmitting() ? 'Creating...' : 'Submit' }}
+          </button>
+        </div>
       </form>
-    </div>
-
-    <!-- Footer actions: same spacing model as Create Event -->
-    <div class="card-footer d-flex justify-content-end gap-2">
-      <button
-        type="button"
-        class="btn btn-outline-light"
-        (click)="cancel()"
-      >
-        Cancel
-      </button>
-
-      <button
-        type="submit"
-        class="btn btn-primary"
-        [disabled]="!form.valid"
-      >
-        Submit
-      </button>
-
     </div>
   </div>
 </div>
