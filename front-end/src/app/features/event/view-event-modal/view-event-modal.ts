@@ -174,6 +174,16 @@ export class ViewEventModal implements OnDestroy {
     return { date, time };
   }
 
+  /**
+   * Get user's timezone abbreviation (e.g., EST, PST, UTC)
+   */
+  getTimezoneAbbr(): string {
+    const timezoneName = new Date().toLocaleDateString('en-US', { 
+      timeZoneName: 'short' 
+    }).split(', ')[1];
+    return timezoneName || 'Local';
+  }
+
   onBack(): void {
     this.back.emit();
   }

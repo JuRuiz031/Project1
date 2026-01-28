@@ -198,6 +198,17 @@ export class EditEventModal implements OnInit {
       return;
     }
 
+    // Log timezone conversion for verification
+    console.log('[EditEvent] User entered (local):', {
+      start: `${v.startDate}T${v.startTime}`,
+      end: `${v.endDate}T${v.endTime}`,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+    console.log('[EditEvent] Sending to backend (UTC):', {
+      start: start.toISOString(),
+      end: end.toISOString()
+    });
+
     const dto: UpdateEventDTO = {
       calendar_id: String(v.calendarId ?? ''),
       title: String(v.title ?? ''),
@@ -257,5 +268,15 @@ export class EditEventModal implements OnInit {
       event.preventDefault();
       this.addTag();
     }
+  }
+
+  /**
+   * Get user's timezone abbreviation (e.g., EST, PST, UTC)
+   */
+  getTimezoneAbbr(): string {
+    const timezoneName = new Date().toLocaleDateString('en-US', { 
+      timeZoneName: 'short' 
+    }).split(', ')[1];
+    return timezoneName || 'Local';
   }
 }

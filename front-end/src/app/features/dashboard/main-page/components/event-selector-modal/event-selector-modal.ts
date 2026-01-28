@@ -145,4 +145,41 @@ export class EventSelectorModal implements OnDestroy {
   getCalendarColor(calendarId: string): { primary: string; secondary: string } {
     return this.colorMap.get(calendarId) || { primary: '#666', secondary: '#eee' };
   }
+
+  /**
+   * Parse server ISO timestamp and handle timezone
+   * If server includes timezone (Z or ±hh:mm), Date can parse safely.
+   * If not, assume server meant UTC and append 'Z'.
+   */
+  private parseServerInstant(iso: string): Date {
+    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
+    return new Date(hasTz ? iso : `${iso}Z`);
+  }
+
+  /**
+   * Convert ISO-8601 timestamp to local date and time for display
+   */
+  formatEventTime(iso: string): string {
+    if (!iso) return '';
+
+    const d = this.parseServerInstant(iso);
+    if (isNaN(d.getTime())) return '';
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    
+    return `${date} ${time}`;
+  }
+
+  /**
+   * Get user's timezone abbreviation (e.g., EST, PST, UTC)
+   */
+  getTimezoneAbbr(): string {
+    const timezoneName = new Date().toLocaleDateString('en-US', { 
+      timeZoneName: 'short' 
+    }).split(', ')[1];
+    return timezoneName || 'Local';
+  }
 }
