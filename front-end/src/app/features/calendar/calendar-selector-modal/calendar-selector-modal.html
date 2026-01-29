@@ -2,7 +2,7 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
     <!-- Header -->
     <div class="modal-header">
-      <h2 class="modal-title">Calendar Selector</h2>
+      <h2 class="modal-title">Select Calendar</h2>
       <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
         ✕
       </button>
@@ -47,10 +47,10 @@
 
     <!-- Footer -->
     <div class="modal-footer">
-      <div class="footer-hint">Double-click a Calendar to open</div>
+      <div class="footer-hint"><i>Double-click a Calendar to open</i></div>
 
       <button class="btn btn-outline-secondary" (click)="onClose()">
-        Close
+        Cancel
       </button>
     </div>
   </div>
