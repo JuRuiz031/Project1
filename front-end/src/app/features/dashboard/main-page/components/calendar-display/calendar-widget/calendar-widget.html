@@ -83,22 +83,41 @@
         (eventClicked)="handleEventClicked($event.event)"
       />
     }
+
     @case (CalendarView.Week) {
-      <mwl-calendar-week-view
-        [viewDate]="viewDate"
-        [events]="events"
-        [refresh]="refresh"
-        (eventClicked)="handleEventClicked($event.event)"
-      />
+      <div
+        #timeViewScroll
+        style="max-height: 70vh; overflow-y: auto;"
+      >
+        <mwl-calendar-week-view
+          [viewDate]="viewDate"
+          [events]="events"
+          [refresh]="refresh"
+          [dayStartHour]="dayStartHour"
+          [dayEndHour]="dayEndHour"
+          [hourSegments]="hourSegments"
+          [hourSegmentHeight]="hourSegmentHeight"
+          (eventClicked)="handleEventClicked($event.event)"
+        />
+      </div>
     }
+
     @case (CalendarView.Day) {
-      <mwl-calendar-day-view
-        [viewDate]="viewDate"
-        [events]="events"
-        [refresh]="refresh"
-        (eventClicked)="handleEventClicked($event.event)"
-      />
+      <div
+        #timeViewScroll
+        style="max-height: 70vh; overflow-y: auto;"
+      >
+        <mwl-calendar-day-view
+          [viewDate]="viewDate"
+          [events]="events"
+          [refresh]="refresh"
+          [dayStartHour]="dayStartHour"
+          [dayEndHour]="dayEndHour"
+          [hourSegments]="hourSegments"
+          [hourSegmentHeight]="hourSegmentHeight"
+          (eventClicked)="handleEventClicked($event.event)"
+        />
+      </div>
     }
   }
 </div>
-
