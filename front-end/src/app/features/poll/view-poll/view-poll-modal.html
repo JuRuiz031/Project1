@@ -1,0 +1,119 @@
+<app-base-modal
+  [title]="title()"
+  [showBackButton]="false"
+  [size]="'large'"
+  (close)="onClose()"
+>
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-secondary">
+    Loading...
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!isLoading() && apiError()" class="alert alert-danger mb-3">
+    {{ apiError() }}
+  </div>
+
+  <!-- Main content -->
+  <ng-container *ngIf="!isLoading() && poll() as p">
+    <div class="row g-3">
+      <!-- LEFT COLUMN -->
+      <div class="col-12 col-lg-7">
+        <!-- Calendar -->
+        <div class="mb-3">
+          <label class="form-label">Calendar</label>
+          <input class="form-control app-input" [value]="p.calendarName" disabled />
+        </div>
+
+        <!-- Title -->
+        <div class="mb-3">
+          <label class="form-label">Poll Title</label>
+          <input class="form-control app-input" [value]="p.title" disabled />
+        </div>
+
+        <!-- (Optional) Description -->
+        <div class="mb-3" *ngIf="p.description">
+          <label class="form-label">Description</label>
+          <textarea class="form-control app-input" rows="3" [value]="p.description" disabled></textarea>
+        </div>
+
+        <!-- Start -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Start date</label>
+            <input class="form-control app-input" [value]="p.startDate" disabled />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Start time</label>
+            <input class="form-control app-input" [value]="p.startTime" disabled />
+          </div>
+        </div>
+
+        <!-- End -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">End date</label>
+            <input class="form-control app-input" [value]="p.endDate" disabled />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">End time</label>
+            <input class="form-control app-input" [value]="p.endTime" disabled />
+          </div>
+        </div>
+
+        <!-- OPTIONS -->
+        <div class="border border-secondary rounded p-3">
+          <div class="fw-semibold mb-2">Options</div>
+
+          <div class="d-grid gap-2">
+            <div class="input-group" *ngFor="let opt of p.options">
+              <input class="form-control app-input" [value]="opt" disabled />
+            </div>
+
+            <div class="text-secondary" *ngIf="p.options?.length === 0">
+              Options list
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="col-12 col-lg-5">
+        <div class="border border-secondary rounded p-3">
+          <div class="fw-semibold mb-2">Tags</div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <span
+              class="badge rounded-pill text-bg-secondary d-inline-flex align-items-center gap-2"
+              *ngFor="let tag of p.tags"
+            >
+              <span>{{ tag }}</span>
+            </span>
+
+            <div class="text-secondary" *ngIf="p.tags?.length === 0">
+              Tags list
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Footer actions -->
+  <div class="d-flex justify-content-end gap-2 mt-4">
+    <button class="btn btn-outline-secondary" type="button" (click)="onClose()">
+      Close
+    </button>
+
+    <button
+      class="btn btn-primary"
+      type="button"
+      (click)="onEdit()"
+      [disabled]="!poll()"
+    >
+      Edit Poll
+    </button>
+  </div>
+</app-base-modal>

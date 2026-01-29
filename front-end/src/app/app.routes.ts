@@ -21,7 +21,7 @@ import { DeleteCalendarGroup } from './features/calendar/delete-calendar-group/d
 import { ViewEvent } from './features/event/view-event/view-event';
 
 // import { CreatePoll } from './features/poll/create-poll/create-poll';
-import { ViewPoll } from './features/poll/view-poll/view-poll';
+import { ViewPoll } from './features/poll/view-poll/view-poll-modal';
 import { EditPoll } from './features/poll/edit-poll/edit-poll';
 import { DeletePoll } from './features/poll/delete-poll/delete-poll';
 

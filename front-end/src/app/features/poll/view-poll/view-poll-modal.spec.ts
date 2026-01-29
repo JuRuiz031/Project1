@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ViewPoll } from './view-poll';
+import { ViewPoll } from './view-poll-modal';
 
 describe('ViewPoll', () => {
   let component: ViewPoll;

@@ -17,11 +17,20 @@
     </button>
 
     <button
-      type="button"
-      class="polls-window__btn"
-      routerLink="/view-poll"
-    >
-      View Poll
+  type="button"
+  class="polls-window__btn"
+  (click)="onViewPoll()"
+>
+  View Poll
     </button>
+
+  <!-- Render the modal
+  <app-view-poll-modal
+    *ngIf="isViewPollOpen"
+    [pollId]="selectedPollId"
+    (close)="isViewPollOpen = false"
+    (edit)="onEditPoll($event)"
+  ></app-view-poll-modal> -->
+
   </div>
 </section>
