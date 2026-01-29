@@ -8,7 +8,7 @@
       </button>
     </div>
 
-    <!-- Search Bar -->
+    <!-- Search -->
     <div class="modal-search">
       <input
         type="text"
@@ -19,7 +19,7 @@
       />
     </div>
 
-    <!-- Calendars List -->
+    <!-- List -->
     <div class="modal-body">
       @if (filteredCalendars().length === 0) {
         <div class="no-items">
@@ -30,16 +30,26 @@
           }
         </div>
       } @else {
-        <div class="items-list">
+        <div class="filter-list">
           @for (cal of filteredCalendars(); track cal.calendar_id) {
-            <div
-              class="calendar-item"
-              [class.selected]="selectedCalendarId() === cal.calendar_id"
+            <button
+              type="button"
+              class="calendar-filter-chip"
+              [class.active]="selectedCalendarId() === cal.calendar_id"
+              [style.border-color]="getColor(cal.calendar_id).primary"
+              [style.color]="selectedCalendarId() === cal.calendar_id ? 'white' : getColor(cal.calendar_id).primary"
+              [style.background-color]="selectedCalendarId() === cal.calendar_id ? getColor(cal.calendar_id).primary : 'white'"
               (click)="onSelect(cal.calendar_id)"
               (dblclick)="onActivate(cal.calendar_id)"
+              [attr.data-secondary]="getColor(cal.calendar_id).secondary"
             >
-              <div class="calendar-title">{{ cal.name }}</div>
-            </div>
+              <span
+                class="calendar-color-dot"
+                [style.background-color]="selectedCalendarId() === cal.calendar_id ? 'white' : getColor(cal.calendar_id).primary">
+              </span>
+
+              <span class="calendar-title">{{ cal.name }}</span>
+            </button>
           }
         </div>
       }
@@ -48,10 +58,7 @@
     <!-- Footer -->
     <div class="modal-footer">
       <div class="footer-hint"><i>Double-click a Calendar to open</i></div>
-
-      <button class="btn btn-outline-secondary" (click)="onClose()">
-        Cancel
-      </button>
+      <button class="btn btn-outline-secondary" (click)="onClose()">Cancel</button>
     </div>
   </div>
 </div>

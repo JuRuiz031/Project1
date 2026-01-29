@@ -1,7 +1,7 @@
 import { Component, input, output, signal, computed, effect, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CALENDAR_COLOR_PALETTE } from '../calendar-display/calendar-colors';
+import { CALENDAR_COLOR_PALETTE } from '../../../../../config/calendar-colors';
 
 type CalendarOption = { calendar_id: string; name: string };
 

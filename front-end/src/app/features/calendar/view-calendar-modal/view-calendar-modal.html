@@ -42,7 +42,14 @@
       @if (currentCalendar(); as cal) {
         <div class="mb-3">
           <label class="form-label">Calendar Name</label>
-          <input class="form-control app-input" [value]="cal.name" disabled />
+          <input
+            class="form-control app-input calendar-name-input"
+            [value]="cal.name"
+            disabled
+            [style.border-color]="getColor(cal.id).primary"
+            [style.color]="getColor(cal.id).primary"
+            [style.background-color]="getColor(cal.id).secondary"
+          />
         </div>
 
         <!-- Users (list only – no admin/user tags) -->
