@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject, throwError, of } from 'rxjs';
 
 import { CreateAccount } from './create-account';
@@ -9,17 +9,12 @@ describe('CreateAccount', () => {
   let fixture: ComponentFixture<CreateAccount>;
   let component: CreateAccount;
 
-  const navigationMock = {
-    goToLogin: jasmine.createSpy('goToLogin'),
-  };
-
-  const userApiMock = {
-    register: jasmine.createSpy('register'),
-  };
+  let navigationMock: jasmine.SpyObj<NavigationService>;
+  let userApiMock: jasmine.SpyObj<UserApiService>;
 
   beforeEach(async () => {
-    navigationMock.goToLogin.calls.reset();
-    userApiMock.register.calls.reset();
+    navigationMock = jasmine.createSpyObj<NavigationService>('NavigationService', ['goToLogin']);
+    userApiMock = jasmine.createSpyObj<UserApiService>('UserApiService', ['register']);
 
     await TestBed.configureTestingModule({
       imports: [CreateAccount],
@@ -39,9 +34,7 @@ describe('CreateAccount', () => {
   });
 
   it('should block submission when form is invalid, show validation apiError, and not call register()', () => {
-    userApiMock.register.and.returnValue(of({}));
-
-    component.form.patchValue({ name: '', email: 'bad', password: '123' });
+    component.form.patchValue({ name: '', email: 'bad', password: '123' }); // invalid (name required, email invalid, pw too short)
     component.createAccount();
     fixture.detectChanges();
 
@@ -50,10 +43,10 @@ describe('CreateAccount', () => {
     expect(userApiMock.register).not.toHaveBeenCalled();
 
     const alert = fixture.nativeElement.querySelector('.alert.alert-danger');
-    expect(!!alert).toBe(true);
+    expect(alert).toBeTruthy();
   });
 
-  it('should call UserApiService.register with correct DTO mapping (name -> username) and navigate on success', fakeAsync(() => {
+  it('should call UserApiService.register with correct DTO mapping (name -> username) and navigate on success', () => {
     const subj = new Subject<any>();
     userApiMock.register.and.returnValue(subj.asObservable());
 
@@ -76,15 +69,13 @@ describe('CreateAccount', () => {
 
     subj.next({ user_id: 'u1' });
     subj.complete();
-
-    tick(); // allow finalize() + subscription handlers to run
     fixture.detectChanges();
 
     expect(component.isSubmitting()).toBe(false);
     expect(navigationMock.goToLogin).toHaveBeenCalledTimes(1);
-  }));
+  });
 
-  it('should handle API error response: show apiError, stop submitting, and not navigate', fakeAsync(() => {
+  it('should handle API error response: show apiError, stop submitting, and not navigate', () => {
     userApiMock.register.and.returnValue(
       throwError(() => ({ error: { message: 'Username already exists' } }))
     );
@@ -96,17 +87,16 @@ describe('CreateAccount', () => {
     });
 
     component.createAccount();
-
-    tick();
     fixture.detectChanges();
 
+    // throwError emits synchronously; finalize runs synchronously too
     expect(component.isSubmitting()).toBe(false);
     expect(component.apiError()).toBe('Username already exists');
     expect(navigationMock.goToLogin).not.toHaveBeenCalled();
 
     const alert = fixture.nativeElement.querySelector('.alert.alert-danger');
-    expect(!!alert).toBe(true);
-  }));
+    expect(alert).toBeTruthy();
+  });
 
   it('cancel() should navigate back to /login', () => {
     component.cancel();

@@ -17,6 +17,7 @@ describe('CreateCalendarModal', () => {
 
   beforeEach(async () => {
     calendarServiceStub.create.calls.reset();
+
     localStorage.clear();
     localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
 
@@ -69,8 +70,12 @@ describe('CreateCalendarModal', () => {
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
-    const createdEmitSpy = spyOn(component.calendarCreated, 'emit');
-    const closeEmitSpy = spyOn(component.close, 'emit');
+    let emittedCalendarId: string | undefined;
+    let closed = false;
+
+    // OutputEmitterRef: subscribe instead of spying on emit()
+    component.calendarCreated.subscribe((id) => (emittedCalendarId = id));
+    component.close.subscribe(() => (closed = true));
 
     component.form.patchValue({ name: 'My Calendar' });
     component.submit();
@@ -81,8 +86,8 @@ describe('CreateCalendarModal', () => {
     expect(dtoArg.user_id).toBe('u1');
     expect(dtoArg.name).toBe('My Calendar');
 
-    expect(createdEmitSpy).toHaveBeenCalledOnceWith('c123');
-    expect(closeEmitSpy).toHaveBeenCalledTimes(1);
+    expect(emittedCalendarId).toBe('c123');
+    expect(closed).toBe(true);
   });
 
   it('should show apiError when create fails', () => {

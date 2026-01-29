@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError, Subject } from 'rxjs';
 
 import { CreateEventModal } from './create-event-modal';
@@ -38,7 +38,8 @@ describe('CreateEventModal', () => {
     fixture = TestBed.createComponent(CreateEventModal);
     component = fixture.componentInstance;
 
-    fixture.detectChanges(); // triggers ngOnInit -> loadCalendars()
+    // triggers ngOnInit -> loadCalendars()
+    fixture.detectChanges();
   }
 
   it('should create', () => {
@@ -46,36 +47,29 @@ describe('CreateEventModal', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ngOnInit should set default calendarId to first admin calendar', fakeAsync(() => {
+  it('ngOnInit should set default calendarId to first admin calendar', () => {
     createComponentWithCalendars([
       { calendar_id: '1', name: 'Admin Cal', is_admin: true },
       { calendar_id: '2', name: 'User Cal', is_admin: false },
     ]);
 
-    tick();
-    fixture.detectChanges();
-
+    // of(...) emits synchronously, so the form should already be updated
     expect(component.form.get('calendarId')?.value).toBe('1');
     expect(component.apiError()).toBe('');
-  }));
+  });
 
-  it('ngOnInit should fallback to first calendar when no admin calendars exist', fakeAsync(() => {
+  it('ngOnInit should fallback to first calendar when no admin calendars exist', () => {
     createComponentWithCalendars([
       { calendar_id: '2', name: 'User Cal A', is_admin: false },
       { calendar_id: '3', name: 'User Cal B', is_admin: false },
     ]);
 
-    tick();
-    fixture.detectChanges();
-
     expect(component.form.get('calendarId')?.value).toBe('2');
     expect(component.apiError()).toBe('');
-  }));
+  });
 
   it('submit should NOT call create when form is invalid', () => {
-    createComponentWithCalendars([
-      { calendar_id: '1', name: 'Admin Cal', is_admin: true },
-    ]);
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
 
     // Leave required fields blank
     component.form.patchValue({
@@ -97,9 +91,7 @@ describe('CreateEventModal', () => {
   });
 
   it('submit should set apiError when missing user id and NOT call create', () => {
-    createComponentWithCalendars([
-      { calendar_id: '1', name: 'Admin Cal', is_admin: true },
-    ]);
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
 
     // No localStorage user
     localStorage.removeItem('user');
@@ -122,9 +114,7 @@ describe('CreateEventModal', () => {
   });
 
   it('submit should set apiError when end <= start and NOT call create', () => {
-    createComponentWithCalendars([
-      { calendar_id: '1', name: 'Admin Cal', is_admin: true },
-    ]);
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
 
     localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
 
@@ -145,10 +135,8 @@ describe('CreateEventModal', () => {
     expect(eventServiceStub.create).not.toHaveBeenCalled();
   });
 
-  it('submit should show apiError when create fails', fakeAsync(() => {
-    createComponentWithCalendars([
-      { calendar_id: '1', name: 'Admin Cal', is_admin: true },
-    ]);
+  it('submit should show apiError when create fails', () => {
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
 
     localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
 
@@ -169,18 +157,12 @@ describe('CreateEventModal', () => {
 
     component.submit();
 
-    // error path is sync with throwError, but tick() is harmless
-    tick();
-    fixture.detectChanges();
-
     expect(component.apiError()).toBe('Could not create event');
     expect(component.isSubmitting()).toBe(false);
-  }));
+  });
 
-  it('submit should call EventService.create with CreateEventDTO and emit eventCreated on success', fakeAsync(() => {
-    createComponentWithCalendars([
-      { calendar_id: '1', name: 'Admin Cal', is_admin: true },
-    ]);
+  it('submit should call EventService.create with CreateEventDTO and emit eventCreated on success', () => {
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
 
     localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
 
@@ -215,27 +197,28 @@ describe('CreateEventModal', () => {
     const expectedStartIso = new Date('2026-01-26T10:00:00').toISOString();
     const expectedEndIso = new Date('2026-01-26T11:00:00').toISOString();
 
-    expect(dtoArg).toEqual(jasmine.objectContaining({
-      user_id: 'u1',
-      calendar_id: '1',
-      title: 'Test Title',
-      start_time: expectedStartIso,
-      end_time: expectedEndIso,
-      description: 'desc',
-      notes: 'notes',
-      tags: ['work', 'school'],
-    }));
+    expect(dtoArg).toEqual(
+      jasmine.objectContaining({
+        user_id: 'u1',
+        calendar_id: '1',
+        title: 'Test Title',
+        start_time: expectedStartIso,
+        end_time: expectedEndIso,
+        description: 'desc',
+        notes: 'notes',
+        tags: ['work', 'school'],
+      })
+    );
 
     // Finish the request
     created$.next({ event_id: 'e123' });
     created$.complete();
 
-    tick();
     fixture.detectChanges();
 
     expect(component.isSubmitting()).toBe(false);
     expect(eventCreatedSpy).toHaveBeenCalledOnceWith('e123');
     expect(closeSpy).toHaveBeenCalledTimes(1);
     expect(component.apiError()).toBe('');
-  }));
+  });
 });
