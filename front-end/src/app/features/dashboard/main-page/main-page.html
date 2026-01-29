@@ -20,7 +20,11 @@
         (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)">
       </app-display-options>
 
-      <app-polls-window class="card"></app-polls-window>
+      <app-polls-window
+        class="card"
+        (createPoll)="openCreatePoll()">
+      </app-polls-window>
+
     </aside>
   </section>
 

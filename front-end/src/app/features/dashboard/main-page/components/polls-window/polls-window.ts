@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-polls-window',
   standalone: true,
-  // imports: [RouterLink],
+  imports: [RouterLink],
   templateUrl: './polls-window.html',
   styleUrl: './polls-window.css',
 })
