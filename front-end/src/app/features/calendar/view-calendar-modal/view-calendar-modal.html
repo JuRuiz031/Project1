@@ -44,24 +44,6 @@
           <label class="form-label">Calendar Name</label>
           <input class="form-control app-input" [value]="cal.name" disabled />
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">Invite Link</label>
-
-          @if (inviteLink()) {
-            <input class="form-control app-input" [value]="inviteLink()" readonly (click)="$event.target.select()" />
-          } @else {
-            <input class="form-control app-input" value="(Not generated yet)" disabled />
-          }
-
-          <div class="hint mt-2">
-            @if (isAdmin()) {
-              <span>Admins can generate an invite link using the Share button above.</span>
-            } @else {
-              <span class="muted">Only admins can generate invite links.</span>
-            }
-          </div>
-        </div>
       }
     </div>
 
