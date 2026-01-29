@@ -106,6 +106,28 @@
           </div>
         </div>
 
+        <!-- Voting settings -->
+        <div class="border border-secondary rounded p-3 mb-3">
+          <div class="fw-semibold mb-2">Voting</div>
+
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="allowMultipleVotesEdit"
+              formControlName="allow_multiple_votes"
+            />
+            <label class="form-check-label" for="allowMultipleVotesEdit">
+              Allow multiple votes (choose more than one option)
+            </label>
+          </div>
+
+          <div class="form-text text-secondary">
+            If unchecked, users can vote for only one option.
+          </div>
+        </div>
+
+
         <!-- OPTIONS MENU -->
         <div class="border border-secondary rounded p-3">
           <div class="fw-semibold mb-2">Options</div>

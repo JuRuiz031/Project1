@@ -63,6 +63,23 @@
           </div>
         </div>
 
+        <!-- Voting settings -->
+        <div class="border rounded p-3 mb-3">
+          <div class="fw-semibold mb-2">Voting</div>
+
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge" [class.text-bg-success]="p.allow_multiple_votes" [class.text-bg-secondary]="!p.allow_multiple_votes">
+              {{ p.allow_multiple_votes ? 'Multiple votes allowed' : 'Single vote only' }}
+            </span>
+          </div>
+
+          <div class="form-text text-secondary mt-2">
+            {{ p.allow_multiple_votes
+              ? 'Voters can select more than one option.'
+              : 'Voters must select exactly one option.' }}
+          </div>
+        </div>
+
         <!-- OPTIONS -->
         <div class="border border-secondary rounded p-3">
           <div class="fw-semibold mb-2">Options</div>
