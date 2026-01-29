@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CreatePoll } from './create-poll';
+import { CreatePollModal } from './create-poll-modal';
 
 describe('CreatePoll', () => {
-  let component: CreatePoll;
-  let fixture: ComponentFixture<CreatePoll>;
+  let component: CreatePollModal;
+  let fixture: ComponentFixture<CreatePollModal>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreatePoll]
+      imports: [CreatePollModal]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CreatePoll);
+    fixture = TestBed.createComponent(CreatePollModal);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

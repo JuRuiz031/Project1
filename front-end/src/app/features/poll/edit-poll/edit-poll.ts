@@ -1,8 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+
+import { CalendarService } from '../../../shared/services/calendar.service';
+import { PollService } from '../../../shared/services/poll.service';
+
+import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
+import { CalendarSummaryDTO } from '../../../shared/models/calendars/calendar-summary.dto';
+import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
+
+import { PollDTO } from '../../../shared/models/polls/poll.dto';
+import { UpdatePollDTO } from '../../../shared/models/polls/update-poll.dto';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
@@ -14,16 +23,21 @@ type CalendarOption = { id: string; name: string; isAdmin: boolean };
   styleUrls: ['./edit-poll.css'],
 })
 export class EditPoll implements OnInit {
-  // Mock calendars (replace with API later)
-  calendars: CalendarOption[] = [
-    { id: '1', name: 'My Admin Calendar', isAdmin: true },
-    { id: '2', name: 'Shared Calendar (read-only)', isAdmin: false },
-  ];
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  private calendarService = inject(CalendarService);
+  private pollService = inject(PollService);
+
+  calendars: CalendarOption[] = [];
 
   apiError = '';
   isSubmitting = false;
+  isLoading = false;
+  isLoadingCalendars = false;
 
-  pollId = 'demo-poll-1'; // later: from route param
+  pollId = ''; // from route param
 
   // Inputs for add
   tagInput = '';
@@ -35,23 +49,39 @@ export class EditPoll implements OnInit {
 
   form!: FormGroup;
 
-  constructor(private fb: FormBuilder, private router: Router) {}
-
   ngOnInit(): void {
-    // Build form
+    // 1) get pollId from route
+    const id = this.route.snapshot.paramMap.get('pollId');
+    if (!id) {
+      this.apiError = 'Missing poll id';
+      return;
+    }
+    this.pollId = id;
+
+    // 2) build form
     this.form = this.fb.group({
       calendarId: ['', Validators.required],
       title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
+      description: ['', [Validators.maxLength(1000)]],
+      notes: ['', [Validators.maxLength(1000)]],
+
       startDate: ['', Validators.required],
       startTime: ['', Validators.required],
       endDate: ['', Validators.required],
       endTime: ['', Validators.required],
+
+      // These exist in your CreatePollDTO / CreatePollResponseDTO.
+      // If your edit UI doesn’t show them yet, it’s fine—defaults apply.
+      results_visible: [true, Validators.required],
+      allow_multiple_votes: [false, Validators.required],
+
       tags: this.fb.array<FormControl<string | null>>([]),
       options: this.fb.array<FormControl<string | null>>([]),
     });
 
-    // TODO later: load poll by id and patch form
-    this.loadMockPoll();
+    // 3) load calendars + poll
+    this.loadCalendars();
+    this.loadPoll(this.pollId);
   }
 
   // ---- getters ----
@@ -64,43 +94,153 @@ export class EditPoll implements OnInit {
   }
 
   get adminCalendars(): CalendarOption[] {
-    return this.calendars.filter(c => c.isAdmin);
+    return this.calendars.filter((c) => c.isAdmin);
   }
 
-  // ---- mock load ----
-  private loadMockPoll(): void {
-    const mock = {
-      calendarId: '1',
-      title: 'Where should we eat?',
-      startDate: '2026-01-22',
-      startTime: '18:00',
-      endDate: '2026-01-23',
-      endTime: '18:00',
-      tags: ['food', 'team', 'friday'],
-      options: ['Tacos', 'Pizza', 'Sushi', 'Burgers'],
-    };
+  // ----------------------------
+  // Calendars: real data
+  // ----------------------------
+  private loadCalendars(): void {
+    this.isLoadingCalendars = true;
 
-    this.form.patchValue({
-      calendarId: mock.calendarId,
-      title: mock.title,
-      startDate: mock.startDate,
-      startTime: mock.startTime,
-      endDate: mock.endDate,
-      endTime: mock.endTime,
+    this.calendarService.getHomepage().subscribe({
+      next: (home: CalendarHomeDTO) => {
+        this.isLoadingCalendars = false;
+
+        this.calendars = (home.calendars ?? []).map((c: CalendarSummaryDTO) => ({
+          id: c.calendar_id,
+          name: c.name,
+          isAdmin: c.is_admin,
+        }));
+
+        // If no calendar is selected yet, default to first admin, else first calendar.
+        const current = this.form.get('calendarId')?.value;
+        if (!current) {
+          const firstAdmin = this.calendars.find((c) => c.isAdmin);
+          const firstAny = this.calendars[0];
+          const selected = firstAdmin ?? firstAny;
+          if (selected) {
+            this.form.patchValue({ calendarId: selected.id }, { emitEvent: false });
+          }
+        }
+      },
+      error: (err) => {
+        this.isLoadingCalendars = false;
+        // Not fatal for editing a poll, but dropdown may be empty.
+        console.warn('Could not load calendars', err);
+      },
     });
+  }
+
+  // ----------------------------
+  // Poll: real load
+  // ----------------------------
+  private loadPoll(pollId: string): void {
+    this.apiError = '';
+    this.isLoading = true;
+
+    this.calendarService.getByPollIds([pollId]).subscribe({
+      next: (res: CalendarFilterResponseDTO) => {
+        this.isLoading = false;
+
+        const poll = (res as any)?.polls?.[0] as PollDTO | undefined;
+
+        if (!poll) {
+          this.apiError = 'Poll not found';
+          return;
+        }
+
+        this.patchFormFromPoll(poll);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.apiError =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Could not load poll';
+      },
+    });
+  }
+
+  private patchFormFromPoll(poll: PollDTO): void {
+    const start = this.isoToDateTime(poll.start_time);
+    const end = this.isoToDateTime(poll.end_time);
+
+    this.form.patchValue(
+      {
+        calendarId: poll.calendar_id ?? '',
+        title: poll.title ?? '',
+        description: poll.description ?? '',
+        notes: poll.notes ?? '',
+        startDate: start.date,
+        startTime: start.time,
+        endDate: end.date,
+        endTime: end.time,
+        results_visible: !!poll.results_visible,
+        allow_multiple_votes: !!poll.allow_multiple_votes,
+      },
+      { emitEvent: false }
+    );
 
     this.tags.clear();
-    mock.tags.forEach(t =>
+    (poll.tags ?? []).forEach((t) =>
       this.tags.push(this.fb.control(t, [Validators.required, Validators.maxLength(30)]))
     );
 
     this.options.clear();
-    mock.options.forEach(o =>
-      this.options.push(this.fb.control(o, [Validators.required, Validators.maxLength(80)]))
+    // PollDTO.options is PollOptionDTO[] (has description). Convert to strings for editing.
+    (poll.options ?? []).forEach((opt) =>
+      this.options.push(this.fb.control(opt.description ?? '', [Validators.required, Validators.maxLength(80)]))
     );
+
+    // Ensure minimum options
+    while (this.options.length < 2) {
+      this.options.push(this.fb.control('', [Validators.required, Validators.maxLength(80)]));
+    }
   }
 
-  // ---- selection ----
+  // ----------------------------
+  // Timezone bug fix helpers
+  // ----------------------------
+
+  private parseServerInstant(iso: string): Date {
+    // If server includes timezone (Z or ±hh:mm), parse normally.
+    // If server sends "2026-01-22T18:00:00" with no timezone, assume UTC and append Z.
+    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
+    return new Date(hasTz ? iso : `${iso}Z`);
+  }
+
+  private isoToDateTime(iso: string): { date: string; time: string } {
+    if (!iso) return { date: '', time: '' };
+
+    const d = this.parseServerInstant(iso);
+    if (isNaN(d.getTime())) return { date: '', time: '' };
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    // Convert to LOCAL values for the input fields
+    const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return { date, time };
+  }
+
+  private toLocalDate(date: string, time: string): Date | null {
+    if (!date || !time) return null;
+
+    const [y, m, d] = date.split('-').map(Number);
+    const [hh, mm] = time.split(':').map(Number);
+
+    if (![y, m, d, hh, mm].every(Number.isFinite)) return null;
+
+    // Construct in LOCAL time zone (no string parsing ambiguity)
+    const local = new Date(y, m - 1, d, hh, mm, 0, 0);
+    return isNaN(local.getTime()) ? null : local;
+  }
+
+  // ----------------------------
+  // Selection
+  // ----------------------------
   selectTag(i: number): void {
     this.selectedTagIndex = i;
   }
@@ -109,13 +249,15 @@ export class EditPoll implements OnInit {
     this.selectedOptionIndex = i;
   }
 
-  // ---- tags actions ----
+  // ----------------------------
+  // Tags actions
+  // ----------------------------
   addTag(): void {
     this.apiError = '';
     const value = (this.tagInput || '').trim();
     if (!value) return;
 
-    const exists = this.tags.controls.some(c => (c.value || '').toLowerCase() === value.toLowerCase());
+    const exists = this.tags.controls.some((c) => (c.value || '').toLowerCase() === value.toLowerCase());
     if (exists) {
       this.apiError = 'Tag already exists.';
       return;
@@ -136,7 +278,9 @@ export class EditPoll implements OnInit {
     this.selectedTagIndex = null;
   }
 
-  // ---- options actions ----
+  // ----------------------------
+  // Options actions
+  // ----------------------------
   addOption(): void {
     this.apiError = '';
     const value = (this.optionInput || '').trim();
@@ -164,15 +308,23 @@ export class EditPoll implements OnInit {
     this.selectedOptionIndex = null;
   }
 
-  // ---- confirm edit ----
+  // ----------------------------
+  // Confirm edit (real backend update)
+  // ----------------------------
   confirmEdit(): void {
     this.apiError = '';
+
+    if (!this.pollId) {
+      this.apiError = 'Missing poll id';
+      return;
+    }
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.apiError = 'Please fix validation errors.';
       return;
     }
+
     if (this.options.length < 2) {
       this.apiError = 'A poll must have at least 2 options.';
       return;
@@ -180,52 +332,78 @@ export class EditPoll implements OnInit {
 
     const v = this.form.getRawValue();
 
-    const start = new Date(`${v.startDate}T${v.startTime}:00`);
-    const end = new Date(`${v.endDate}T${v.endTime}:00`);
+    const start = this.toLocalDate(String(v.startDate), String(v.startTime));
+    const end = this.toLocalDate(String(v.endDate), String(v.endTime));
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    if (!start || !end) {
       this.apiError = 'Start/End date-time is invalid.';
       return;
     }
-    if (end <= start) {
+    if (end.getTime() <= start.getTime()) {
       this.apiError = 'End must be after start.';
       return;
     }
 
-    const payload = {
-      poll_id: this.pollId,
-      calendar_id: v.calendarId,
-      title: v.title,
+    const tags = (v.tags ?? [])
+      .map((t: string | null) => (t ?? '').trim())
+      .filter((t: string) => t.length > 0);
+
+    const optionDescriptions = (v.options ?? [])
+      .map((o: string | null) => (o ?? '').trim())
+      .filter((o: string) => o.length > 0);
+
+    if (optionDescriptions.length < 2) {
+      this.apiError = 'A poll must have at least 2 options.';
+      return;
+    }
+
+    // Build UpdatePollDTO for your backend
+    const dto: UpdatePollDTO = {
+      calendar_id: String(v.calendarId),
+      title: String(v.title),
+
+      description: (v.description ?? '').trim() || undefined,
+      notes: (v.notes ?? '').trim() || undefined,
+
+      // Store as UTC instants (no cumulative +6 bug)
       start_time: start.toISOString(),
       end_time: end.toISOString(),
-      tags: (v.tags ?? [])
-        .filter((t: string | null) => typeof t === 'string' && t.trim().length > 0)
-        .map((t: string | null) => (t ?? '').trim()),
-      options: (v.options ?? [])
-        .filter((o: string | null) => typeof o === 'string' && o.trim().length > 0)
-        .map((o: string | null) => (o ?? '').trim()),
+
+      results_visible: Boolean(v.results_visible),
+      allow_multiple_votes: Boolean(v.allow_multiple_votes),
+
+      // API expects { description }[]
+      options: optionDescriptions.map((desc: string) => ({ description: desc })),
+
+      tags,
     };
 
-    // TODO: PollApiService.updatePoll(this.pollId, payload).subscribe(...)
     this.isSubmitting = true;
-    console.log('UpdatePoll payload:', payload);
 
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.router.navigate(['/view-poll']);
-      // later: this.router.navigate(['/view-poll', this.pollId]);
-    }, 400);
+    this.pollService.update(this.pollId, dto).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        // Navigate back to view page (adjust route to your app)
+        this.router.navigate(['/view-poll', this.pollId]);
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.apiError =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : '') ||
+          err?.message ||
+          'Could not update poll';
+      },
+    });
   }
 
   // ---- delete poll (route to delete component) ----
   deletePoll(): void {
-    this.router.navigate(['/delete-poll']);
-    // later (recommended): this.router.navigate(['/delete-poll', this.pollId]);
+    this.router.navigate(['/delete-poll', this.pollId]);
   }
 
   cancel(): void {
-    this.router.navigate(['/view-poll']);
-    // later: this.router.navigate(['/view-poll', this.pollId]);
+    this.router.navigate(['/view-poll', this.pollId]);
   }
 
   hasError(name: string): boolean {

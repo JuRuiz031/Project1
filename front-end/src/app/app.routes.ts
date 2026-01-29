@@ -20,7 +20,7 @@ import { DeleteCalendarGroup } from './features/calendar/delete-calendar-group/d
 
 import { ViewEvent } from './features/event/view-event/view-event';
 
-import { CreatePoll } from './features/poll/create-poll/create-poll';
+// import { CreatePoll } from './features/poll/create-poll/create-poll';
 import { ViewPoll } from './features/poll/view-poll/view-poll';
 import { EditPoll } from './features/poll/edit-poll/edit-poll';
 import { DeletePoll } from './features/poll/delete-poll/delete-poll';
@@ -83,10 +83,10 @@ export const routes: Routes = [
 
       // Event routes removed - now all modals from main-page
 
-      { path: 'create-poll', component: CreatePoll },
-      { path: 'view-poll', component: ViewPoll },
-      { path: 'edit-poll', component: EditPoll },
-      { path: 'delete-poll', component: DeletePoll },
+      // { path: 'create-poll', component: CreatePoll },
+      { path: 'view-poll/:pollId', component: ViewPoll },
+      { path: 'edit-poll/:pollId', component: EditPoll },
+      { path: 'delete-poll/:pollId', component: DeletePoll },
     ],
   },
 ];

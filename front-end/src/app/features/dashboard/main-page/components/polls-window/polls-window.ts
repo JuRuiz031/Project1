@@ -1,11 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-polls-window',
   standalone: true,
-  imports: [RouterLink],
+  // imports: [RouterLink],
   templateUrl: './polls-window.html',
   styleUrl: './polls-window.css',
 })
-export class PollsWindow {}
+export class PollsWindow {
+    createPoll = output<void>();
+
+    onCreatePoll(): void {
+      this.createPoll.emit();
+  }
+}

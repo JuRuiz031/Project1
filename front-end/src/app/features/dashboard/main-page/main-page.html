@@ -69,4 +69,13 @@
       (eventDeleted)="onEventDeleted($event)">
     </app-delete-event-modal>
   }
+
+  <!-- Create Poll Modal -->
+@if (modalState() === 'create-poll') {
+  <app-create-poll-modal
+    (close)="closeAllModals()"
+    (pollCreated)="onPollCreated($event)">
+  </app-create-poll-modal>
+}
+
 </main>

@@ -1,0 +1,31 @@
+<app-base-modal
+  [title]="title()"
+  [showBackButton]="false"
+  [size]="'large'"
+  (close)="onClose()"
+>
+  <!-- Optional errors -->
+  <div *ngIf="apiError()" class="alert alert-danger mb-3">
+    {{ apiError() }}
+  </div>
+
+  <div *ngIf="isLoadingCalendars()" class="text-secondary mb-3">
+    Loading calendars...
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Your existing create-poll.html content can be moved here as-is.
+         Just keep bindings to tagInput/optionInput, form arrays, etc. -->
+
+    <!-- Example footer actions (replace with your buttons if you already have them) -->
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button type="button" class="btn btn-outline-secondary" (click)="onClose()" [disabled]="isSubmitting()">
+        Cancel
+      </button>
+
+      <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Creating…' : 'Create Poll' }}
+      </button>
+    </div>
+  </form>
+</app-base-modal>
