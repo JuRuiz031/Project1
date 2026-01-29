@@ -1,22 +1,11 @@
-import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
-import { PollService } from '../../../shared/services/poll.service';
+import { CalendarService } from '../../../shared/services/calendar.service';
 
-// Use your actual DTO types if you have them:
-type ViewPollVM = {
-  pollId: string;
-  calendarName: string;
-  title: string;
-  description?: string | null;
-  startDate: string;
-  startTime: string;
-  endDate: string;
-  endTime: string;
-  options: string[];
-  tags: string[];
-};
+import { PollDTO } from '../../../shared/models/polls/poll.dto';
+import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 @Component({
   selector: 'app-view-poll-modal',
@@ -26,15 +15,15 @@ type ViewPollVM = {
   styleUrls: ['./view-poll-modal.css'],
 })
 export class ViewPollModal implements OnInit {
-  private pollService = inject(PollService);
+  private calendarService = inject(CalendarService);
 
   title = input<string>('View Poll');
-  pollId = input<string>(''); // parent passes the id
+  pollId = input<string>(''); // required
 
   close = output<void>();
-  edit = output<string>(); // emit pollId so parent can open edit modal or route
+  edit = output<string>();
 
-  poll = signal<ViewPollVM | null>(null);
+  poll = signal<PollDTO | null>(null);
   apiError = signal('');
   isLoading = signal(false);
 
@@ -51,27 +40,19 @@ export class ViewPollModal implements OnInit {
     this.apiError.set('');
     this.isLoading.set(true);
 
-    // Replace with your actual API call (getById, getPoll, etc.)
-    this.pollService.getById(id).subscribe({
-      next: (res: any) => {
+    this.calendarService.getByPollIds([id]).subscribe({
+      next: (res: CalendarFilterResponseDTO) => {
         this.isLoading.set(false);
 
-        // Map your backend shape -> ViewPollVM
-        // (Adjust these field names to match your response DTO.)
-        const vm: ViewPollVM = {
-          pollId: res.poll_id ?? res.pollId ?? id,
-          calendarName: res.calendar_name ?? res.calendarName ?? '',
-          title: res.title ?? '',
-          description: res.description ?? null,
-          startDate: res.startDate ?? res.start_date ?? '',
-          startTime: res.startTime ?? res.start_time ?? '',
-          endDate: res.endDate ?? res.end_date ?? '',
-          endTime: res.endTime ?? res.end_time ?? '',
-          options: (res.options ?? []).map((o: any) => o.description ?? o),
-          tags: res.tags ?? [],
-        };
+        const found = (res.polls ?? []).find(p => p.poll_id === id) ?? (res.polls?.[0] ?? null);
 
-        this.poll.set(vm);
+        if (!found) {
+          this.apiError.set('Poll not found.');
+          this.poll.set(null);
+          return;
+        }
+
+        this.poll.set(found);
       },
       error: (err: any) => {
         this.isLoading.set(false);
@@ -92,6 +73,24 @@ export class ViewPollModal implements OnInit {
   onEdit(): void {
     const p = this.poll();
     if (!p) return;
-    this.edit.emit(p.pollId);
+    this.edit.emit(p.poll_id);
+  }
+
+  // Optional helpers for template display
+  formatLocalDate(iso: string): string {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  formatLocalTime(iso: string): string {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    return `${hh}:${mi}`;
   }
 }

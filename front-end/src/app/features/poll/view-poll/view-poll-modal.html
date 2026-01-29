@@ -22,7 +22,7 @@
         <!-- Calendar -->
         <div class="mb-3">
           <label class="form-label">Calendar</label>
-          <input class="form-control app-input" [value]="p.calendarName" disabled />
+          <input class="form-control app-input" [value]="p.calendar_id" disabled />
         </div>
 
         <!-- Title -->
@@ -41,12 +41,12 @@
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-6">
             <label class="form-label">Start date</label>
-            <input class="form-control app-input" [value]="p.startDate" disabled />
+            <input class="form-control app-input" [value]="formatLocalDate(p.start_time)" disabled />
           </div>
 
           <div class="col-12 col-md-6">
             <label class="form-label">Start time</label>
-            <input class="form-control app-input" [value]="p.startTime" disabled />
+            <input class="form-control app-input" [value]="formatLocalTime(p.start_time)" disabled />
           </div>
         </div>
 
@@ -54,12 +54,12 @@
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-6">
             <label class="form-label">End date</label>
-            <input class="form-control app-input" [value]="p.endDate" disabled />
+            <input class="form-control app-input" [value]="p.end_time" disabled />
           </div>
 
           <div class="col-12 col-md-6">
             <label class="form-label">End time</label>
-            <input class="form-control app-input" [value]="p.endTime" disabled />
+            <input class="form-control app-input" [value]="p.end_time" disabled />
           </div>
         </div>
 
@@ -69,7 +69,7 @@
 
           <div class="d-grid gap-2">
             <div class="input-group" *ngFor="let opt of p.options">
-              <input class="form-control app-input" [value]="opt" disabled />
+              <input class="form-control app-input" [value]="opt.description" disabled />
             </div>
 
             <div class="text-secondary" *ngIf="p.options?.length === 0">

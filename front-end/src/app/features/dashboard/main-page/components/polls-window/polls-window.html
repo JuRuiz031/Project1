@@ -2,35 +2,54 @@
   <h2 class="polls-window__title">Polls Window</h2>
 
   <div class="polls-window__panel">
-    <div class="polls-window__placeholder">
-      Poll information will display here
+    <div *ngIf="apiError()" class="alert alert-danger mb-2">
+      {{ apiError() }}
     </div>
+
+    <div *ngIf="isLoading()" class="text-secondary">
+      Loading polls...
+    </div>
+
+    <div *ngIf="!isLoading() && polls().length === 0" class="polls-window__placeholder">
+      No polls yet.
+    </div>
+
+    <ul *ngIf="!isLoading() && polls().length > 0" class="list-group">
+      <li
+        class="list-group-item d-flex justify-content-between align-items-center"
+        *ngFor="let p of polls()"
+        (click)="onSelectPoll(p)"
+        [class.active]="p.poll_id === selectedPollId()"
+        style="cursor: pointer;"
+      >
+        <span>{{ p.title }}</span>
+        <small class="text-muted">{{ p.start_time }}</small>
+      </li>
+    </ul>
   </div>
 
   <div class="polls-window__actions">
-    <button
-      type="button"
-      class="polls-window__btn"
-      (click)="onCreatePoll()"
-    >
+    <button type="button" class="polls-window__btn" (click)="onCreatePoll()">
       Create Poll
     </button>
 
-    <button
-  type="button"
-  class="polls-window__btn"
-  (click)="onViewPoll()"
->
-  View Poll
+    <button type="button" class="polls-window__btn" (click)="onViewPoll()">
+      View Poll
     </button>
-
-  <!-- Render the modal
-  <app-view-poll-modal
-    *ngIf="isViewPollOpen"
-    [pollId]="selectedPollId"
-    (close)="isViewPollOpen = false"
-    (edit)="onEditPoll($event)"
-  ></app-view-poll-modal> -->
-
   </div>
+
+  <!-- View Poll Modal -->
+  <app-view-poll-modal
+    *ngIf="isViewPollOpen()"
+    [pollId]="selectedPollId()"
+    (close)="isViewPollOpen.set(false)"
+    (edit)="onEditPoll($event)"
+  ></app-view-poll-modal>
+
+  <!-- Create Poll Modal (only if you want it opened from polls-window) -->
+  <app-create-poll-modal
+    *ngIf="isCreatePollOpen()"
+    (close)="isCreatePollOpen.set(false)"
+    (pollCreated)="onPollCreated($event)"
+  ></app-create-poll-modal>
 </section>
