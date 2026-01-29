@@ -76,6 +76,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
 
   // User info
   userId: string | null = null;
+  currentUserId = computed(() => this.userId ?? '');
 
   // Refresh interval
   private refreshInterval?: number;

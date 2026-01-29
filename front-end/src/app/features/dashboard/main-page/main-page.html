@@ -52,10 +52,26 @@
     <app-view-calendar-modal
       [calendarId]="selectedCalendarId()"
       (back)="onViewCalendarBack()"
-      (close)="closeAllModals()">
+      (close)="closeAllModals()"
+      (editCalendar)="openEditCalendar($event)">
     </app-view-calendar-modal>
   }
 
+  <!-- Edit Calendar Modal -->
+  @if (modalState() === 'edit-calendar') {
+    <app-edit-calendar-modal
+      [calendarId]="selectedCalendarId()!"
+      [currentUserId]="currentUserId()"
+      (close)="closeAllModals()"
+      (calendarUpdated)="onCalendarUpdated($event)"
+      (deleteRequested)="onDeleteCalendarRequested($event)">
+    </app-edit-calendar-modal>
+  }
+
+  <!-- Delete Calendar Modal -->
+  @if (modalState() === 'delete-calendar') {
+    <app-delete-calendar-modal></app-delete-calendar-modal>
+  }
 
   <!-- Event Selector Modal -->
   @if (modalState() === 'event-selector') {
@@ -98,12 +114,10 @@
 
   <!-- Delete Event Modal -->
   @if (modalState() === 'delete-event') {
-    <app-edit-calendar-modal
-      [calendarId]="selectedCalendarId()!"
-      [currentUserId]="currentUserId()"
+    <app-delete-event-modal
+      [eventId]="selectedEventId()!"
       (close)="closeAllModals()"
-      (calendarUpdated)="onCalendarUpdated($event)"
-      (deleteRequested)="onDeleteCalendarRequested($event)"
-    />
+      (eventDeleted)="onEventDeleted($event)">
+    </app-delete-event-modal>
   }
 </main>
