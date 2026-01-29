@@ -70,7 +70,14 @@
 
   <!-- Delete Calendar Modal -->
   @if (modalState() === 'delete-calendar') {
-    <app-delete-calendar-modal></app-delete-calendar-modal>
+    <app-delete-calendar-modal
+      [targetId]="selectedCalendarId()"
+      [targetName]="selectedCalendarName()"
+      [isDeleting]="isDeletingCalendar()"
+      [apiError]="deleteCalendarApiError()"
+      (cancel)="closeAllModals()"
+      (confirmDelete)="onConfirmDeleteCalendar($event)">
+    </app-delete-calendar-modal>
   }
 
   <!-- Event Selector Modal -->

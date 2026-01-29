@@ -1,52 +1,14 @@
-.app-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 1000;
+.card {
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-.app-modal {
-  position: fixed;
-  left: 50%;
-  top: 12vh;
-  transform: translateX(-50%);
-  width: min(560px, calc(100vw - 2rem));
-  background: #1f232a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-  z-index: 1001;
-  overflow: hidden;
+.delete-calendar__message {
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
-.app-modal__header,
-.app-modal__footer {
-  padding: 1rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.app-modal__header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.app-modal__title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.app-modal__close {
-  line-height: 1;
-}
-
-.app-modal__body {
-  padding: 1.25rem;
-}
-
-.app-modal__footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  justify-content: flex-end;
+.card-body {
+  padding: 32px 24px;
 }

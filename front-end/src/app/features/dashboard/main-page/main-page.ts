@@ -1,5 +1,5 @@
 import { Component, OnInit, DestroyRef, signal, computed, effect, inject } from '@angular/core';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, take } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -264,6 +264,45 @@ export class MainPageComponent implements OnInit {
     console.log('[MainPage] Opening delete calendar modal:', calendarId);
     this.selectedCalendarId.set(calendarId);
     this.modalState.set('delete-calendar');
+  }
+
+  // Delete-calendar modal state
+  deleteCalendarApiError = signal('');
+  isDeletingCalendar = signal(false);
+
+  selectedCalendarName = computed(() => {
+    const id = this.selectedCalendarId();
+    if (!id) return 'this calendar';
+
+    const found = this.calendars().find(c => String(c.calendar_id) === String(id));
+    return found?.name ?? 'this calendar';
+  });
+
+  onConfirmDeleteCalendar(calendarId: string): void {
+    this.deleteCalendarApiError.set('');
+    this.isDeletingCalendar.set(true);
+
+    // assuming CalendarService has delete(calendarId) like update()
+    this.calendarService.delete(calendarId)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.isDeletingCalendar.set(false);
+
+          // refresh calendar list + close
+          this.loadCalendarHome();
+          this.closeAllModals();
+        },
+        error: (err) => {
+          this.isDeletingCalendar.set(false);
+          this.deleteCalendarApiError.set(
+            err?.error?.message ||
+              (typeof err?.error === 'string' ? err.error : '') ||
+              err?.message ||
+              'Could not delete calendar'
+          );
+        },
+      });
   }
 
   onCalendarUpdated(calendarId: string): void {

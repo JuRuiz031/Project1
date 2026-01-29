@@ -1,19 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
+import { BaseModal } from '../../../shared/components/base-modal/base-modal';
+
 @Component({
   selector: 'app-delete-calendar-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BaseModal],
   templateUrl: './delete-calendar-modal.html',
   styleUrls: ['./delete-calendar-modal.css'],
 })
 export class DeleteCalendarModal {
-  /**
-   * Parent-controlled visibility (matches modal transfer flow).
-   */
-  @Input() isOpen = false;
-
   /**
    * Parent passes the selected calendar/group info into the modal.
    * (Keep names generic so main-page can reuse this for calendars or groups.)

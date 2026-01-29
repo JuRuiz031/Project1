@@ -51,24 +51,4 @@ describe('DeleteCalendarModal', () => {
 
     expect(spy).not.toHaveBeenCalled();
   });
-
-  it('should render nothing when isOpen is false', async () => {
-    component.isOpen = false;
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const modalEl = fixture.nativeElement.querySelector('.app-modal');
-    expect(modalEl).toBeNull();
-  });
-
-  it('should render modal when isOpen is true', async () => {
-    component.isOpen = true;
-    component.targetId = 'cg-123';
-    component.targetName = 'Group A';
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    const modalEl = fixture.nativeElement.querySelector('.app-modal');
-    expect(modalEl).toBeTruthy();
-  });
 });

@@ -1,59 +1,37 @@
-@if (isOpen) {
-  <!-- Backdrop -->
-  <div class="app-modal-backdrop" (click)="onCancel()" aria-hidden="true"></div>
+<app-base-modal
+  [title]="'Delete Calendar'"
+  [size]="'small'"
+  (close)="onCancel()"
+>
+  <div class="text-center">
+    @if (apiError) {
+      <div class="alert alert-danger mb-3">{{ apiError }}</div>
+    }
 
-  <!-- Dialog -->
-  <div
-    class="app-modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="deleteCalendarTitle"
-    (click)="$event.stopPropagation()"
-  >
-    <header class="app-modal__header">
-      <h2 id="deleteCalendarTitle" class="app-modal__title">Confirm Delete</h2>
-      <button
-        type="button"
-        class="btn btn-sm btn-outline-light app-modal__close"
-        (click)="onCancel()"
-        [disabled]="isDeleting"
-        aria-label="Close"
-      >
-        ✕
-      </button>
-    </header>
+    <div class="mb-4">
+      <p class="mb-2">Are you sure you want to delete</p>
+      <strong class="fs-5">{{ targetName }}</strong>
+      <p class="mt-2 text-muted">This action cannot be undone.</p>
+    </div>
 
-    <section class="app-modal__body">
-      <p class="mb-2">
-        Are you sure you want to delete <strong>{{ targetName }}</strong>?
-      </p>
-      <p class="text-muted mb-0">This action cannot be undone.</p>
-
-      @if (apiError) {
-        <div class="alert alert-danger mt-3 mb-0">
-          {{ apiError }}
-        </div>
-      }
-    </section>
-
-    <footer class="app-modal__footer">
+    <div class="d-flex justify-content-center gap-3">
       <button
         type="button"
         class="btn btn-danger"
         (click)="onConfirm()"
         [disabled]="isDeleting || !targetId"
       >
-        {{ isDeleting ? 'Deleting...' : 'Confirm' }}
+        {{ isDeleting ? 'Deleting...' : 'Delete' }}
       </button>
 
       <button
         type="button"
-        class="btn btn-outline-light"
+        class="btn btn-outline-secondary"
         (click)="onCancel()"
         [disabled]="isDeleting"
       >
         Cancel
       </button>
-    </footer>
+    </div>
   </div>
-}
+</app-base-modal>
