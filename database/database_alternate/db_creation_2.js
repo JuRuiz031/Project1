@@ -579,7 +579,7 @@ db.polls.insertMany([
     allowMultipleVotes: true,
     tags: ["social", "planning"],
     inviteLinks: [{ token: generateToken(), createdAt: pollNow, expiresAt: pollOneWeekLater }],
-    options: {
+    optionsList: {
       "0": {
         optionId: 0,
         description: "Potluck + board games",
@@ -611,7 +611,7 @@ db.polls.insertMany([
     allowMultipleVotes: false,
     tags: ["family", "scheduling"],
     inviteLinks: [],
-    options: {
+    optionsList: {
       "0": { optionId: 0, description: "Saturday", userVotes: [USER.Diana, USER.George], guestVotes: [] },
       "1": { optionId: 1, description: "Sunday", userVotes: [USER.Bob, USER.Alice], guestVotes: ["Grandma (guest)"] },
     },
@@ -627,7 +627,7 @@ db.polls.insertMany([
     allowMultipleVotes: false,
     tags: ["travel", "planning"],
     inviteLinks: [{ token: generateToken(), createdAt: pollNow, expiresAt: pollOneWeekLater }],
-    options: {
+    optionsList: {
       "0": { optionId: 0, description: "Beach weekend", userVotes: [USER.Ethan, USER.Fiona], guestVotes: [] },
       "1": { optionId: 1, description: "Mountain cabin", userVotes: [USER.Alice, USER.Ivan], guestVotes: ["Chris (guest)"] },
       "2": { optionId: 2, description: "City trip", userVotes: [USER.Hannah, USER.Julia], guestVotes: [] },
@@ -644,7 +644,7 @@ db.polls.insertMany([
     allowMultipleVotes: true,
     tags: ["climbing", "planning"],
     inviteLinks: [],
-    options: {
+    optionsList: {
       "0": { optionId: 0, description: "Weekend 1", userVotes: [USER.Alice], guestVotes: ["Taylor (guest)"] },
       "1": { optionId: 1, description: "Weekend 2", userVotes: [USER.Alice, USER.Bob], guestVotes: [] },
     },
