@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, signal, computed, effect, inject } from '@angular/core';
+import { Component, OnInit, DestroyRef, signal, computed, effect, inject } from '@angular/core';
 import { map, catchError, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, interval } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CalendarDisplay } from './components/calendar-display/calendar-display';
 import { CalendarOptions } from './components/calendar-options/calendar-options';
@@ -57,8 +58,9 @@ type ModalState =
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
 })
-export class MainPageComponent implements OnInit, OnDestroy {
+export class MainPageComponent implements OnInit {
   private calendarService = inject(CalendarService);
+  private destroyRef = inject(DestroyRef);
 
   // Signals for reactive state
   calendars = signal<CalendarOptionDTO[]>([]);
@@ -77,9 +79,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
   // User info
   userId: string | null = null;
   currentUserId = computed(() => this.userId ?? '');
-
-  // Refresh interval
-  private refreshInterval?: number;
 
   constructor() {
     // Effect: react to calendar selection changes
@@ -135,19 +134,23 @@ export class MainPageComponent implements OnInit, OnDestroy {
     window.addEventListener('focus', this.handleWindowFocus);
 
     // Poll every 30 seconds while page is active (keeps data fresh)
-    this.refreshInterval = window.setInterval(() => {
-      if (this.selectedCalendarIds().length > 0) {
-        console.log('[MainPage] Auto-refresh (30s polling)');
-        this.refreshEvents();
-      }
-    }, 30000);
-  }
+    interval(30000)
+      .pipe(
+        tap(() => {
+          if (this.selectedCalendarIds().length > 0) {
+            console.log('[MainPage] Auto-refresh (30s polling)');
+            this.refreshEvents();
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe();
 
-  ngOnDestroy(): void {
-    window.removeEventListener('focus', this.handleWindowFocus);
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-    }
+    // Register cleanup on component destroy
+    this.destroyRef.onDestroy(() => {
+      console.log('[MainPage] Component destroyed - cleaning up resources');
+      window.removeEventListener('focus', this.handleWindowFocus);
+    });
   }
 
   /**
