@@ -22,7 +22,7 @@
         <!-- Calendar -->
         <div class="mb-3">
           <label class="form-label">Calendar</label>
-          <input class="form-control app-input" [value]="p.calendar_id" disabled />
+          <input class="form-control app-input" [value]="calendarName() || p.calendar_id" disabled />
         </div>
 
         <!-- Title -->
@@ -54,12 +54,12 @@
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-6">
             <label class="form-label">End date</label>
-            <input class="form-control app-input" [value]="p.end_time" disabled />
+            <input class="form-control app-input" [value]="formatLocalDate(p.end_time)" disabled />
           </div>
 
           <div class="col-12 col-md-6">
             <label class="form-label">End time</label>
-            <input class="form-control app-input" [value]="p.end_time" disabled />
+            <input class="form-control app-input" [value]="formatLocalTime(p.end_time)" disabled />
           </div>
         </div>
 

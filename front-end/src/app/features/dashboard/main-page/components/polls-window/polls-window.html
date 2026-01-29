@@ -23,7 +23,7 @@
         style="cursor: pointer;"
       >
         <span>{{ p.title }}</span>
-        <small class="text-muted">{{ p.start_time }}</small>
+        <small class="text-muted">{{ formatEventTime(p.start_time) }} ({{ getTimezoneAbbr() }})</small>
       </li>
     </ul>
   </div>

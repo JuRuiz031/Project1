@@ -109,4 +109,34 @@ export class PollsWindow implements OnInit {
     // Later: open edit modal or route
     // this.router.navigate(['/edit-poll', pollId]);
   }
+
+  formatEventTime(iso: string): string {
+    if (!iso) return '';
+
+    const d = this.parseServerInstant(iso);
+    if (isNaN(d.getTime())) return '';
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    
+    return `${date} ${time}`;
+  }
+
+    private parseServerInstant(iso: string): Date {
+    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
+    return new Date(hasTz ? iso : `${iso}Z`);
+  }
+
+  getTimezoneAbbr(): string {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZoneName: 'short',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const parts = formatter.formatToParts(now);
+    const tzPart = parts.find(p => p.type === 'timeZoneName');
+    return tzPart?.value ?? 'UTC';
+  }
 }
