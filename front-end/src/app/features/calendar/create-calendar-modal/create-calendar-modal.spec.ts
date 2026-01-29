@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { fakeAsync, flushMicrotasks } from '@angular/core/testing';
 
 import { CreateCalendarModal } from './create-calendar-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
@@ -65,7 +66,7 @@ describe('CreateCalendarModal', () => {
     expect(calendarServiceStub.create).not.toHaveBeenCalled();
   });
 
-  it('should call CalendarService.create and emit calendarCreated + close on success', () => {
+  it('should call CalendarService.create and emit calendarCreated + close on success', fakeAsync(() => {
     const fixture = TestBed.createComponent(CreateCalendarModal);
     const component = fixture.componentInstance;
     fixture.detectChanges();
@@ -73,12 +74,15 @@ describe('CreateCalendarModal', () => {
     let emittedCalendarId: string | undefined;
     let closed = false;
 
-    // OutputEmitterRef: subscribe instead of spying on emit()
+    // OutputEmitterRef: subscribe is correct, but emissions may flush as microtasks in tests
     component.calendarCreated.subscribe((id) => (emittedCalendarId = id));
     component.close.subscribe(() => (closed = true));
 
     component.form.patchValue({ name: 'My Calendar' });
     component.submit();
+
+    // Ensure any queued output emissions run before assertions
+    flushMicrotasks();
 
     expect(calendarServiceStub.create).toHaveBeenCalledTimes(1);
 
@@ -88,7 +92,7 @@ describe('CreateCalendarModal', () => {
 
     expect(emittedCalendarId).toBe('c123');
     expect(closed).toBe(true);
-  });
+  }));
 
   it('should show apiError when create fails', () => {
     calendarServiceStub.create.and.returnValue(throwError(() => ({})));
