@@ -1,32 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
-import { vi } from 'vitest';
 
 import { DeleteUser } from './delete-user';
-import { Router } from '@angular/router';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 describe('DeleteUser', () => {
   let fixture: ComponentFixture<DeleteUser>;
   let component: DeleteUser;
 
-  const routerMock = {
-    navigateByUrl: vi.fn(),
+  const navigationMock = {
+    goToLogin: jasmine.createSpy('goToLogin'),
+    goToEditUser: jasmine.createSpy('goToEditUser'),
   };
 
   const userApiMock = {
-    deleteUser: vi.fn(),
+    deleteUser: jasmine.createSpy('deleteUser'),
   };
 
   beforeEach(async () => {
-    vi.clearAllMocks();
     localStorage.clear();
+    navigationMock.goToLogin.calls.reset();
+    navigationMock.goToEditUser.calls.reset();
+    userApiMock.deleteUser.calls.reset();
 
     await TestBed.configureTestingModule({
       imports: [DeleteUser],
       providers: [
-        { provide: Router, useValue: routerMock },
+        { provide: NavigationService, useValue: navigationMock },
         { provide: UserApiService, useValue: userApiMock },
       ],
     }).compileComponents();
@@ -53,7 +55,6 @@ describe('DeleteUser', () => {
   });
 
   it('should show "No user found in session" when localStorage has no user', () => {
-    // no localStorage user set
     fixture = TestBed.createComponent(DeleteUser);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -73,13 +74,13 @@ describe('DeleteUser', () => {
     expect(strongEl.nativeElement.textContent).toContain('"Ben"');
   });
 
-  it('confirmDelete should call deleteUser with userId and navigate to /login on success', () => {
+  it('confirmDelete should call deleteUser with userId and navigate to login on success', () => {
     createComponentWithUser({ user_id: 'u-123', username: 'Alice' });
 
     // Keep a key to verify localStorage.clear() happened
     localStorage.setItem('extra', 'value');
 
-    userApiMock.deleteUser.mockReturnValue(of({}));
+    userApiMock.deleteUser.and.returnValue(of({}));
 
     component.confirmDelete();
 
@@ -87,9 +88,10 @@ describe('DeleteUser', () => {
     expect(userApiMock.deleteUser).toHaveBeenCalledTimes(1);
     expect(userApiMock.deleteUser).toHaveBeenCalledWith('u-123');
 
+    // success path clears session + navigates
     expect(localStorage.getItem('user')).toBeNull();
     expect(localStorage.getItem('extra')).toBeNull();
-    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(navigationMock.goToLogin).toHaveBeenCalledTimes(1);
   });
 
   it('confirmDelete should set apiError if no userId exists', () => {
@@ -110,7 +112,7 @@ describe('DeleteUser', () => {
   it('confirmDelete should show failure message and reset isDeleting on error', () => {
     createComponentWithUser({ user_id: 'u-500', username: 'Alice' });
 
-    userApiMock.deleteUser.mockReturnValue(
+    userApiMock.deleteUser.and.returnValue(
       throwError(() => new Error('boom'))
     );
 
@@ -126,11 +128,11 @@ describe('DeleteUser', () => {
     expect(alertEl.nativeElement.textContent).toContain('Failed to delete profile. Please try again.');
   });
 
-  it('cancelDelete should navigate to /edit-user', () => {
+  it('cancelDelete should navigate to edit user', () => {
     createComponentWithUser({ user_id: 'u-7', username: 'Alice' });
 
     component.cancelDelete();
 
-    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/edit-user');
+    expect(navigationMock.goToEditUser).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+
 import { MainHeader } from './main-header';
 
 describe('MainHeader', () => {
@@ -7,11 +9,15 @@ describe('MainHeader', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MainHeader],
+      imports: [
+        RouterTestingModule, // ✅ provides ActivatedRoute needed by RouterLink
+        MainHeader,
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MainHeader);
     component = fixture.componentInstance;
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

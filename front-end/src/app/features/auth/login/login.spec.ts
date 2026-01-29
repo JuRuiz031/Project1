@@ -1,41 +1,42 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { vi } from 'vitest';
 
 import { Login } from './login';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 describe('Login', () => {
   let fixture: ComponentFixture<Login>;
   let component: Login;
-  let router: Router;
+
+  const navigationMock = {
+    goToHome: jasmine.createSpy('goToHome'),
+  };
 
   const userApiMock = {
-    login: vi.fn(),
+    login: jasmine.createSpy('login'),
   };
 
   beforeEach(async () => {
-    vi.clearAllMocks();
+    localStorage.clear();
+    navigationMock.goToHome.calls.reset();
+    userApiMock.login.calls.reset();
 
     await TestBed.configureTestingModule({
       imports: [Login],
       providers: [
-        provideRouter([]),
+        { provide: NavigationService, useValue: navigationMock },
         { provide: UserApiService, useValue: userApiMock },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router);
-
-    await fixture.whenStable();
     fixture.detectChanges();
   });
 
   it('should create', () => {
-    expect(!!component).toBe(true);
+    expect(component).toBeTruthy();
   });
 
   it('should not call login endpoint when form is invalid, and should mark controls as touched', () => {
@@ -43,17 +44,18 @@ describe('Login', () => {
 
     component.onLogin();
 
-    expect(component.form.get('username')?.touched === true).toBe(true);
-    expect(component.form.get('password')?.touched === true).toBe(true);
+    expect(component.form.invalid).toBe(true);
+    expect(component.form.get('username')?.touched).toBe(true);
+    expect(component.form.get('password')?.touched).toBe(true);
 
-    expect(userApiMock.login.mock.calls).toEqual([]);
+    expect(userApiMock.login).not.toHaveBeenCalled();
+    expect(navigationMock.goToHome).not.toHaveBeenCalled();
   });
 
   it('should call login endpoint with correct DTO and navigate on success', () => {
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
-    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+    const setItemSpy = spyOn(Storage.prototype, 'setItem').and.callThrough();
 
-    userApiMock.login.mockReturnValue(
+    userApiMock.login.and.returnValue(
       of({
         token: 'real-token',
         user: {
@@ -70,43 +72,61 @@ describe('Login', () => {
 
     component.onLogin();
 
-    expect(userApiMock.login.mock.calls).toEqual([
-      [{ username: 'alice', password: 'password' }],
-    ]);
+    expect(userApiMock.login).toHaveBeenCalledTimes(1);
+    expect(userApiMock.login).toHaveBeenCalledWith({
+      username: 'alice',
+      password: 'password',
+    });
 
-    expect(setItemSpy.mock.calls).toEqual([
-      ['token', 'real-token'],
-      [
-        'user',
-        JSON.stringify({
-          user_id: '3',
-          username: 'alice',
-          email: 'alice@example.com',
-          is_superuser: false,
-        }),
-      ],
-    ]);
+    // component stores token, user, and expiresAt
+    expect(setItemSpy).toHaveBeenCalledWith('token', 'real-token');
+    expect(setItemSpy).toHaveBeenCalledWith(
+      'user',
+      JSON.stringify({
+        user_id: '3',
+        username: 'alice',
+        email: 'alice@example.com',
+        is_superuser: false,
+      })
+    );
+    expect(setItemSpy).toHaveBeenCalledWith('expiresAt', '2026-02-01T00:00:00Z');
 
-    expect(navSpy.mock.calls).toEqual([['/dashboard/main-page']]);
-    expect(component.errorMessage).toBe('');
+    expect(navigationMock.goToHome).toHaveBeenCalledTimes(1);
+    expect(component.errorMessage()).toBe('');
   });
 
-  it('should set errorMessage and not navigate when login endpoint fails', () => {
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
-
-    userApiMock.login.mockReturnValue(
-      throwError(() => ({ error: { message: 'Invalid credentials' } }))
+  it('should set errorMessage and not navigate when login endpoint fails (401/403 -> invalid username/password)', () => {
+    userApiMock.login.and.returnValue(
+      throwError(() => ({
+        status: 401,
+        error: { message: 'Invalid credentials' },
+      }))
     );
 
     component.form.setValue({ username: 'alice', password: 'wrongpass' });
 
     component.onLogin();
 
-    expect(userApiMock.login.mock.calls).toEqual([
-      [{ username: 'alice', password: 'wrongpass' }],
-    ]);
+    expect(userApiMock.login).toHaveBeenCalledTimes(1);
+    expect(navigationMock.goToHome).not.toHaveBeenCalled();
 
-    expect(navSpy.mock.calls).toEqual([]);
-    expect(component.errorMessage).toBe('Invalid credentials');
+    // per component logic for 401/403:
+    expect(component.errorMessage()).toBe('Invalid username or password');
+  });
+
+  it('should set errorMessage using err.error.message for non-auth failures', () => {
+    userApiMock.login.and.returnValue(
+      throwError(() => ({
+        status: 500,
+        error: { message: 'Server blew up' },
+      }))
+    );
+
+    component.form.setValue({ username: 'alice', password: 'password' });
+
+    component.onLogin();
+
+    expect(navigationMock.goToHome).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toBe('Server blew up');
   });
 });

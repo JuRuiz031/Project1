@@ -1,30 +1,30 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Subject, throwError, firstValueFrom } from 'rxjs';
-import { vi } from 'vitest';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { Subject, throwError, of } from 'rxjs';
 
 import { CreateAccount } from './create-account';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
-import { Router } from '@angular/router';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 describe('CreateAccount', () => {
   let fixture: ComponentFixture<CreateAccount>;
   let component: CreateAccount;
 
-  const routerMock = {
-    navigate: vi.fn(),
+  const navigationMock = {
+    goToLogin: jasmine.createSpy('goToLogin'),
   };
 
   const userApiMock = {
-    register: vi.fn(),
+    register: jasmine.createSpy('register'),
   };
 
   beforeEach(async () => {
-    vi.clearAllMocks();
+    navigationMock.goToLogin.calls.reset();
+    userApiMock.register.calls.reset();
 
     await TestBed.configureTestingModule({
       imports: [CreateAccount],
       providers: [
-        { provide: Router, useValue: routerMock },
+        { provide: NavigationService, useValue: navigationMock },
         { provide: UserApiService, useValue: userApiMock },
       ],
     }).compileComponents();
@@ -32,31 +32,30 @@ describe('CreateAccount', () => {
     fixture = TestBed.createComponent(CreateAccount);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    await fixture.whenStable();
   });
 
   it('should create', () => {
-    expect(!!component).toBe(true);
+    expect(component).toBeTruthy();
   });
 
   it('should block submission when form is invalid, show validation apiError, and not call register()', () => {
-    userApiMock.register.mockReturnValue(new Subject().asObservable());
+    userApiMock.register.and.returnValue(of({}));
 
     component.form.patchValue({ name: '', email: 'bad', password: '123' });
     component.createAccount();
+    fixture.detectChanges();
 
     expect(component.form.invalid).toBe(true);
-    expect(component.apiError.length > 0).toBe(true);
-    expect(userApiMock.register).toHaveBeenCalledTimes(0);
+    expect(component.apiError()).toBe('Please fix validation errors.');
+    expect(userApiMock.register).not.toHaveBeenCalled();
 
-    fixture.detectChanges();
     const alert = fixture.nativeElement.querySelector('.alert.alert-danger');
     expect(!!alert).toBe(true);
   });
 
-  it('should call UserApiService.register with correct DTO mapping (name -> username) and navigate on success', async () => {
+  it('should call UserApiService.register with correct DTO mapping (name -> username) and navigate on success', fakeAsync(() => {
     const subj = new Subject<any>();
-    userApiMock.register.mockReturnValue(subj.asObservable());
+    userApiMock.register.and.returnValue(subj.asObservable());
 
     component.form.patchValue({
       name: 'Alice C',
@@ -66,7 +65,8 @@ describe('CreateAccount', () => {
 
     component.createAccount();
 
-    expect(component.isSubmitting).toBe(true);
+    expect(component.isSubmitting()).toBe(true);
+    expect(component.apiError()).toBe('');
     expect(userApiMock.register).toHaveBeenCalledTimes(1);
     expect(userApiMock.register).toHaveBeenCalledWith({
       username: 'Alice C',
@@ -74,21 +74,18 @@ describe('CreateAccount', () => {
       password: 'password123',
     });
 
-    // Resolve the observable without Zone helpers
-    subj.next({ user_id: 1, username: 'Alice C', email: 'alice@example.com' });
+    subj.next({ user_id: 'u1' });
     subj.complete();
 
-    // let subscription finalize + change detection settle
-    await fixture.whenStable();
+    tick(); // allow finalize() + subscription handlers to run
     fixture.detectChanges();
 
-    expect(component.isSubmitting).toBe(false);
-    expect(routerMock.navigate).toHaveBeenCalledTimes(1);
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
-  });
+    expect(component.isSubmitting()).toBe(false);
+    expect(navigationMock.goToLogin).toHaveBeenCalledTimes(1);
+  }));
 
-  it('should handle API error response: show apiError, stop submitting, and not navigate', async () => {
-    userApiMock.register.mockReturnValue(
+  it('should handle API error response: show apiError, stop submitting, and not navigate', fakeAsync(() => {
+    userApiMock.register.and.returnValue(
       throwError(() => ({ error: { message: 'Username already exists' } }))
     );
 
@@ -100,20 +97,19 @@ describe('CreateAccount', () => {
 
     component.createAccount();
 
-    await fixture.whenStable();
+    tick();
     fixture.detectChanges();
 
-    expect(component.isSubmitting).toBe(false);
-    expect(component.apiError).toBe('Username already exists');
-    expect(routerMock.navigate).toHaveBeenCalledTimes(0);
+    expect(component.isSubmitting()).toBe(false);
+    expect(component.apiError()).toBe('Username already exists');
+    expect(navigationMock.goToLogin).not.toHaveBeenCalled();
 
     const alert = fixture.nativeElement.querySelector('.alert.alert-danger');
     expect(!!alert).toBe(true);
-  });
+  }));
 
   it('cancel() should navigate back to /login', () => {
     component.cancel();
-    expect(routerMock.navigate).toHaveBeenCalledTimes(1);
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    expect(navigationMock.goToLogin).toHaveBeenCalledTimes(1);
   });
 });
