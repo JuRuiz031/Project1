@@ -8,7 +8,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { CALENDAR_COLOR_PALETTE } from '../calendar-display/calendar-colors';
+import { getCalendarColor } from '../../../../../config/calendar-colors';
 
 export type CalendarOptionDTO = { calendar_id: string; name: string };
 
@@ -32,17 +32,13 @@ export class DisplayOptions implements OnDestroy {
   selectedCalendarIds = signal<string[]>([]);
   selectedTags = signal<string[]>([]);
 
-  /** Map of calendar_id to color for displaying colored dots */
-  colorMap = new Map<string, { primary: string; secondary: string }>();
-
   /** Cleanup subscriptions */
   private destroy$ = new Subject<void>();
 
   constructor() {
     effect(() => {
       const cals = this.calendars();
-      this.rebuildColors(cals);
-      
+
       // Select all calendars by default on first load
       if (cals.length > 0 && this.selectedCalendarIds().length === 0) {
         const allIds = cals.map(c => c.calendar_id);
@@ -55,19 +51,6 @@ export class DisplayOptions implements OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  private rebuildColors(calendars: CalendarOptionDTO[]): void {
-    this.colorMap.clear();
-
-    if (!calendars?.length) {
-      return;
-    }
-
-    // Assign color based on index in palette
-    calendars.forEach((c, index) => {
-      this.colorMap.set(c.calendar_id, CALENDAR_COLOR_PALETTE[index % CALENDAR_COLOR_PALETTE.length]);
-    });
   }
 
   toggleCalendar(calendarId: string): void {
@@ -111,6 +94,6 @@ export class DisplayOptions implements OnDestroy {
   }
 
   getCalendarColor(calendarId: string): { primary: string; secondary: string } {
-    return this.colorMap.get(calendarId) || { primary: '#666', secondary: '#eee' };
+    return getCalendarColor(calendarId);
   }
 }

@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, input, OnInit, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CalendarEvent } from 'angular-calendar';
 
 import { CalendarWidget } from './calendar-widget/calendar-widget';
-import { CALENDAR_COLOR_PALETTE } from './calendar-colors';
+import { getCalendarColor } from '../../../../../config/calendar-colors';
 
 type EventDTO = {
   event_id: string;
@@ -33,7 +32,6 @@ export class CalendarDisplay implements OnInit {
   eventClicked = output<string>();  // Emit event ID when user clicks on event
   createEvent = output<void>();  // Emit when user wants to create event
 
-  private calendarColorMap = new Map<string, { primary: string; secondary: string }>();
   private readonly STORAGE_KEY = 'calendar_view_date';
 
   ngOnInit(): void {
@@ -76,11 +74,7 @@ export class CalendarDisplay implements OnInit {
   });
 
   private getColorForCalendar(calendarId: string): { primary: string; secondary: string } {
-    if (!this.calendarColorMap.has(calendarId)) {
-      const index = this.calendarColorMap.size % CALENDAR_COLOR_PALETTE.length;
-      this.calendarColorMap.set(calendarId, CALENDAR_COLOR_PALETTE[index]);
-    }
-    return this.calendarColorMap.get(calendarId)!;
+    return getCalendarColor(calendarId);
   }
 
   onEventClicked(event: CalendarEvent): void {

@@ -7,6 +7,8 @@ import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
+import { getCalendarColor } from '../../../config/calendar-colors';
+
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
 
 type CalendarUserRow = {
@@ -232,5 +234,9 @@ export class ViewCalendarModal implements OnDestroy {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  getColor(calendarId: string) {
+    return getCalendarColor(calendarId);
   }
 }

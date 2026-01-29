@@ -2,6 +2,8 @@ import { Component, input, output, signal, computed, OnDestroy } from '@angular/
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { getCalendarColor } from '../../../config/calendar-colors';
+
 type CalendarOptionDTO = { calendar_id: string; name: string };
 
 @Component({
@@ -13,7 +15,7 @@ type CalendarOptionDTO = { calendar_id: string; name: string };
 })
 export class CalendarSelectorModal implements OnDestroy {
   calendars = input<CalendarOptionDTO[]>([]);
-  calendarActivated = output<string>(); // double-click activates
+  calendarActivated = output<string>();
   closeModal = output<void>();
 
   searchQuery = signal('');
@@ -31,6 +33,10 @@ export class CalendarSelectorModal implements OnDestroy {
 
   ngOnDestroy(): void {
     document.body.style.overflow = '';
+  }
+
+  getColor(calendarId: string) {
+    return getCalendarColor(calendarId);
   }
 
   onSelect(calendarId: string): void {

@@ -268,3 +268,8 @@
 .user-name {
   font-weight: 500;
 }
+
+.calendar-name-input:disabled {
+  opacity: 1;           /* prevents washed-out look */
+  font-weight: 600;
+}
