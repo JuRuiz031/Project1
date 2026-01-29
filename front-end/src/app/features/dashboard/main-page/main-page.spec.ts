@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MainPageComponent } from './main-page';
 
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+
 import {
   DateAdapter,
   CalendarDateFormatter,
@@ -16,10 +19,22 @@ describe('MainPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MainPageComponent],
       providers: [
-        // angular-calendar DateAdapter (fixes NG0201: DateAdapter)
-        { provide: DateAdapter, useFactory: adapterFactory },
+        // ✅ Fix: RouterLink requires router DI (ActivatedRoute, etc.)
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: convertToParamMap({}) },
+            paramMap: of(convertToParamMap({})),
+            queryParamMap: of(convertToParamMap({})),
+            params: of({}),
+            queryParams: of({}),
+            data: of({}),
+          },
+        },
 
-        // angular-calendar date formatter (fixes NG0201: _CalendarDateFormatter)
+        // ✅ Keep these for angular-calendar views
+        { provide: DateAdapter, useFactory: adapterFactory },
         { provide: CalendarDateFormatter, useClass: CalendarNativeDateFormatter },
       ],
     }).compileComponents();
@@ -27,7 +42,6 @@ describe('MainPageComponent', () => {
     fixture = TestBed.createComponent(MainPageComponent);
     component = fixture.componentInstance;
 
-    // MainPage reads localStorage in ngOnInit; give it something valid.
     localStorage.setItem('user', JSON.stringify({ user_id: 'test-user' }));
 
     fixture.detectChanges();

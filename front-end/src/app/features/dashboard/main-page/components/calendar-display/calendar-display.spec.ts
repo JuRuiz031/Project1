@@ -9,15 +9,16 @@ describe('CalendarDisplay', () => {
   let fixture: ComponentFixture<CalendarDisplay>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CalendarDisplay],
-      providers: [{ provide: DateAdapter, useFactory: adapterFactory }],
-    }).compileComponents();
+  await TestBed.configureTestingModule({
+    imports: [CalendarDisplay],
+    providers: [{ provide: DateAdapter, useFactory: adapterFactory }],
+  }).compileComponents();
 
-    fixture = TestBed.createComponent(CalendarDisplay);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-  });
+  fixture = TestBed.createComponent(CalendarDisplay);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+  await fixture.whenStable();
+});
 
   it('should create', () => {
     expect(component).toBeTruthy();
