@@ -1,14 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { DeleteEventModal } from './delete-event-modal';
 import { of, throwError } from 'rxjs';
 
+import { DeleteEventModal } from './delete-event-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { EventService } from '../../../shared/services/event.service';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
 import { DeleteEventDTO } from '../../../shared/models/events/delete-event.dto';
-
-import { vi } from 'vitest';
 
 describe('DeleteEventModal', () => {
   const mockEvent: EventDTO = {
@@ -23,13 +21,12 @@ describe('DeleteEventModal', () => {
   };
 
   const calendarServiceStub = {
-    getByEventIds: vi.fn((_ids: string[]) =>
-      of<CalendarFilterResponseDTO>({ events: [mockEvent] })
-    ),
+    getByEventIds: jasmine.createSpy('getByEventIds'),
+    getHomepage: jasmine.createSpy('getHomepage'),
   };
 
   const eventServiceStub = {
-    delete: vi.fn((_eventId: string, _dto: DeleteEventDTO) => of(true)),
+    delete: jasmine.createSpy('delete'),
   };
 
   beforeEach(async () => {
@@ -41,108 +38,121 @@ describe('DeleteEventModal', () => {
       ],
     }).compileComponents();
 
+    // defaults (individual tests can override)
+    calendarServiceStub.getByEventIds.calls.reset();
+    calendarServiceStub.getHomepage.calls.reset();
+    eventServiceStub.delete.calls.reset();
+
+    calendarServiceStub.getByEventIds.and.returnValue(
+      of<CalendarFilterResponseDTO>({ events: [mockEvent] })
+    );
+    calendarServiceStub.getHomepage.and.returnValue(
+      of({ calendars: [{ calendar_id: '1', name: 'My Admin Calendar' }] })
+    );
+    eventServiceStub.delete.and.returnValue(of(true));
+
+    localStorage.clear();
     localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
   });
 
   afterEach(() => {
     localStorage.clear();
-    vi.clearAllMocks();
+  });
+
+  /**
+   * ✅ Always set required input BEFORE first detectChanges to avoid NG0950.
+   */
+  function createWithEventId(eventId = 'e1') {
+    const fixture = TestBed.createComponent(DeleteEventModal);
+    const component = fixture.componentInstance;
+
+    fixture.componentRef.setInput('eventId', eventId);
+    fixture.detectChanges(); // triggers ngOnInit safely
+
+    return { fixture, component };
+  }
+
+  it('should create', () => {
+    const { component } = createWithEventId('e1');
+    expect(component).toBeTruthy();
   });
 
   it('ngOnInit should load the event via CalendarService and populate eventName/calendarName', () => {
-    const fixture = TestBed.createComponent(DeleteEventModal);
-    const component = fixture.componentInstance;
+    const { component } = createWithEventId('e1');
 
-    fixture.detectChanges(); // triggers ngOnInit
+    expect(component.apiError()).toBe('');
+    expect(calendarServiceStub.getByEventIds).toHaveBeenCalledOnceWith(['e1']);
+    expect(component.eventName()).toBe('Loaded Event');
 
-    expect(component.apiError).toBe('');
-    expect(calendarServiceStub.getByEventIds).toHaveBeenCalledTimes(1);
-    expect(component.eventName).toBe('Loaded Event');
-    // calendar_id is "1" which exists in calendars array -> "My Admin Calendar indicated in component calendars"
-    expect(component.calendarName).toBeTruthy();
+    expect(calendarServiceStub.getHomepage).toHaveBeenCalledTimes(1);
+    expect(component.calendarName()).toBe('My Admin Calendar');
   });
 
   it('ngOnInit should set apiError when no event is returned', () => {
-    calendarServiceStub.getByEventIds.mockReturnValueOnce(
+    calendarServiceStub.getByEventIds.and.returnValue(
       of<CalendarFilterResponseDTO>({ events: [] })
     );
 
-    const fixture = TestBed.createComponent(DeleteEventModal);
-    const component = fixture.componentInstance;
+    const { component } = createWithEventId('e1');
 
-    fixture.detectChanges();
-
-    expect(component.apiError).toBe('Event not found');
+    expect(component.apiError()).toBe('Event not found');
   });
 
   it('confirmDelete should set apiError when missing user id and NOT call delete', () => {
     localStorage.removeItem('user');
 
-    const fixture = TestBed.createComponent(DeleteEventModal);
-    const component = fixture.componentInstance;
-    fixture.detectChanges(); // loads eventId + calendarId
+    const { component } = createWithEventId('e1');
 
     component.confirmDelete();
 
-    expect(component.apiError).toContain('Not logged in');
+    expect(component.apiError()).toContain('Not logged in');
     expect(eventServiceStub.delete).not.toHaveBeenCalled();
-    expect(component.isDeleting).toBe(false);
+    expect(component.isDeleting()).toBe(false);
   });
 
   it('confirmDelete should call EventService.delete with correct dto and emit eventDeleted on success', () => {
-    const fixture = TestBed.createComponent(DeleteEventModal);
-    const component = fixture.componentInstance;
+    const { component } = createWithEventId('e1');
 
-    fixture.detectChanges(); // loads event + sets calendarId, eventId
-
-    const eventDeletedSpy = vi.fn();
-    const closeSpy = vi.fn();
-    component.eventDeleted.subscribe(eventDeletedSpy);
-    component.close.subscribe(closeSpy);
+    const eventDeletedEmitSpy = spyOn(component.eventDeleted, 'emit');
+    const closeEmitSpy = spyOn(component.close, 'emit');
 
     component.confirmDelete();
 
     expect(eventServiceStub.delete).toHaveBeenCalledTimes(1);
 
-    const call = eventServiceStub.delete.mock.calls[0];
-    const eventIdArg = call?.[0] as string;
-    const dtoArg = call?.[1] as DeleteEventDTO;
+    const [eventIdArg, dtoArg] = eventServiceStub.delete.calls.mostRecent()
+      .args as [string, DeleteEventDTO];
 
     expect(eventIdArg).toBe('e1');
     expect(dtoArg.user_id).toBe('u1');
     expect(dtoArg.calendar_id).toBe('1');
 
-    expect(eventDeletedSpy).toHaveBeenCalledWith('e1');
-    expect(closeSpy).toHaveBeenCalled();
-    expect(component.apiError).toBe('');
-    expect(component.isDeleting).toBe(false);
+    expect(eventDeletedEmitSpy).toHaveBeenCalledOnceWith('e1');
+    expect(closeEmitSpy).toHaveBeenCalledTimes(1);
+
+    expect(component.apiError()).toBe('');
+    expect(component.isDeleting()).toBe(false);
   });
 
   it('confirmDelete should show apiError when delete fails', () => {
-    eventServiceStub.delete.mockReturnValueOnce(
-      throwError(() => new Error('boom'))
-    );
+    eventServiceStub.delete.and.returnValue(throwError(() => new Error('boom')));
 
-    const fixture = TestBed.createComponent(DeleteEventModal);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    const { component } = createWithEventId('e1');
 
     component.confirmDelete();
 
-    // Your DeleteEvent uses err.message as fallback, so this becomes "boom"
-    expect(component.apiError).toBe('boom');
-    expect(component.isDeleting).toBe(false);
+    expect(component.apiError()).toBe('boom');
+    expect(component.isDeleting()).toBe(false);
   });
 
   it('onClose should emit close event', () => {
     const fixture = TestBed.createComponent(DeleteEventModal);
     const component = fixture.componentInstance;
 
-    const closeSpy = vi.fn();
-    component.close.subscribe(closeSpy);
+    const closeEmitSpy = spyOn(component.close, 'emit');
 
     component.onClose();
 
-    expect(closeSpy).toHaveBeenCalled();
+    expect(closeEmitSpy).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,105 +1,139 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { of } from 'rxjs';
-import { vi } from 'vitest';
-import { Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
 import { AccountView } from './account-view';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 describe('AccountView', () => {
   let fixture: ComponentFixture<AccountView>;
   let component: AccountView;
 
-  const routerMock = {
-    navigate: vi.fn(),
+  const navigationMock = {
+    goToHome: jasmine.createSpy('goToHome'),
+    goToEditUser: jasmine.createSpy('goToEditUser'),
+    goToLogin: jasmine.createSpy('goToLogin'),
   };
 
   const userApiMock = {
-    getUserById: vi.fn(),
+    getUserById: jasmine.createSpy('getUserById'),
   };
 
   beforeEach(async () => {
-    vi.clearAllMocks();
     localStorage.clear();
 
-    // Ensure constructor loadUserData() finds a user_id in localStorage
-    localStorage.setItem('user', JSON.stringify({ user_id: 'u-999' }));
-
-    // Ensure API call resolves immediately and sets the signal
-    userApiMock.getUserById.mockReturnValue(
-      of({
-        user_id: 'u-999',
-        username: 'Ben Tuley',
-        email: 'ben@example.com',
-        role: 'User',
-      })
-    );
+    navigationMock.goToHome.calls.reset();
+    navigationMock.goToEditUser.calls.reset();
+    navigationMock.goToLogin.calls.reset();
+    userApiMock.getUserById.calls.reset();
 
     await TestBed.configureTestingModule({
       imports: [AccountView],
       providers: [
-        { provide: Router, useValue: routerMock },
+        { provide: NavigationService, useValue: navigationMock },
         { provide: UserApiService, useValue: userApiMock },
       ],
     }).compileComponents();
+  });
+
+  function createComponentWithSessionUser(sessionUser: any, fullUserResponse?: any) {
+    localStorage.setItem('user', JSON.stringify(sessionUser));
+
+    userApiMock.getUserById.and.returnValue(
+      of(
+        fullUserResponse ?? {
+          user_id: sessionUser.user_id,
+          username: sessionUser.username ?? 'Alice',
+          email: sessionUser.email ?? 'alice@example.com',
+          role: sessionUser.role ?? 'User',
+        }
+      )
+    );
 
     fixture = TestBed.createComponent(AccountView);
     component = fixture.componentInstance;
-  });
+    fixture.detectChanges(); // fine; constructor already ran, but this keeps template in sync
+  }
 
   it('should create', () => {
+    createComponentWithSessionUser({ user_id: 'u1', username: 'Alice' });
     expect(component).toBeTruthy();
   });
 
   it('should call UserApiService.getUserById using the user_id from localStorage', () => {
+    createComponentWithSessionUser({ user_id: '123', username: 'Alice' });
+
     expect(userApiMock.getUserById).toHaveBeenCalledTimes(1);
-    expect(userApiMock.getUserById).toHaveBeenCalledWith('u-999');
+    expect(userApiMock.getUserById).toHaveBeenCalledWith('123');
   });
 
-  it('should render username + email in disabled inputs from user() signal', () => {
-    fixture.detectChanges();
+  it('should populate user signal from API response', () => {
+    createComponentWithSessionUser(
+      { user_id: '123' },
+      { user_id: '123', username: 'Ben', email: 'ben@test.com', role: 'Admin' }
+    );
 
-    const inputs = fixture.debugElement.queryAll(By.css('input.form-control'));
-    const nameInput: HTMLInputElement = inputs[0].nativeElement;
-    const emailInput: HTMLInputElement = inputs[1].nativeElement;
-
-    expect(nameInput.value).toBe('Ben Tuley');
-    expect(emailInput.value).toBe('ben@example.com');
-    expect(nameInput.disabled).toBe(true);
-    expect(emailInput.disabled).toBe(true);
+    expect(component.apiError()).toBe('');
+    expect(component.user()).toEqual({
+      id: '123',
+      name: 'Ben',
+      email: 'ben@test.com',
+      role: 'Admin',
+    });
   });
 
-  it('should show apiError only when apiError() has a value', () => {
-    component.apiError.set('');
-    fixture.detectChanges();
-    expect(fixture.debugElement.query(By.css('.alert.alert-danger'))).toBeNull();
+  it('should set apiError when no user exists in localStorage', () => {
+    // no localStorage user set
+    userApiMock.getUserById.and.returnValue(of({}));
 
-    component.apiError.set('Something went wrong');
+    fixture = TestBed.createComponent(AccountView);
+    component = fixture.componentInstance;
     fixture.detectChanges();
 
-    const alertEl = fixture.debugElement.query(By.css('.alert.alert-danger'));
-    expect(alertEl).not.toBeNull();
-    expect(alertEl.nativeElement.textContent).toContain('Something went wrong');
+    expect(userApiMock.getUserById).not.toHaveBeenCalled();
+    expect(component.apiError()).toBe('No user found in session');
   });
 
-  it('goToDashboard should navigate to /dashboard/main-page', () => {
+  it('should set apiError when API call fails', () => {
+    localStorage.setItem('user', JSON.stringify({ user_id: '123' }));
+    userApiMock.getUserById.and.returnValue(throwError(() => new Error('boom')));
+
+    fixture = TestBed.createComponent(AccountView);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(userApiMock.getUserById).toHaveBeenCalledTimes(1);
+    expect(component.apiError()).toBe('Failed to load user details');
+  });
+
+  it('goToDashboard should navigate to home', () => {
+    createComponentWithSessionUser({ user_id: '123' });
+
     component.goToDashboard();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/dashboard/main-page']);
+
+    expect(navigationMock.goToHome).toHaveBeenCalledTimes(1);
   });
 
-  it('goToEditUser should navigate to /edit-user', () => {
+  it('goToEditUser should navigate to edit user', () => {
+    createComponentWithSessionUser({ user_id: '123' });
+
     component.goToEditUser();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/edit-user']);
+
+    expect(navigationMock.goToEditUser).toHaveBeenCalledTimes(1);
   });
 
-  it('logOut should clear localStorage and navigate to /login', () => {
-    localStorage.setItem('someKey', 'someValue');
+  it('logOut should clear localStorage and navigate to login', () => {
+    createComponentWithSessionUser({ user_id: '123' });
+
+    localStorage.setItem('token', 't');
+    localStorage.setItem('expiresAt', 'x');
 
     component.logOut();
 
-    expect(localStorage.getItem('someKey')).toBeNull();
     expect(localStorage.getItem('user')).toBeNull();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(localStorage.getItem('expiresAt')).toBeNull();
+
+    expect(navigationMock.goToLogin).toHaveBeenCalledTimes(1);
   });
 });

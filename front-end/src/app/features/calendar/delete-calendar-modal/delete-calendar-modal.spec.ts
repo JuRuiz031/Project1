@@ -12,6 +12,8 @@ describe('DeleteCalendarModal', () => {
 
     fixture = TestBed.createComponent(DeleteCalendarModal);
     component = fixture.componentInstance;
+
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 
@@ -20,35 +22,48 @@ describe('DeleteCalendarModal', () => {
   });
 
   it('should emit cancel when onCancel is called', () => {
-    const spy = vi.fn();
-    component.cancel.subscribe(spy);
+    const cancelSpy = jasmine.createSpy('cancelSpy');
+    component.cancel.subscribe(cancelSpy);
 
     component.onCancel();
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(cancelSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should emit confirmDelete with targetId when onConfirm is called', () => {
-    const spy = vi.fn();
-    component.confirmDelete.subscribe(spy);
+    const confirmSpy = jasmine.createSpy('confirmSpy');
+    component.confirmDelete.subscribe(confirmSpy);
 
     component.targetId = 'cg-123';
     component.isDeleting = false;
 
     component.onConfirm();
 
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith('cg-123');
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(confirmSpy).toHaveBeenCalledWith('cg-123');
   });
 
   it('should not emit confirmDelete if targetId is missing', () => {
-    const spy = vi.fn();
-    component.confirmDelete.subscribe(spy);
+    const confirmSpy = jasmine.createSpy('confirmSpy');
+    component.confirmDelete.subscribe(confirmSpy);
 
     component.targetId = null;
+    component.isDeleting = false;
 
     component.onConfirm();
 
-    expect(spy).not.toHaveBeenCalled();
+    expect(confirmSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not emit confirmDelete if isDeleting is true', () => {
+    const confirmSpy = jasmine.createSpy('confirmSpy');
+    component.confirmDelete.subscribe(confirmSpy);
+
+    component.targetId = 'cg-123';
+    component.isDeleting = true;
+
+    component.onConfirm();
+
+    expect(confirmSpy).not.toHaveBeenCalled();
   });
 });

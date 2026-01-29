@@ -1,112 +1,94 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
-import { vi } from 'vitest';
 
 import { Login } from './login';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 
 describe('Login', () => {
   let fixture: ComponentFixture<Login>;
   let component: Login;
-  let router: Router;
 
-  const userApiMock = {
-    login: vi.fn(),
-  };
+  let userApiMock: jasmine.SpyObj<UserApiService>;
+  let navigationMock: jasmine.SpyObj<NavigationService>;
 
-  beforeEach(async () => {
-    vi.clearAllMocks();
+  beforeEach(() => {
+    localStorage.clear();
 
-    await TestBed.configureTestingModule({
-      imports: [Login],
-      providers: [
-        provideRouter([]),
-        { provide: UserApiService, useValue: userApiMock },
+    userApiMock = jasmine.createSpyObj<UserApiService>('UserApiService', ['login']);
+    navigationMock = jasmine.createSpyObj<NavigationService>('NavigationService', ['goToHome']);
+
+    TestBed.configureTestingModule({
+      imports: [
+        Login,
+        RouterTestingModule.withRoutes([]), // ✅ provides Router + ActivatedRoute for routerLink
       ],
-    }).compileComponents();
+      providers: [
+        { provide: UserApiService, useValue: userApiMock },
+        { provide: NavigationService, useValue: navigationMock },
+      ],
+    });
 
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router);
-
-    await fixture.whenStable();
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   it('should create', () => {
-    expect(!!component).toBe(true);
+    expect(component).toBeTruthy();
   });
 
   it('should not call login endpoint when form is invalid, and should mark controls as touched', () => {
-    component.form.setValue({ username: '', password: '' });
+    const touchedSpy = spyOn(component.form, 'markAllAsTouched').and.callThrough();
 
+    component.form.patchValue({ username: '', password: '' }); // invalid
     component.onLogin();
 
-    expect(component.form.get('username')?.touched === true).toBe(true);
-    expect(component.form.get('password')?.touched === true).toBe(true);
-
-    expect(userApiMock.login.mock.calls).toEqual([]);
+    expect(userApiMock.login).not.toHaveBeenCalled();
+    expect(touchedSpy).toHaveBeenCalled();
   });
 
   it('should call login endpoint with correct DTO and navigate on success', () => {
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
-    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
-
-    userApiMock.login.mockReturnValue(
-      of({
-        token: 'real-token',
-        user: {
-          user_id: '3',
-          username: 'alice',
-          email: 'alice@example.com',
-          is_superuser: false,
-        },
-        expires_at: '2026-02-01T00:00:00Z',
-      })
-    );
+    userApiMock.login.and.returnValue(of({
+      token: 't123',
+      user: { user_id: 1, username: 'alice' },
+      expires_at: '2099-01-01T00:00:00Z',
+    } as any));
 
     component.form.setValue({ username: 'alice', password: 'password' });
-
     component.onLogin();
 
-    expect(userApiMock.login.mock.calls).toEqual([
-      [{ username: 'alice', password: 'password' }],
-    ]);
-
-    expect(setItemSpy.mock.calls).toEqual([
-      ['token', 'real-token'],
-      [
-        'user',
-        JSON.stringify({
-          user_id: '3',
-          username: 'alice',
-          email: 'alice@example.com',
-          is_superuser: false,
-        }),
-      ],
-    ]);
-
-    expect(navSpy.mock.calls).toEqual([['/dashboard/main-page']]);
-    expect(component.errorMessage).toBe('');
+    expect(userApiMock.login).toHaveBeenCalledWith({ username: 'alice', password: 'password' });
+    expect(localStorage.getItem('token')).toBe('t123');
+    expect(localStorage.getItem('expiresAt')).toBe('2099-01-01T00:00:00Z');
+    expect(navigationMock.goToHome).toHaveBeenCalled();
   });
 
-  it('should set errorMessage and not navigate when login endpoint fails', () => {
-    const navSpy = vi.spyOn(router, 'navigateByUrl');
+  it('should set errorMessage and not navigate when login endpoint fails (401/403 -> invalid username/password)', () => {
+    userApiMock.login.and.returnValue(throwError(() => ({ status: 401 })));
 
-    userApiMock.login.mockReturnValue(
-      throwError(() => ({ error: { message: 'Invalid credentials' } }))
-    );
-
-    component.form.setValue({ username: 'alice', password: 'wrongpass' });
-
+    component.form.setValue({ username: 'alice', password: 'password' });
     component.onLogin();
 
-    expect(userApiMock.login.mock.calls).toEqual([
-      [{ username: 'alice', password: 'wrongpass' }],
-    ]);
+    expect(navigationMock.goToHome).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toBe('Invalid username or password');
+  });
 
-    expect(navSpy.mock.calls).toEqual([]);
-    expect(component.errorMessage).toBe('Invalid credentials');
+  it('should set errorMessage using err.error.message for non-auth failures', () => {
+    userApiMock.login.and.returnValue(throwError(() => ({
+      status: 500,
+      error: { message: 'Server blew up' },
+    })));
+
+    component.form.setValue({ username: 'alice', password: 'password' });
+    component.onLogin();
+
+    expect(navigationMock.goToHome).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toBe('Server blew up');
   });
 });
