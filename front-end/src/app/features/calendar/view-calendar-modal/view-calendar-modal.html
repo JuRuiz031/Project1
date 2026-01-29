@@ -1,11 +1,31 @@
 <div class="modal-overlay" (click)="onClose()">
   <div class="modal-content" (click)="$event.stopPropagation()">
-
+    <!-- Header -->
     <div class="modal-header">
-      <h2 class="modal-title">View Calendar</h2>
+      <div class="header-left">
+        <h2 class="modal-title">View Calendar</h2>
+
+        <button
+          class="btn-share"
+          (click)="onShare()"
+          [disabled]="!isAdmin()"
+          [title]="isAdmin() ? 'Share this calendar' : 'Only admins can generate invite links'"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+          Share
+        </button>
+      </div>
+
       <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">✕</button>
     </div>
 
+    <!-- Body -->
     <div class="modal-body">
       @if (apiError(); as err) {
         <div class="alert alert-danger mb-3">
@@ -22,52 +42,102 @@
       @if (currentCalendar(); as cal) {
         <div class="mb-3">
           <label class="form-label">Calendar Name</label>
-          <input class="form-control" [value]="cal.name" disabled />
+          <input class="form-control app-input" [value]="cal.name" disabled />
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Invite Link</label>
+        <!-- Users (list only – no admin/user tags) -->
+        <div class="mt-4">
+          <h3 class="h5 mb-2">Users</h3>
 
-          @if (inviteLink()) {
-            <input class="form-control" [value]="inviteLink()" readonly />
-          } @else {
-            <input class="form-control" value="(Not generated yet)" disabled />
+          @if (usersError(); as uErr) {
+            <div class="alert alert-danger mb-3">
+              {{ uErr }}
+            </div>
           }
 
-          <div class="hint mt-2">
-            @if (isAdmin()) {
-              <span>Admins can generate an invite link for this calendar.</span>
-            } @else {
-              <span class="muted">Only admins can generate invite links.</span>
-            }
-          </div>
-        </div>
-
-        <div class="actions-row">
-          <button
-            type="button"
-            class="btn btn-primary"
-            [class.btn-disabled]="!isAdmin()"
-            (click)="onEditCalendar()"
-          >
-            Edit Calendar
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-outline-secondary"
-            [class.btn-disabled]="!isAdmin()"
-            (click)="onGenerateInviteLink()"
-          >
-            Generate Invite Link
-          </button>
+          @if (isLoadingUsers()) {
+            <div class="text-center py-2">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          } @else if (users().length === 0) {
+            <p class="text-muted mb-0">No users returned for this calendar.</p>
+          } @else {
+            <ul class="list-group">
+              @for (u of users(); track u.user_id) {
+                <li class="list-group-item user-row">
+                  <span class="user-name">{{ u.username }}</span>
+                </li>
+              }
+            </ul>
+          }
         </div>
       }
     </div>
 
+    <!-- Footer (match ViewEventModal layout) -->
     <div class="modal-footer">
       <button class="btn btn-outline-secondary" (click)="onBack()">← Back</button>
-      <button class="btn btn-outline-secondary" (click)="onClose()">Close</button>
+
+      @if (isAdmin()) {
+        <button class="btn btn-primary" (click)="onEditCalendar()">Edit Calendar</button>
+      } @else {
+        <button class="btn btn-primary" disabled title="You don't have permission to edit this calendar">
+          Edit Calendar
+        </button>
+      }
     </div>
+
+    <!-- Share Popup Overlay -->
+    @if (showSharePopup()) {
+      <div class="share-overlay" (click)="closeSharePopup()">
+        <div class="share-popup" (click)="$event.stopPropagation()">
+          <!-- Popup Header -->
+          <div class="share-popup-header">
+            <h3>Share Calendar</h3>
+            <button class="popup-close-btn" (click)="closeSharePopup()" aria-label="Close popup">✕</button>
+          </div>
+
+          <!-- Popup Body -->
+          <div class="share-popup-body">
+            @if (isGeneratingLink()) {
+              <div class="loading-state">
+                <div class="spinner-border"></div>
+                <p>Generating invite link...</p>
+              </div>
+            } @else if (shareLink()) {
+              <p class="share-description">
+                Share this link to invite others to view this calendar:
+              </p>
+
+              <div class="share-link-container">
+                <input
+                  type="text"
+                  class="share-link-input"
+                  [value]="shareLink()"
+                  readonly
+                  (click)="$event.target.select()"
+                />
+                <button class="btn btn-primary btn-copy" (click)="copyShareLink()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  {{ copySuccess() ? 'Copied!' : 'Copy' }}
+                </button>
+              </div>
+
+              <p class="share-note">This link will expire in 7 days.</p>
+            }
+          </div>
+
+          <!-- Popup Footer -->
+          <div class="share-popup-footer">
+            <button class="btn btn-outline-secondary" (click)="closeSharePopup()">Close</button>
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit, DestroyRef, signal, computed, effect, inject } from '@angular/core';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, take } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -15,6 +15,8 @@ import { DeleteEventModal } from '../../event/delete-event-modal/delete-event-mo
 import { CreateCalendarModal } from '../../calendar/create-calendar-modal/create-calendar-modal';
 import { CalendarSelectorModal } from '../../calendar/calendar-selector-modal/calendar-selector-modal';
 import { ViewCalendarModal } from '../../calendar/view-calendar-modal/view-calendar-modal';
+import { EditCalendarModal } from '../../calendar/edit-calendar-modal/edit-calendar-modal';
+import { DeleteCalendarModal } from '../../calendar/delete-calendar-modal/delete-calendar-modal';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
@@ -30,7 +32,9 @@ type ModalState =
   | 'edit-event'
   | 'delete-event'
   | 'calendar-selector'
-  | 'view-calendar';
+  | 'view-calendar'
+  | 'edit-calendar'
+  | 'delete-calendar';
 
 @Component({
   selector: 'app-main-page',
@@ -48,6 +52,8 @@ type ModalState =
     CreateCalendarModal,
     CalendarSelectorModal,
     ViewCalendarModal,
+    EditCalendarModal,
+    DeleteCalendarModal,
   ],
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
@@ -72,6 +78,7 @@ export class MainPageComponent implements OnInit {
 
   // User info
   userId: string | null = null;
+  currentUserId = computed(() => this.userId ?? '');
 
   constructor() {
     // Effect: react to calendar selection changes
@@ -245,6 +252,68 @@ export class MainPageComponent implements OnInit {
   onViewCalendarBack(): void {
     console.log('[MainPage] Back from view-calendar');
     this.modalState.set('calendar-selector');
+  }
+
+  openEditCalendar(calendarId: string): void {
+    console.log('[MainPage] Opening edit calendar modal:', calendarId);
+    this.selectedCalendarId.set(calendarId);
+    this.modalState.set('edit-calendar');
+  }
+
+  openDeleteCalendar(calendarId: string): void {
+    console.log('[MainPage] Opening delete calendar modal:', calendarId);
+    this.selectedCalendarId.set(calendarId);
+    this.modalState.set('delete-calendar');
+  }
+
+  // Delete-calendar modal state
+  deleteCalendarApiError = signal('');
+  isDeletingCalendar = signal(false);
+
+  selectedCalendarName = computed(() => {
+    const id = this.selectedCalendarId();
+    if (!id) return 'this calendar';
+
+    const found = this.calendars().find(c => String(c.calendar_id) === String(id));
+    return found?.name ?? 'this calendar';
+  });
+
+  onConfirmDeleteCalendar(calendarId: string): void {
+    this.deleteCalendarApiError.set('');
+    this.isDeletingCalendar.set(true);
+
+    // assuming CalendarService has delete(calendarId) like update()
+    this.calendarService.delete(calendarId)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.isDeletingCalendar.set(false);
+
+          // refresh calendar list + close
+          this.loadCalendarHome();
+          this.closeAllModals();
+        },
+        error: (err) => {
+          this.isDeletingCalendar.set(false);
+          this.deleteCalendarApiError.set(
+            err?.error?.message ||
+              (typeof err?.error === 'string' ? err.error : '') ||
+              err?.message ||
+              'Could not delete calendar'
+          );
+        },
+      });
+  }
+
+  onCalendarUpdated(calendarId: string): void {
+    console.log('[MainPage] Calendar updated:', calendarId);
+    this.loadCalendarHome(); // refresh calendar list names
+    this.closeAllModals();
+  }
+
+  onDeleteCalendarRequested(calendarId: string): void {
+    console.log('[MainPage] Delete calendar requested:', calendarId);
+    this.openDeleteCalendar(calendarId);
   }
 
   /**

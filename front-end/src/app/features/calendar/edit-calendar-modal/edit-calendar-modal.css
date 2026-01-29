@@ -1,0 +1,22 @@
+.card {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.user-row {
+  cursor: pointer;
+  user-select: none;
+}
+
+.user-row--selected {
+  background-color: #e3f2fd;
+  border-color: #90caf9;
+}
+
+.user-row--selected:hover {
+  background-color: #bbdefb;
+}
+
+.badge {
+  white-space: nowrap;
+}

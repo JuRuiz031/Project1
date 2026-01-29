@@ -1,0 +1,19 @@
+/* Make week + day time grids scrollable */
+:host ::ng-deep .cal-week-view .cal-time-events {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+:host ::ng-deep .cal-day-view .cal-hour-rows {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Optional: keep the header visible while scrolling */
+:host ::ng-deep .cal-week-view .cal-header,
+:host ::ng-deep .cal-day-view .cal-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: inherit;
+}

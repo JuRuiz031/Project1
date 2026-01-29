@@ -2,7 +2,7 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
     <!-- Header -->
     <div class="modal-header">
-      <h2 class="modal-title">View Calendars</h2>
+      <h2 class="modal-title">Select Calendar</h2>
       <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
         ✕
       </button>
@@ -39,7 +39,6 @@
               (dblclick)="onActivate(cal.calendar_id)"
             >
               <div class="calendar-title">{{ cal.name }}</div>
-              <div class="calendar-subtitle">Double-click to open</div>
             </div>
           }
         </div>
@@ -48,8 +47,10 @@
 
     <!-- Footer -->
     <div class="modal-footer">
+      <div class="footer-hint"><i>Double-click a Calendar to open</i></div>
+
       <button class="btn btn-outline-secondary" (click)="onClose()">
-        Close
+        Cancel
       </button>
     </div>
   </div>

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ViewCalendarGroup } from './view-calendar-group';
+import { EditCalendarModal } from './edit-calendar-modal';
 
-describe('ViewCalendarGroup', () => {
-  let component: ViewCalendarGroup;
-  let fixture: ComponentFixture<ViewCalendarGroup>;
+describe('EditCalendarModal', () => {
+  let component: EditCalendarModal;
+  let fixture: ComponentFixture<EditCalendarModal>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ViewCalendarGroup]
+      imports: [EditCalendarModal]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ViewCalendarGroup);
+    fixture = TestBed.createComponent(EditCalendarModal);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,8 +1,10 @@
-/* intentionally minimal; you can replace with the snapshot styling later */
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,28 +14,48 @@
 .modal-content {
   background: white;
   border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 90%;
-  max-width: 600px;
+  max-width: 650px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
-.modal-header, .modal-footer {
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
+.modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
-.modal-footer {
-  border-bottom: none;
-  border-top: 1px solid #e0e0e0;
-  justify-content: flex-end;
-  gap: 10px;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.modal-title {
+  margin: 0;
 }
 
 .modal-body {
   padding: 20px;
+  overflow: auto;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .modal-close-btn {
@@ -41,30 +63,194 @@
   border: none;
   font-size: 22px;
   cursor: pointer;
-}
-.btn-outline-secondary {
-  background: white;
-  border: 1px solid #ddd;
-  padding: 8px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.actions-row {
+  padding: 0;
+  width: 28px;
+  height: 28px;
   display: flex;
-  gap: 10px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s;
 }
 
-.btn-disabled {
-  opacity: 0.5;
-  filter: grayscale(0.4);
+.modal-close-btn:hover {
+  color: #000;
 }
 
-/* Important: allow click so we can show "not admin" message */
-.btn-disabled:hover {
+.btn-share {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-share:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.btn-share:disabled {
+  background: #6c757d;
   cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.btn-share svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Share overlay inside modal */
+.share-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  border-radius: 8px;
+}
+
+.share-popup {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+.share-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.share-popup-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.popup-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.popup-close-btn:hover {
+  color: #000;
+}
+
+.share-popup-body {
+  padding: 20px;
+  min-height: 150px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.loading-state p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.share-description {
+  margin: 0 0 12px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.share-link-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.share-link-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: monospace;
+  background: #f8f9fa;
+}
+
+.share-link-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.btn-copy {
+  padding: 10px 20px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-copy svg {
+  width: 16px;
+  height: 16px;
+}
+
+.share-note {
+  margin: 0;
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.share-popup-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.spinner-border {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .hint {
@@ -73,4 +259,12 @@
 
 .muted {
   color: #777;
+}
+
+.user-row {
+  padding: 10px 12px;
+}
+
+.user-name {
+  font-weight: 500;
 }
