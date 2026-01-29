@@ -1,86 +1,107 @@
-<app-base-modal (close)="onClose()">
-  <header class="modal__header">
-    <h2>Edit Calendar</h2>
-  </header>
+<app-base-modal
+  [title]="'Edit Calendar'"
+  (close)="onClose()">
 
-  <section class="modal__body">
+  <form [formGroup]="form" (ngSubmit)="saveChanges()" novalidate>
+    @if (apiError()) {
+      <div class="alert alert-danger mb-3">{{ apiError() }}</div>
+    }
+
     @if (isLoading()) {
-      <p class="muted">Loading…</p>
+      <div class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
     } @else {
-      @if (apiError()) {
-        <div class="error">{{ apiError() }}</div>
-      }
+      <!-- Calendar name -->
+      <div class="mb-3">
+        <label class="form-label">Calendar name</label>
+        <input
+          type="text"
+          class="form-control app-input"
+          placeholder="Calendar name"
+          formControlName="name"
+          [class.is-invalid]="hasError('name')"
+        />
+        <div class="invalid-feedback">Name must be 2–100 characters.</div>
+      </div>
 
-      <form [formGroup]="form" class="form">
-        <label class="label">
-          Calendar name
-          <input
-            class="input"
-            type="text"
-            formControlName="name"
-            placeholder="Calendar name"
-            [class.input--error]="hasError('name')"
-          />
-        </label>
-
-        @if (hasError('name')) {
-          <p class="field-error">Name must be 2–100 characters.</p>
-        }
-      </form>
-
-      <div class="section">
-        <h3>Users</h3>
+      <!-- Users -->
+      <div class="mt-4">
+        <h3 class="h5 mb-2">Users</h3>
 
         @if (users().length === 0) {
-          <p class="muted">No users returned for this calendar.</p>
+          <p class="text-muted mb-0">No users returned for this calendar.</p>
         } @else {
-          <ul class="user-list">
+          <ul class="list-group">
             @for (u of users(); track u.user_id) {
-                <li
-                    class="user-row"
-                    [class.user-row--selected]="selectedUserId() === u.user_id"
-                    (click)="selectUser(u.user_id)"
-                >
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center user-row"
+                [class.user-row--selected]="selectedUserId() === u.user_id"
+                (click)="selectUser(u.user_id)"
+              >
                 <span class="user-name">{{ u.username }}</span>
 
-                <span class="badge" [class.badge--admin]="isRequesterAdmin(u.user_id)">
-                    @if (isRequesterAdmin(u.user_id)) {
+                <span
+                  class="badge rounded-pill"
+                  [class.text-bg-primary]="isRequesterAdmin(u.user_id)"
+                  [class.text-bg-secondary]="!isRequesterAdmin(u.user_id)"
+                >
+                  @if (isRequesterAdmin(u.user_id)) {
                     Admin (you)
-                    } @else {
+                  } @else {
                     Non-admin
-                    }
+                  }
                 </span>
-                </li>
+              </li>
             }
           </ul>
 
-          <div class="actions-row">
+          <!-- <div class="mt-3">
             <button
               type="button"
-              class="btn"
+              class="btn btn-outline-primary"
               (click)="promoteSelectedToAdmin()"
               [disabled]="!selectedUserId() || isSubmitting()"
             >
               Promote selected to admin
             </button>
-          </div>
+          </div> -->
         }
       </div>
+
+      <!-- Action buttons -->
+      <div class="d-flex justify-content-between gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-danger"
+          (click)="deleteCalendarGroup()"
+          [disabled]="isSubmitting()"
+        >
+          Delete calendar
+        </button>
+
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="onClose()"
+            [disabled]="isSubmitting()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSubmitting() || form.invalid"
+          >
+            {{ isSubmitting() ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
     }
-  </section>
+  </form>
 
-  <footer class="modal__footer">
-    <button type="button" class="btn btn--danger" (click)="deleteCalendarGroup()">
-      Delete calendar
-    </button>
-
-    <div class="spacer"></div>
-
-    <button type="button" class="btn" (click)="onClose()" [disabled]="isSubmitting()">
-      Cancel
-    </button>
-    <button type="button" class="btn btn--primary" (click)="saveChanges()" [disabled]="isSubmitting()">
-      Save
-    </button>
-  </footer>
 </app-base-modal>

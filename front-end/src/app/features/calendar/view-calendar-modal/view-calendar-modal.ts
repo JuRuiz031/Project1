@@ -23,14 +23,20 @@ export class ViewCalendarModal implements OnDestroy {
   back = output<void>();
   close = output<void>();
 
-  // This will be used later by MainPage to switch to edit-calendar-modal (which doesn't exist yet)
+  // Used by parent to open edit-calendar-modal
   editCalendar = output<string>();
 
   // State
   calendars = signal<CalendarOption[]>([]);
   apiError = signal('');
-  toast = signal(''); // click message for non-admin actions
+  toast = signal('');
   inviteLink = signal('');
+
+  // Share popup state (matches ViewEventModal pattern)
+  showSharePopup = signal(false);
+  shareLink = signal<string>('');
+  isGeneratingLink = signal(false);
+  copySuccess = signal(false);
 
   // Current calendar
   currentCalendar = computed(() => {
@@ -52,6 +58,12 @@ export class ViewCalendarModal implements OnDestroy {
       this.apiError.set('');
       this.toast.set('');
       this.inviteLink.set('');
+
+      // reset share state
+      this.showSharePopup.set(false);
+      this.shareLink.set('');
+      this.isGeneratingLink.set(false);
+      this.copySuccess.set(false);
 
       this.loadCalendars();
     });
@@ -76,7 +88,6 @@ export class ViewCalendarModal implements OnDestroy {
       .subscribe(calendars => {
         this.calendars.set(calendars);
 
-        // If the calendarId isn't in the list, surface it
         const id = this.calendarId();
         if (id && !calendars.some(c => c.id === id)) {
           this.apiError.set('Calendar not found');
@@ -94,7 +105,6 @@ export class ViewCalendarModal implements OnDestroy {
       .filter(c => c.id);
   }
 
-  // Admin-gated actions
   onEditCalendar(): void {
     this.clearToast();
 
@@ -109,22 +119,53 @@ export class ViewCalendarModal implements OnDestroy {
     this.editCalendar.emit(id);
   }
 
-  onGenerateInviteLink(): void {
+  // Share button flow (instead of "Generate Invite Link" button)
+  onShare(): void {
     this.clearToast();
 
     const id = this.calendarId();
-    if (!id) return;
-
-    if (!this.isAdmin()) {
+    if (!id || !this.isAdmin()) {
       this.showNotAdmin();
       return;
     }
 
-    // TODO: Replace with real API call:
-    // GET /calendars/{id}/invite
-    // For now: mock link generation like ViewCalendarGroup
+    this.showSharePopup.set(true);
+    this.isGeneratingLink.set(true);
+    this.shareLink.set('');
+    this.copySuccess.set(false);
+
+    // TODO: Replace with real API call when available.
+    // For now: mock link generation
     const token = Math.random().toString(36).slice(2, 10);
-    this.inviteLink.set(`https://yourapp/invite/calendars/${id}/${token}`);
+    const link = `https://yourapp/invite/calendars/${id}/${token}`;
+
+    // Simulate async generation (keeps same UX as event share)
+    setTimeout(() => {
+      this.inviteLink.set(link);
+      this.shareLink.set(link);
+      this.isGeneratingLink.set(false);
+    }, 400);
+  }
+
+  closeSharePopup(): void {
+    this.showSharePopup.set(false);
+    this.shareLink.set('');
+    this.copySuccess.set(false);
+  }
+
+  copyShareLink(): void {
+    const link = this.shareLink();
+    if (!link) return;
+
+    navigator.clipboard
+      .writeText(link)
+      .then(() => {
+        this.copySuccess.set(true);
+        setTimeout(() => this.copySuccess.set(false), 2000);
+      })
+      .catch(err => {
+        console.error('[ViewCalendarModal] Failed to copy link:', err);
+      });
   }
 
   private showNotAdmin(): void {
