@@ -1,178 +1,224 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of, throwError, Subject } from 'rxjs';
+
 import { CreateEventModal } from './create-event-modal';
-import { of, throwError } from 'rxjs';
-
+import { CalendarService } from '../../../shared/services/calendar.service';
 import { EventService } from '../../../shared/services/event.service';
-import { CreateEventDTO } from '../../../shared/models/events/create-event.dto';
-import { EventDTO } from '../../../shared/models/events/event.dto';
-
-import { vi } from 'vitest';
 
 describe('CreateEventModal', () => {
-  const createdEvent: EventDTO = {
-    event_id: 'e123',
-    calendar_id: '1',
-    title: 'Team Meeting',
-    start_time: '2026-01-26T18:00:00.000Z',
-    end_time: '2026-01-26T19:00:00.000Z',
-    description: 'Discuss roadmap',
-    notes: 'Bring notes',
-    tags: [],
+  let fixture: ComponentFixture<CreateEventModal>;
+  let component: CreateEventModal;
+
+  const calendarServiceStub = {
+    getHomepage: jasmine.createSpy('getHomepage'),
   };
 
-  // ✅ Strongly-typed mock so mock.calls is indexable (fixes tuple [] error)
-  const createMock = vi.fn<(dto: CreateEventDTO) => ReturnType<EventService['create']>>(
-    () => of(createdEvent)
-  );
-
-  const eventServiceStub: Pick<EventService, 'create'> = {
-    create: createMock,
+  const eventServiceStub = {
+    create: jasmine.createSpy('create'),
   };
 
   beforeEach(async () => {
+    localStorage.clear();
+
+    calendarServiceStub.getHomepage.calls.reset();
+    eventServiceStub.create.calls.reset();
+
     await TestBed.configureTestingModule({
       imports: [CreateEventModal],
-      providers: [{ provide: EventService, useValue: eventServiceStub }],
+      providers: [
+        { provide: CalendarService, useValue: calendarServiceStub },
+        { provide: EventService, useValue: eventServiceStub },
+      ],
     }).compileComponents();
-
-    // simulate logged-in user
-    localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
   });
 
-  afterEach(() => {
-    localStorage.clear();
-    vi.clearAllMocks();
+  function createComponentWithCalendars(calendars: any[]) {
+    calendarServiceStub.getHomepage.and.returnValue(of({ calendars }));
+
+    fixture = TestBed.createComponent(CreateEventModal);
+    component = fixture.componentInstance;
+
+    // triggers ngOnInit -> loadCalendars()
+    fixture.detectChanges();
+  }
+
+  it('should create', () => {
+    createComponentWithCalendars([]);
+    expect(component).toBeTruthy();
   });
 
   it('ngOnInit should set default calendarId to first admin calendar', () => {
-    const fixture = TestBed.createComponent(CreateEventModal);
-    const component = fixture.componentInstance;
+    createComponentWithCalendars([
+      { calendar_id: '1', name: 'Admin Cal', is_admin: true },
+      { calendar_id: '2', name: 'User Cal', is_admin: false },
+    ]);
 
-    fixture.detectChanges();
-
+    // of(...) emits synchronously, so the form should already be updated
     expect(component.form.get('calendarId')?.value).toBe('1');
+    expect(component.apiError()).toBe('');
+  });
+
+  it('ngOnInit should fallback to first calendar when no admin calendars exist', () => {
+    createComponentWithCalendars([
+      { calendar_id: '2', name: 'User Cal A', is_admin: false },
+      { calendar_id: '3', name: 'User Cal B', is_admin: false },
+    ]);
+
+    expect(component.form.get('calendarId')?.value).toBe('2');
+    expect(component.apiError()).toBe('');
   });
 
   it('submit should NOT call create when form is invalid', () => {
-    const fixture = TestBed.createComponent(CreateEventModal);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
+
+    // Leave required fields blank
+    component.form.patchValue({
+      calendarId: '', // required
+      title: '',
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+    });
 
     component.submit();
 
-    expect(createMock).not.toHaveBeenCalled();
-    expect(component.apiError).toBe('');
-    expect(component.isSubmitting).toBe(false);
+    expect(component.form.invalid).toBe(true);
+    expect(eventServiceStub.create).not.toHaveBeenCalled();
+
+    // Component marks touched; it does NOT set apiError for invalid form
+    expect(component.form.get('title')?.touched).toBe(true);
   });
 
   it('submit should set apiError when missing user id and NOT call create', () => {
-    localStorage.removeItem('user');
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
 
-    const fixture = TestBed.createComponent(CreateEventModal);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    // No localStorage user
+    localStorage.removeItem('user');
 
     component.form.patchValue({
       calendarId: '1',
-      title: 'OK',
+      title: 'Test',
       startDate: '2026-01-26',
-      startTime: '12:00',
+      startTime: '10:00',
       endDate: '2026-01-26',
-      endTime: '13:00',
+      endTime: '11:00',
+      description: '',
+      notes: '',
     });
 
     component.submit();
 
-    expect(component.apiError).toContain('Not logged in');
-    expect(createMock).not.toHaveBeenCalled();
-    expect(component.isSubmitting).toBe(false);
+    expect(component.apiError()).toContain('Not logged in');
+    expect(eventServiceStub.create).not.toHaveBeenCalled();
   });
 
   it('submit should set apiError when end <= start and NOT call create', () => {
-    const fixture = TestBed.createComponent(CreateEventModal);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
+
+    localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
 
     component.form.patchValue({
       calendarId: '1',
-      title: 'OK',
+      title: 'Test',
       startDate: '2026-01-26',
-      startTime: '12:00',
+      startTime: '10:00',
       endDate: '2026-01-26',
-      endTime: '12:00', // equal => invalid
+      endTime: '10:00', // equal -> invalid
+      description: '',
+      notes: '',
     });
 
     component.submit();
 
-    expect(component.apiError).toBe('End must be after start.');
-    expect(createMock).not.toHaveBeenCalled();
-    expect(component.isSubmitting).toBe(false);
-  });
-
-  it('submit should call EventService.create with CreateEventDTO and emit eventCreated on success', () => {
-    const fixture = TestBed.createComponent(CreateEventModal);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    const eventCreatedSpy = vi.fn();
-    const closeSpy = vi.fn();
-    component.eventCreated.subscribe(eventCreatedSpy);
-    component.close.subscribe(closeSpy);
-
-    component.form.patchValue({
-      calendarId: '1',
-      title: 'Team Meeting',
-      startDate: '2026-01-26',
-      startTime: '12:00',
-      endDate: '2026-01-26',
-      endTime: '13:00',
-      description: 'Discuss roadmap',
-      notes: 'Bring notes',
-    });
-
-    component.submit();
-
-    expect(createMock).toHaveBeenCalledTimes(1);
-
-    // ✅ Typed extraction (no unknown/optional chaining needed)
-    const dto = createMock.mock.calls[0][0];
-
-    expect(dto.user_id).toBe('u1');
-    expect(dto.calendar_id).toBe('1');
-    expect(dto.title).toBe('Team Meeting');
-
-    const expectedStartIso = new Date('2026-01-26T12:00:00').toISOString();
-    const expectedEndIso = new Date('2026-01-26T13:00:00').toISOString();
-
-    expect(dto.start_time).toBe(expectedStartIso);
-    expect(dto.end_time).toBe(expectedEndIso);
-
-    expect(eventCreatedSpy).toHaveBeenCalledWith('e123');
-    expect(closeSpy).toHaveBeenCalled();
-    expect(component.apiError).toBe('');
-    expect(component.isSubmitting).toBe(false);
+    expect(component.apiError()).toBe('End must be after start.');
+    expect(eventServiceStub.create).not.toHaveBeenCalled();
   });
 
   it('submit should show apiError when create fails', () => {
-    // ✅ Make the NEXT call fail without rebuilding the TestBed
-    createMock.mockReturnValueOnce(throwError(() => ({})));
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
 
-    const fixture = TestBed.createComponent(CreateEventModal);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
+
+    eventServiceStub.create.and.returnValue(
+      throwError(() => ({ error: { message: 'Could not create event' } }))
+    );
 
     component.form.patchValue({
       calendarId: '1',
-      title: 'Team Meeting',
+      title: 'Test',
       startDate: '2026-01-26',
-      startTime: '12:00',
+      startTime: '10:00',
       endDate: '2026-01-26',
-      endTime: '13:00',
+      endTime: '11:00',
+      description: 'd',
+      notes: 'n',
     });
 
     component.submit();
 
-    expect(component.apiError).toBe('Could not create event');
-    expect(component.isSubmitting).toBe(false);
+    expect(component.apiError()).toBe('Could not create event');
+    expect(component.isSubmitting()).toBe(false);
+  });
+
+  it('submit should call EventService.create with CreateEventDTO and emit eventCreated on success', () => {
+    createComponentWithCalendars([{ calendar_id: '1', name: 'Admin Cal', is_admin: true }]);
+
+    localStorage.setItem('user', JSON.stringify({ user_id: 'u1' }));
+
+    const created$ = new Subject<any>();
+    eventServiceStub.create.and.returnValue(created$.asObservable());
+
+    const eventCreatedSpy = spyOn(component.eventCreated, 'emit');
+    const closeSpy = spyOn(component.close, 'emit');
+
+    component.form.patchValue({
+      calendarId: '1',
+      title: 'Test Title',
+      startDate: '2026-01-26',
+      startTime: '10:00',
+      endDate: '2026-01-26',
+      endTime: '11:00',
+      description: 'desc',
+      notes: 'notes',
+    });
+
+    // add tags to ensure they are passed
+    component.tags.set(['work', 'school']);
+
+    component.submit();
+
+    expect(component.isSubmitting()).toBe(true);
+    expect(eventServiceStub.create).toHaveBeenCalledTimes(1);
+
+    const dtoArg = eventServiceStub.create.calls.mostRecent().args[0];
+
+    // Verify key fields (timestamps are local->UTC so we compute them the same way as the component)
+    const expectedStartIso = new Date('2026-01-26T10:00:00').toISOString();
+    const expectedEndIso = new Date('2026-01-26T11:00:00').toISOString();
+
+    expect(dtoArg).toEqual(
+      jasmine.objectContaining({
+        user_id: 'u1',
+        calendar_id: '1',
+        title: 'Test Title',
+        start_time: expectedStartIso,
+        end_time: expectedEndIso,
+        description: 'desc',
+        notes: 'notes',
+        tags: ['work', 'school'],
+      })
+    );
+
+    // Finish the request
+    created$.next({ event_id: 'e123' });
+    created$.complete();
+
+    fixture.detectChanges();
+
+    expect(component.isSubmitting()).toBe(false);
+    expect(eventCreatedSpy).toHaveBeenCalledOnceWith('e123');
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(component.apiError()).toBe('');
   });
 });

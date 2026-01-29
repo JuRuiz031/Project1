@@ -1,11 +1,11 @@
 <section class="calendar-options" aria-label="Calendar Options">
-  <h2 class="h6 mb-3">Calendar Options</h2>
+  <h2 class="h6 mb-3"><strong>Calendar Options</strong></h2>
 
   <div class="d-grid gap-2">
     <button
       type="button"
       class="btn btn-primary"
-      routerLink="/create-calendar"
+      (click)="onCreateCalendar()"
     >
       Create New Calendar
     </button>
@@ -13,9 +13,9 @@
     <button
       type="button"
       class="btn btn-primary"
-      routerLink="/view-calendar-group"
+      (click)="onViewCalendars()"
     >
-      View Calendar Details
+      View Calendars
     </button>
   </div>
 </section>

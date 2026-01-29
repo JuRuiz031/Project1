@@ -1,10 +1,11 @@
 import { Component, input, output, signal, computed, effect, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
 import { CalendarService } from '../../../shared/services/calendar.service';
+import { InviteService } from '../../../shared/services/invite.service';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { EventDTO } from '../../../shared/models/events/event.dto';
@@ -19,6 +20,7 @@ type EventDisplay = {
   endTime: string;
   description: string;
   notes: string;
+  tags: string[];
 };
 
 @Component({
@@ -31,17 +33,24 @@ type EventDisplay = {
 export class ViewEventModal implements OnDestroy {
   private calendarApi = inject(CalendarApiService);
   private calendarService = inject(CalendarService);
+  private inviteService = inject(InviteService);
 
   // Inputs & Outputs
   eventId = input<string | null>(null);
   back = output<void>();
   close = output<void>();
   editEvent = output<string>();
+  showSuccessMessage = input<boolean>(false);
 
   // State
   calendars = signal<CalendarOption[]>([]);
   apiError = signal('');
   event = signal<EventDisplay | null>(null);
+  showNotification = signal(false);
+  showSharePopup = signal(false);
+  shareLink = signal<string>('');
+  isGeneratingLink = signal(false);
+  copySuccess = signal(false);
 
   // Computed
   adminCalendars = computed(() => this.calendars().filter(c => c.isAdmin));
@@ -60,6 +69,13 @@ export class ViewEventModal implements OnDestroy {
         this.loadCalendars();
         this.loadEvent(id);
       }
+      
+      // Show notification if success message is true
+      const showSuccess = this.showSuccessMessage();
+      if (showSuccess) {
+        this.showNotification.set(true);
+        setTimeout(() => this.showNotification.set(false), 3000);
+      }
     });
   }
 
@@ -71,6 +87,7 @@ export class ViewEventModal implements OnDestroy {
     this.calendarService
       .getHomepage()
       .pipe(
+        take(1),
         map((home: CalendarHomeDTO) => this.mapCalendars(home.calendars ?? [])),
         tap(calendars => console.log('[ViewEventModal] Calendars loaded:', calendars)),
         catchError(err => {
@@ -89,6 +106,7 @@ export class ViewEventModal implements OnDestroy {
     this.calendarApi
       .getByEventIds([eventId])
       .pipe(
+        take(1),
         map((res: CalendarFilterResponseDTO) => res?.events?.[0]),
         tap(ev => {
           if (!ev) this.apiError.set('Event not found');
@@ -129,10 +147,10 @@ export class ViewEventModal implements OnDestroy {
       endTime: end.time,
       description: ev.description ?? '',
       notes: ev.notes ?? '',
+      tags: ev.tags ?? [],
     });
   }
 
-  // ✅ SAME FIX AS YOUR OLD view-event.ts
   private parseServerInstant(iso: string): Date {
     // If server includes timezone (Z or ±hh:mm), Date can parse safely.
     // If not, assume server meant UTC and append 'Z'.
@@ -140,7 +158,6 @@ export class ViewEventModal implements OnDestroy {
     return new Date(hasTz ? iso : `${iso}Z`);
   }
 
-  // ✅ ISO -> Local date/time for display
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
 
@@ -152,6 +169,67 @@ export class ViewEventModal implements OnDestroy {
     const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; // LOCAL time
     return { date, time };
+  }
+
+  getTimezoneAbbr(): string {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZoneName: 'short',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    const parts = formatter.formatToParts(now);
+    const tzPart = parts.find(p => p.type === 'timeZoneName');
+    return tzPart?.value ?? 'UTC';
+  }
+
+  onShare(): void {
+    const eventId = this.eventId();
+    if (!eventId || !this.canEdit()) return;
+
+    // Show popup and start generating link
+    this.showSharePopup.set(true);
+    this.isGeneratingLink.set(true);
+    this.shareLink.set('');
+    this.copySuccess.set(false);
+
+    // Generate expiration date (7 days from now)
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7);
+    const expirationISO = expirationDate.toISOString();
+
+    // Create invite link
+    this.inviteService.createEventInvite(eventId, expirationISO)
+      .pipe(take(1))
+      .subscribe({
+        next: (response) => {
+          this.shareLink.set(response.invite_link);
+          this.isGeneratingLink.set(false);
+        },
+        error: (err) => {
+          console.error('[ViewEventModal] Failed to generate invite link:', err);
+          this.isGeneratingLink.set(false);
+          this.apiError.set('Failed to generate invite link');
+          this.showSharePopup.set(false);
+        }
+      });
+  }
+
+  closeSharePopup(): void {
+    this.showSharePopup.set(false);
+    this.shareLink.set('');
+    this.copySuccess.set(false);
+  }
+
+  copyShareLink(): void {
+    const link = this.shareLink();
+    if (!link) return;
+
+    navigator.clipboard.writeText(link).then(() => {
+      this.copySuccess.set(true);
+      setTimeout(() => this.copySuccess.set(false), 2000);
+    }).catch(err => {
+      console.error('[ViewEventModal] Failed to copy link:', err);
+    });
   }
 
   onBack(): void {

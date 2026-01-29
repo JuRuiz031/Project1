@@ -1,0 +1,37 @@
+<app-base-modal
+  [title]="'Delete Calendar'"
+  [size]="'small'"
+  (close)="onCancel()"
+>
+  <div class="text-center">
+    @if (apiError) {
+      <div class="alert alert-danger mb-3">{{ apiError }}</div>
+    }
+
+    <div class="mb-4">
+      <p class="mb-2">Are you sure you want to delete</p>
+      <strong class="fs-5">{{ targetName }}</strong>
+      <p class="mt-2 text-muted">This action cannot be undone.</p>
+    </div>
+
+    <div class="d-flex justify-content-center gap-3">
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="onConfirm()"
+        [disabled]="isDeleting || !targetId"
+      >
+        {{ isDeleting ? 'Deleting...' : 'Delete' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="onCancel()"
+        [disabled]="isDeleting"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</app-base-modal>

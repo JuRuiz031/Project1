@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, input, OnInit, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CalendarEvent } from 'angular-calendar';
 
 import { CalendarWidget } from './calendar-widget/calendar-widget';
-import { CALENDAR_COLOR_PALETTE } from './calendar-colors';
+import { getCalendarColor } from '../../../../../config/calendar-colors';
 
 type EventDTO = {
   event_id: string;
@@ -28,11 +27,11 @@ export class CalendarDisplay implements OnInit {
   viewDate = new Date();
 
   events = input<EventDTO[]>([]);
+  selectedTags = input<string[]>([]);
   openEventSelector = output<void>();
   eventClicked = output<string>();  // Emit event ID when user clicks on event
   createEvent = output<void>();  // Emit when user wants to create event
 
-  private calendarColorMap = new Map<string, { primary: string; secondary: string }>();
   private readonly STORAGE_KEY = 'calendar_view_date';
 
   ngOnInit(): void {
@@ -48,7 +47,17 @@ export class CalendarDisplay implements OnInit {
   }
 
   calendarEvents = computed(() => {
-    return this.events().map((e) => ({
+    let filteredEvents = this.events();
+    
+    // Filter by selected tags (events must have ALL selected tags)
+    const tags = this.selectedTags();
+    if (tags && tags.length > 0) {
+      filteredEvents = filteredEvents.filter(e =>
+        tags.every(tag => e.tags?.includes(tag))
+      );
+    }
+    
+    return filteredEvents.map((e) => ({
       title: e.title,
       start: new Date(e.start_time),
       end: new Date(e.end_time),
@@ -65,11 +74,7 @@ export class CalendarDisplay implements OnInit {
   });
 
   private getColorForCalendar(calendarId: string): { primary: string; secondary: string } {
-    if (!this.calendarColorMap.has(calendarId)) {
-      const index = this.calendarColorMap.size % CALENDAR_COLOR_PALETTE.length;
-      this.calendarColorMap.set(calendarId, CALENDAR_COLOR_PALETTE[index]);
-    }
-    return this.calendarColorMap.get(calendarId)!;
+    return getCalendarColor(calendarId);
   }
 
   onEventClicked(event: CalendarEvent): void {

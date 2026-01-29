@@ -13,11 +13,6 @@ import { DeleteUser } from './features/auth/delete-user/delete-user';
 
 import { MainPageComponent } from './features/dashboard/main-page/main-page';
 
-import { CreateCalendar } from './features/calendar/create-calendar/create-calendar';
-import { ViewCalendarGroup } from './features/calendar/view-calendar-group/view-calendar-group';
-import { EditCalendarGroup } from './features/calendar/edit-calendar-group/edit-calendar-group';
-import { DeleteCalendarGroup } from './features/calendar/delete-calendar-group/delete-calendar-group';
-
 import { ViewEvent } from './features/event/view-event/view-event';
 
 // import { CreatePoll } from './features/poll/create-poll/create-poll';
@@ -71,14 +66,9 @@ export const routes: Routes = [
 
       { path: 'main-page', redirectTo: '/dashboard/main-page', pathMatch: 'full' },
 
-      { path: 'create-calendar', component: CreateCalendar },
       { path: 'account', component: AccountView },
       { path: 'edit-user', component: EditUser },
       { path: 'delete-user', component: DeleteUser },
-
-      { path: 'view-calendar-group', component: ViewCalendarGroup },
-      { path: 'edit-calendar-group', component: EditCalendarGroup },
-      { path: 'delete-calendar-group', component: DeleteCalendarGroup },
 
       // Event routes removed - now all modals from main-page
 

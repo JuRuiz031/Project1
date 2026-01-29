@@ -4,21 +4,18 @@ import {
   input,
   output,
   signal,
-  computed,
   effect,
   OnDestroy,
-  inject,
 } from '@angular/core';
-import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
-import { CALENDAR_COLOR_PALETTE } from '../calendar-display/calendar-colors';
+import { Subject } from 'rxjs';
+import { getCalendarColor } from '../../../../../config/calendar-colors';
 
 export type CalendarOptionDTO = { calendar_id: string; name: string };
 
 @Component({
   selector: 'app-display-options',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule],
   templateUrl: './display-options.html',
   styleUrl: './display-options.css',
 })
@@ -27,21 +24,27 @@ export class DisplayOptions implements OnDestroy {
   calendars = input<CalendarOptionDTO[]>([]);
   tags = input<string[]>([]);
 
-  /** emit selected calendar_ids back to MainPage */
+  /** emit selected calendar_ids and tags back to MainPage */
   selectedCalendarIdsChange = output<string[]>();
+  selectedTagsChange = output<string[]>();
 
-  /** Reactive form to manage checkbox state */
-  checkboxForm = new FormGroup({});
-
-  /** Map of calendar_id to color for displaying colored dots */
-  colorMap = new Map<string, { primary: string; secondary: string }>();
+  /** State for selected calendars and tags */
+  selectedCalendarIds = signal<string[]>([]);
+  selectedTags = signal<string[]>([]);
 
   /** Cleanup subscriptions */
   private destroy$ = new Subject<void>();
 
   constructor() {
     effect(() => {
-      this.rebuildForm(this.calendars());
+      const cals = this.calendars();
+
+      // Select all calendars by default on first load
+      if (cals.length > 0 && this.selectedCalendarIds().length === 0) {
+        const allIds = cals.map(c => c.calendar_id);
+        this.selectedCalendarIds.set(allIds);
+        this.selectedCalendarIdsChange.emit(allIds);
+      }
     });
   }
 
@@ -50,42 +53,47 @@ export class DisplayOptions implements OnDestroy {
     this.destroy$.complete();
   }
 
-  private rebuildForm(calendars: CalendarOptionDTO[]): void {
-    this.checkboxForm = new FormGroup({});
-    this.colorMap.clear();
-
-    if (!calendars?.length) {
-      this.emitSelection();
-      return;
-    }
-
-    // Create a FormControl for each calendar (all checked by default)
-    calendars.forEach((c, index) => {
-      this.checkboxForm.addControl(c.calendar_id, new FormControl(true));
-      // Assign color based on index in palette
-      this.colorMap.set(c.calendar_id, CALENDAR_COLOR_PALETTE[index % CALENDAR_COLOR_PALETTE.length]);
+  toggleCalendar(calendarId: string): void {
+    this.selectedCalendarIds.update(current => {
+      if (current.includes(calendarId)) {
+        return current.filter(id => id !== calendarId);
+      } else {
+        return [...current, calendarId];
+      }
     });
-
-    // Subscribe to value changes for instant updates
-    this.checkboxForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.emitSelection();
-      });
-
-    // Emit initial selection (all selected)
-    this.emitSelection();
+    this.selectedCalendarIdsChange.emit(this.selectedCalendarIds());
   }
 
-  private emitSelection(): void {
-    const selectedIds = Object.entries(this.checkboxForm.value)
-      .filter(([_, isSelected]) => isSelected === true)
-      .map(([id]) => id);
-
-    this.selectedCalendarIdsChange.emit(selectedIds);
+  isCalendarSelected(calendarId: string): boolean {
+    return this.selectedCalendarIds().includes(calendarId);
   }
 
-  getCalendarColor(calendarId: string): string {
-    return this.colorMap.get(calendarId)?.primary || '#cccccc';
+  clearCalendarFilters(): void {
+    this.selectedCalendarIds.set([]);
+    this.selectedCalendarIdsChange.emit([]);
+  }
+
+  toggleTag(tag: string): void {
+    this.selectedTags.update(current => {
+      if (current.includes(tag)) {
+        return current.filter(t => t !== tag);
+      } else {
+        return [...current, tag];
+      }
+    });
+    this.selectedTagsChange.emit(this.selectedTags());
+  }
+
+  isTagSelected(tag: string): boolean {
+    return this.selectedTags().includes(tag);
+  }
+
+  clearTagFilters(): void {
+    this.selectedTags.set([]);
+    this.selectedTagsChange.emit([]);
+  }
+
+  getCalendarColor(calendarId: string): { primary: string; secondary: string } {
+    return getCalendarColor(calendarId);
   }
 }

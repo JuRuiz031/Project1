@@ -8,31 +8,41 @@ import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/cale
 import { EventDTO } from '../../../shared/models/events/event.dto';
 
 describe('EditEventModal', () => {
+  // Use Z timestamps so isoToDateTime() converts to local time reliably.
+  // 16:15Z == 10:15 in America/Chicago (CST) for Jan 26.
   const mockEvent: EventDTO = {
     event_id: 'e1',
     calendar_id: '2',
     title: 'Loaded Event',
-    start_time: '2026-01-26T10:15:00',
-    end_time: '2026-01-26T11:00:00',
+    start_time: '2026-01-26T16:15:00Z',
+    end_time: '2026-01-26T17:00:00Z',
     description: 'Loaded desc',
     notes: 'Loaded notes',
     tags: ['work'],
   };
 
-  const calendarServiceStub = {
-    getByEventIds: (_ids: string[]) =>
-      of<CalendarFilterResponseDTO>({ events: [mockEvent] }),
+  let calendarServiceStub: {
+    getByEventIds: jasmine.Spy;
+    getHomepage: jasmine.Spy;
   };
 
-  // const eventServiceStub = {
-  //   update: (_eventId: string, _dto: any) => of(mockEvent),
-  // };
-  let eventServiceStub: { update: any };
-
+  let eventServiceStub: {
+    update: jasmine.Spy;
+  };
 
   beforeEach(async () => {
+    calendarServiceStub = {
+      getByEventIds: jasmine.createSpy('getByEventIds').and.returnValue(
+        of<CalendarFilterResponseDTO>({ events: [mockEvent] })
+      ),
+      // ngOnInit() calls loadCalendars() which calls getHomepage(); not fatal, but must exist
+      getHomepage: jasmine.createSpy('getHomepage').and.returnValue(
+        of({ calendars: [] })
+      ),
+    };
+
     eventServiceStub = {
-      update: vi.fn(() => of(mockEvent)),
+      update: jasmine.createSpy('update').and.returnValue(of(mockEvent)),
     };
 
     await TestBed.configureTestingModule({
@@ -44,14 +54,14 @@ describe('EditEventModal', () => {
     }).compileComponents();
   });
 
-
   it('ngOnInit should load the event via CalendarService and populate the form', () => {
     const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
+    fixture.componentRef.setInput('eventId', 'e1');
     fixture.detectChanges(); // triggers ngOnInit
 
-    expect(component.apiError).toBe('');
+    expect(component.apiError()).toBe('');
 
     expect(component.form.get('calendarId')?.value).toBe('2');
     expect(component.form.get('title')?.value).toBe('Loaded Event');
@@ -64,44 +74,47 @@ describe('EditEventModal', () => {
 
     expect(component.form.get('description')?.value).toBe('Loaded desc');
     expect(component.form.get('notes')?.value).toBe('Loaded notes');
+
+    expect(calendarServiceStub.getByEventIds).toHaveBeenCalledOnceWith(['e1']);
   });
 
-  it('ngOnInit should set apiError to "Event not found" when no event is returned', async () => {
-    TestBed.overrideProvider(CalendarService, {
-      useValue: { getByEventIds: () => of<CalendarFilterResponseDTO>({ events: [] }) },
-    });
+  it('ngOnInit should set apiError to "Event not found" when no event is returned', () => {
+    calendarServiceStub.getByEventIds.and.returnValue(
+      of<CalendarFilterResponseDTO>({ events: [] })
+    );
 
     const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
+    fixture.componentRef.setInput('eventId', 'e1');
     fixture.detectChanges();
 
-    expect(component.apiError).toBe('Event not found');
+    expect(component.apiError()).toBe('Event not found');
   });
 
-  it('ngOnInit should set apiError when loading fails', async () => {
-    TestBed.overrideProvider(CalendarService, {
-      useValue: { getByEventIds: () => throwError(() => new Error('boom')) },
-    });
+  it('ngOnInit should set apiError when loading fails', () => {
+    calendarServiceStub.getByEventIds.and.returnValue(
+      throwError(() => new Error('boom'))
+    );
 
     const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
+    fixture.componentRef.setInput('eventId', 'e1');
     fixture.detectChanges();
 
-    expect(component.apiError).toBe('Could not load event');
+    expect(component.apiError()).toBe('boom');
   });
 
   it('saveChanges should call EventService.update and emit eventUpdated on success', () => {
     const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
-    const eventService = TestBed.inject(EventService) as any;
 
-    fixture.detectChanges(); // ensures eventId is set from route & form populated
+    fixture.componentRef.setInput('eventId', 'e1');
+    fixture.detectChanges(); // loads event and sets internal eventIdValue
 
-    const updateSpy = vi.spyOn(eventService, 'update').mockReturnValue(of(mockEvent));
-    const eventUpdatedSpy = vi.fn();
-    const closeSpy = vi.fn();
+    const eventUpdatedSpy = jasmine.createSpy('eventUpdatedSpy');
+    const closeSpy = jasmine.createSpy('closeSpy');
     component.eventUpdated.subscribe(eventUpdatedSpy);
     component.close.subscribe(closeSpy);
 
@@ -118,9 +131,9 @@ describe('EditEventModal', () => {
 
     component.saveChanges();
 
-    expect(updateSpy).toHaveBeenCalledTimes(1);
+    expect(eventServiceStub.update).toHaveBeenCalledTimes(1);
 
-    const [eventId, dto] = updateSpy.mock.calls[0] as [
+    const [eventId, dto] = eventServiceStub.update.calls.mostRecent().args as [
       string,
       {
         calendar_id: string;
@@ -134,18 +147,17 @@ describe('EditEventModal', () => {
     ];
 
     expect(eventId).toBe('e1');
-
-    // verify payload shape at least for the big fields
     expect(dto.calendar_id).toBe('2');
     expect(dto.title).toBe('Updated Title');
-    const expectedStartIso = new Date('2026-01-26T12:00:00').toISOString();
-    const expectedEndIso = new Date('2026-01-26T13:00:00').toISOString();
+
+    // Build expected ISO the same way component does (LOCAL date parts -> toISOString)
+    const expectedStartIso = new Date(2026, 0, 26, 12, 0, 0, 0).toISOString();
+    const expectedEndIso = new Date(2026, 0, 26, 13, 0, 0, 0).toISOString();
 
     expect(dto.start_time).toBe(expectedStartIso);
     expect(dto.end_time).toBe(expectedEndIso);
 
-
-    expect(eventUpdatedSpy).toHaveBeenCalledWith('e1');
+    expect(eventUpdatedSpy).toHaveBeenCalledOnceWith('e1');
     expect(closeSpy).toHaveBeenCalled();
   });
 
@@ -153,9 +165,9 @@ describe('EditEventModal', () => {
     const fixture = TestBed.createComponent(EditEventModal);
     const component = fixture.componentInstance;
 
+    fixture.componentRef.setInput('eventId', 'e1');
     fixture.detectChanges();
 
-    // fill in invalid end-before-start
     component.form.patchValue({
       calendarId: '2',
       title: 'Updated Title',
@@ -170,8 +182,6 @@ describe('EditEventModal', () => {
     component.saveChanges();
 
     expect(eventServiceStub.update).not.toHaveBeenCalled();
-    expect(component.apiError).toBe('End must be after start.');
+    expect(component.apiError()).toBe('End must be after start.');
   });
-
-
 });

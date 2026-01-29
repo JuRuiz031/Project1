@@ -1,23 +1,29 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+
 import { finalize } from 'rxjs';
 
+import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
+
 import { CreateCalendarDTO } from '../../../shared/models/calendars/create-calendar.dto';
+import { CreateCalendarResponseDTO } from '../../../shared/models/calendars/create-calendar-response.dto';
 
 @Component({
-  selector: 'app-create-calendar',
+  selector: 'app-create-calendar-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './create-calendar.html',
-  styleUrl: './create-calendar.css',
+  imports: [CommonModule, ReactiveFormsModule, BaseModal],
+  templateUrl: './create-calendar-modal.html',
+  styleUrls: ['./create-calendar-modal.css'],
 })
-export class CreateCalendar {
+export class CreateCalendarModal {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private calendarService = inject(CalendarService);
+
+  // Outputs (modal-style)
+  close = output<void>();
+  calendarCreated = output<string>(); // emits calendar_id
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]],
@@ -32,7 +38,7 @@ export class CreateCalendar {
   }
 
   private getCurrentUserId(): string | null {
-    // Adjust this if you have a single known key; these are safe fallbacks.
+    // same safe fallbacks as current create-calendar
     const keysToTry = ['user', 'currentUser', 'auth_user'];
 
     for (const key of keysToTry) {
@@ -44,14 +50,14 @@ export class CreateCalendar {
         const userId = obj?.user_id ?? obj?.id ?? obj?.userId;
         if (typeof userId === 'string' && userId.length > 0) return userId;
       } catch {
-        // ignore parse errors and keep trying other keys
+        // ignore and keep trying
       }
     }
 
     return null;
   }
 
-  createCalendar(): void {
+  submit(): void {
     this.apiError.set('');
 
     if (this.form.invalid) {
@@ -84,8 +90,9 @@ export class CreateCalendar {
       .create(dto)
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
-        next: () => {
-          this.router.navigate(['/main-page']);
+        next: (created: CreateCalendarResponseDTO) => {
+          this.calendarCreated.emit(created.calendar_id);
+          this.close.emit();
         },
         error: (err) => {
           const message =
@@ -98,7 +105,7 @@ export class CreateCalendar {
       });
   }
 
-  cancel(): void {
-    this.router.navigate(['/main-page']);
+  onClose(): void {
+    this.close.emit();
   }
 }

@@ -4,6 +4,7 @@
     <app-calendar-display 
       class="card card--calendar"
       [events]="events()"
+      [selectedTags]="selectedTags()"
       (openEventSelector)="openEventSelector()"
       (eventClicked)="onEventClicked($event)"
       (createEvent)="openCreateEvent()">
@@ -11,13 +12,18 @@
 
     <!-- RIGHT: Side panel stack -->
     <aside class="side">
-      <app-calendar-options class="card"></app-calendar-options>
+      <app-calendar-options
+        class="card"
+        (createCalendar)="openCreateCalendar()"
+        (viewCalendars)="openCalendarSelector()">
+      </app-calendar-options>
 
       <app-display-options
         class="card"
         [calendars]="calendars()"
         [tags]="tags()"
-        (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)">
+        (selectedCalendarIdsChange)="onSelectedCalendarIdsChange($event)"
+        (selectedTagsChange)="onSelectedTagsChange($event)">
       </app-display-options>
 
       <app-polls-window
@@ -28,10 +34,61 @@
     </aside>
   </section>
 
+  <!-- Create Calendar Modal -->
+  @if (modalState() === 'create-calendar') {
+    <app-create-calendar-modal
+      (close)="closeAllModals()"
+      (calendarCreated)="onCalendarCreated($event)">
+    </app-create-calendar-modal>
+  }
+
+  <!-- Calendar Selector Modal -->
+  @if (modalState() === 'calendar-selector') {
+    <app-calendar-selector-modal
+      [calendars]="calendars()"
+      (calendarActivated)="onCalendarActivated($event)"
+      (closeModal)="closeAllModals()">
+    </app-calendar-selector-modal>
+  }
+
+  <!-- View Calendar Modal (stub for now) -->
+  @if (modalState() === 'view-calendar') {
+    <app-view-calendar-modal
+      [calendarId]="selectedCalendarId()"
+      (back)="onViewCalendarBack()"
+      (close)="closeAllModals()"
+      (editCalendar)="openEditCalendar($event)">
+    </app-view-calendar-modal>
+  }
+
+  <!-- Edit Calendar Modal -->
+  @if (modalState() === 'edit-calendar') {
+    <app-edit-calendar-modal
+      [calendarId]="selectedCalendarId()!"
+      [currentUserId]="currentUserId()"
+      (close)="closeAllModals()"
+      (calendarUpdated)="onCalendarUpdated($event)"
+      (deleteRequested)="onDeleteCalendarRequested($event)">
+    </app-edit-calendar-modal>
+  }
+
+  <!-- Delete Calendar Modal -->
+  @if (modalState() === 'delete-calendar') {
+    <app-delete-calendar-modal
+      [targetId]="selectedCalendarId()"
+      [targetName]="selectedCalendarName()"
+      [isDeleting]="isDeletingCalendar()"
+      [apiError]="deleteCalendarApiError()"
+      (cancel)="closeAllModals()"
+      (confirmDelete)="onConfirmDeleteCalendar($event)">
+    </app-delete-calendar-modal>
+  }
+
   <!-- Event Selector Modal -->
   @if (modalState() === 'event-selector') {
     <app-event-selector-modal
       [events]="events()"
+      [calendars]="calendars()"
       (eventSelected)="onEventSelected($event)"
       (closeModal)="closeAllModals()">
     </app-event-selector-modal>
@@ -41,6 +98,7 @@
   @if (modalState() === 'view-event') {
     <app-view-event-modal
       [eventId]="selectedEventId()"
+      [showSuccessMessage]="showEventSuccessMessage()"
       (back)="onViewEventBack()"
       (close)="closeAllModals()"
       (editEvent)="openEditEvent(selectedEventId()!)">
