@@ -5,8 +5,15 @@ import { of } from 'rxjs';
 
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
+import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 type CalendarOption = { id: string; name: string; isAdmin: boolean };
+
+type CalendarUserRow = {
+  calendar_id: string;
+  user_id: string;
+  username: string;
+};
 
 @Component({
   selector: 'app-view-calendar-modal',
@@ -31,6 +38,11 @@ export class ViewCalendarModal implements OnDestroy {
   apiError = signal('');
   toast = signal('');
   inviteLink = signal('');
+
+  // Users (list only – no admin/user tags)
+  users = signal<CalendarUserRow[]>([]);
+  usersError = signal('');
+  isLoadingUsers = signal(false);
 
   // Share popup state (matches ViewEventModal pattern)
   showSharePopup = signal(false);
@@ -59,6 +71,11 @@ export class ViewCalendarModal implements OnDestroy {
       this.toast.set('');
       this.inviteLink.set('');
 
+      // reset users state
+      this.users.set([]);
+      this.usersError.set('');
+      this.isLoadingUsers.set(false);
+
       // reset share state
       this.showSharePopup.set(false);
       this.shareLink.set('');
@@ -66,6 +83,7 @@ export class ViewCalendarModal implements OnDestroy {
       this.copySuccess.set(false);
 
       this.loadCalendars();
+      this.loadCalendarUsers(id);
     });
   }
 
@@ -92,6 +110,38 @@ export class ViewCalendarModal implements OnDestroy {
         if (id && !calendars.some(c => c.id === id)) {
           this.apiError.set('Calendar not found');
         }
+      });
+  }
+
+  private loadCalendarUsers(calendarId: string): void {
+    this.usersError.set('');
+    this.isLoadingUsers.set(true);
+
+    // Endpoint: GET /calendar?calendarIds=...
+    this.calendarService
+      .getByCalendarIds([calendarId])
+      .pipe(
+        map((res: CalendarFilterResponseDTO) => {
+          const rows: CalendarUserRow[] = (res.users ?? [])
+            .filter(u => String(u.calendar_id) === String(calendarId))
+            .map(u => ({
+              calendar_id: String(u.calendar_id),
+              user_id: String(u.user_id),
+              username: String(u.username ?? ''),
+            }))
+            .filter(u => u.user_id && u.username);
+
+          return rows;
+        }),
+        catchError(err => {
+          console.error('[ViewCalendarModal] Failed to load calendar users:', err);
+          this.usersError.set('Could not load calendar users');
+          return of([] as CalendarUserRow[]);
+        })
+      )
+      .subscribe(rows => {
+        this.isLoadingUsers.set(false);
+        this.users.set(rows);
       });
   }
 

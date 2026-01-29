@@ -14,6 +14,7 @@ describe('ViewCalendarModal', () => {
           provide: CalendarService,
           useValue: {
             getHomepage: vi.fn(() => of({ calendars: [] })),
+            getByCalendarIds: vi.fn(() => of({ users: [] })),
           },
         },
       ],

@@ -260,3 +260,11 @@
 .muted {
   color: #777;
 }
+
+.user-row {
+  padding: 10px 12px;
+}
+
+.user-name {
+  font-weight: 500;
+}

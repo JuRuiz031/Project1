@@ -44,6 +44,35 @@
           <label class="form-label">Calendar Name</label>
           <input class="form-control app-input" [value]="cal.name" disabled />
         </div>
+
+        <!-- Users (list only – no admin/user tags) -->
+        <div class="mt-4">
+          <h3 class="h5 mb-2">Users</h3>
+
+          @if (usersError(); as uErr) {
+            <div class="alert alert-danger mb-3">
+              {{ uErr }}
+            </div>
+          }
+
+          @if (isLoadingUsers()) {
+            <div class="text-center py-2">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          } @else if (users().length === 0) {
+            <p class="text-muted mb-0">No users returned for this calendar.</p>
+          } @else {
+            <ul class="list-group">
+              @for (u of users(); track u.user_id) {
+                <li class="list-group-item user-row">
+                  <span class="user-name">{{ u.username }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
       }
     </div>
 
