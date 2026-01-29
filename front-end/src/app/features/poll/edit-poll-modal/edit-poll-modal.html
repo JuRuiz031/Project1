@@ -1,0 +1,226 @@
+<app-base-modal
+  [title]="title()"
+  [showBackButton]="false"
+  [size]="'large'"
+  (close)="onClose()"
+>
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-secondary mb-3">
+    Loading...
+  </div>
+
+  <!-- API error -->
+  <div *ngIf="apiError()" class="alert alert-danger mb-3">
+    {{ apiError() }}
+  </div>
+
+  <form [formGroup]="form" novalidate>
+    <div class="row g-3">
+      <!-- LEFT COLUMN -->
+      <div class="col-12 col-lg-7">
+        <!-- Calendar -->
+        <div class="mb-3">
+          <label class="form-label">Calendar (admin only)</label>
+          <select
+            class="form-select app-select"
+            formControlName="calendarId"
+            [ngClass]="{ 'is-invalid': hasError('calendarId') }"
+          >
+            <option value="" disabled>Select calendar (admin only)</option>
+            <option *ngFor="let c of adminCalendars()" [value]="c.id">
+              {{ c.name }}
+            </option>
+          </select>
+          <div class="invalid-feedback">Select an admin calendar.</div>
+        </div>
+
+        <!-- Title -->
+        <div class="mb-3">
+          <label class="form-label">Poll Title</label>
+          <input
+            type="text"
+            class="form-control app-input"
+            placeholder="Poll title"
+            formControlName="title"
+            [ngClass]="{ 'is-invalid': hasError('title') }"
+          />
+          <div class="invalid-feedback">Title required (min 2 chars).</div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+          <label class="form-label">Description (optional)</label>
+          <textarea
+            class="form-control app-input"
+            rows="3"
+            placeholder="Optional description"
+            formControlName="description"
+            [ngClass]="{ 'is-invalid': hasError('description') }"
+          ></textarea>
+          <div class="invalid-feedback">Description too long.</div>
+        </div>
+
+        <!-- Start -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Start date</label>
+            <input
+              type="date"
+              class="form-control app-input"
+              formControlName="startDate"
+              [ngClass]="{ 'is-invalid': hasError('startDate') }"
+            />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Start time</label>
+            <input
+              type="time"
+              class="form-control app-input"
+              formControlName="startTime"
+              [ngClass]="{ 'is-invalid': hasError('startTime') }"
+            />
+          </div>
+        </div>
+
+        <!-- End -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">End date</label>
+            <input
+              type="date"
+              class="form-control app-input"
+              formControlName="endDate"
+              [ngClass]="{ 'is-invalid': hasError('endDate') }"
+            />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">End time</label>
+            <input
+              type="time"
+              class="form-control app-input"
+              formControlName="endTime"
+              [ngClass]="{ 'is-invalid': hasError('endTime') }"
+            />
+          </div>
+        </div>
+
+        <!-- OPTIONS MENU -->
+        <div class="border border-secondary rounded p-3">
+          <div class="fw-semibold mb-2">Options</div>
+
+          <div class="list-group">
+            <button
+              type="button"
+              class="list-group-item list-group-item-action bg-transparent border-secondary"
+              *ngFor="let optCtrl of options.controls; let i = index"
+              (click)="selectOption(i)"
+              [class.active]="selectedOptionIndex() === i"
+            >
+              {{ optCtrl.value }}
+            </button>
+
+            <div
+              class="list-group-item bg-transparent text-secondary border-secondary"
+              *ngIf="options.length === 0"
+            >
+              Options list
+            </div>
+          </div>
+
+          <div class="input-group mt-3">
+            <input
+              class="form-control app-input"
+              type="text"
+              placeholder="Option text"
+              [(ngModel)]="optionInput"
+              [ngModelOptions]="{ standalone: true }"
+            />
+            <button class="btn btn-outline-secondary" type="button" (click)="addOption()">
+              Add Option
+            </button>
+          </div>
+
+          <button
+            class="btn btn-outline-danger w-100 mt-2"
+            type="button"
+            (click)="deleteSelectedOption()"
+            [disabled]="selectedOptionIndex() === null"
+          >
+            Delete Selected Option
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="col-12 col-lg-5">
+        <!-- TAGS MENU -->
+        <div class="border border-secondary rounded p-3">
+          <div class="fw-semibold mb-2">Tags</div>
+
+          <div class="list-group">
+            <button
+              type="button"
+              class="list-group-item list-group-item-action bg-transparent border-secondary"
+              *ngFor="let tagCtrl of tags.controls; let i = index"
+              (click)="selectTag(i)"
+              [class.active]="selectedTagIndex() === i"
+            >
+              {{ tagCtrl.value }}
+            </button>
+
+            <div
+              class="list-group-item bg-transparent text-secondary border-secondary"
+              *ngIf="tags.length === 0"
+            >
+              Tags list
+            </div>
+          </div>
+
+          <div class="input-group mt-3">
+            <input
+              class="form-control app-input"
+              type="text"
+              placeholder="Tag text"
+              [(ngModel)]="tagInput"
+              [ngModelOptions]="{ standalone: true }"
+            />
+            <button class="btn btn-outline-secondary" type="button" (click)="addTag()">
+              Add Tag
+            </button>
+          </div>
+
+          <button
+            class="btn btn-outline-danger w-100 mt-2"
+            type="button"
+            (click)="deleteSelectedTag()"
+            [disabled]="selectedTagIndex() === null"
+          >
+            Delete Selected Tag
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL FOOTER -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button class="btn btn-outline-secondary" type="button" (click)="onClose()" [disabled]="isSubmitting()">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="confirmEdit()"
+        [disabled]="isSubmitting() || isLoading()"
+      >
+        {{ isSubmitting() ? 'Saving…' : 'Save Changes' }}
+      </button>
+
+      <button class="btn btn-danger" type="button" (click)="onDelete()" [disabled]="isSubmitting() || isLoading()">
+        Delete Poll
+      </button>
+    </div>
+  </form>
+</app-base-modal>

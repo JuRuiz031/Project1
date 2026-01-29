@@ -43,7 +43,7 @@
     *ngIf="isViewPollOpen()"
     [pollId]="selectedPollId()"
     (close)="isViewPollOpen.set(false)"
-    (edit)="onEditPoll($event)"
+    (edit)="openEditPoll($event)"
   ></app-view-poll-modal>
 
   <!-- Create Poll Modal (only if you want it opened from polls-window) -->
@@ -52,4 +52,15 @@
     (close)="isCreatePollOpen.set(false)"
     (pollCreated)="onPollCreated($event)"
   ></app-create-poll-modal>
+
+  <app-edit-poll-modal
+    *ngIf="isEditPollOpen()"
+    [pollId]="selectedPollId()"
+    (close)="isEditPollOpen.set(false)"
+    (saved)="onPollSaved($event)"
+    (deleted)="onPollDeleted($event)"
+  ></app-edit-poll-modal>
 </section>
+
+
+

@@ -3,13 +3,15 @@ import { CalendarService } from '../../../../../shared/services/calendar.service
 import { PollDTO } from '../../../../../shared/models/polls/poll.dto';
 import { CalendarHomeDTO } from '../../../../../shared/models/calendars/calendar-home.dto';
 import { CommonModule } from '@angular/common';
-import { ViewPollModal } from '../../../../poll/view-poll/view-poll-modal';
+import { ViewPollModal } from '../../../../poll/view-poll-modal/view-poll-modal';
 import { CreatePollModal } from '../../../../poll/create-poll-modal/create-poll-modal';
+import { EditPollModal } from '../../../../poll/edit-poll-modal/edit-poll-modal';
+
 
 @Component({
   selector: 'app-polls-window',
   standalone: true,
-  imports: [CommonModule, ViewPollModal, CreatePollModal],
+  imports: [CommonModule, ViewPollModal, CreatePollModal, EditPollModal],
   templateUrl: './polls-window.html',
   styleUrls: ['./polls-window.css'],
 })
@@ -25,7 +27,7 @@ export class PollsWindow implements OnInit {
   apiError = signal('');
 
   polls = signal<PollDTO[]>([]);
-  selectedPollId = signal<string>('');
+  selectedPollId = signal('');
 
   ngOnInit(): void {
     this.loadPolls();
@@ -104,11 +106,11 @@ export class PollsWindow implements OnInit {
     this.isViewPollOpen.set(true);
   }
 
-  onEditPoll(pollId: string): void {
-    this.isViewPollOpen.set(false);
-    // Later: open edit modal or route
-    // this.router.navigate(['/edit-poll', pollId]);
-  }
+  // onEditPoll(pollId: string): void {
+  //   this.isViewPollOpen.set(false);
+  //   // Later: open edit modal or route
+  //   // this.router.navigate(['/edit-poll', pollId]);
+  // }
 
   formatEventTime(iso: string): string {
     if (!iso) return '';
@@ -139,4 +141,38 @@ export class PollsWindow implements OnInit {
     const tzPart = parts.find(p => p.type === 'timeZoneName');
     return tzPart?.value ?? 'UTC';
   }
+
+  isEditPollOpen = signal(false);
+
+openEditPoll(pollId: string) {
+  const id = (pollId || '').trim();
+  if (!id) {
+    this.apiError.set('Missing poll id.');
+    return;
+  }
+
+  this.selectedPollId.set(id);
+  this.isViewPollOpen.set(false);
+  this.isEditPollOpen.set(true);
+}
+
+onPollSaved(pollId: string) {
+  this.isEditPollOpen.set(false);
+  this.selectedPollId.set(pollId);
+  this.isViewPollOpen.set(true);
+  // this.loadPolls(); // optional
+}
+
+onPollDeleted(_pollId: string) {
+  this.isEditPollOpen.set(false);
+  this.isViewPollOpen.set(false);
+  this.selectedPollId.set('');
+  // this.loadPolls(); // optional
+}
+
+closeViewPoll() { this.isViewPollOpen.set(false); }
+closeEditPoll() { this.isEditPollOpen.set(false); }
+
+
+
 }

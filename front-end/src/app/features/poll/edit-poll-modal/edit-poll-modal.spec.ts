@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EditPoll } from './edit-poll';
+import { EditPoll } from './edit-poll-modal';
 
 describe('EditPoll', () => {
   let component: EditPoll;

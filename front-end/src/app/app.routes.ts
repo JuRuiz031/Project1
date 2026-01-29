@@ -16,7 +16,6 @@ import { MainPageComponent } from './features/dashboard/main-page/main-page';
 import { ViewEvent } from './features/event/view-event/view-event';
 
 // import { CreatePoll } from './features/poll/create-poll/create-poll';
-import { EditPoll } from './features/poll/edit-poll/edit-poll';
 import { DeletePoll } from './features/poll/delete-poll/delete-poll';
 
 export const routes: Routes = [
@@ -72,8 +71,6 @@ export const routes: Routes = [
 
       // Event routes removed - now all modals from main-page
 
-      // { path: 'create-poll', component: CreatePoll },
-      { path: 'edit-poll/:pollId', component: EditPoll },
       { path: 'delete-poll/:pollId', component: DeletePoll },
     ],
   },

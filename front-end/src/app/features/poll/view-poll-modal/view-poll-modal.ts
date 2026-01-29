@@ -97,20 +97,33 @@ export class ViewPollModal implements OnInit {
     this.edit.emit(p.poll_id);
   }
 
-  formatLocalDate(iso: string): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return '';
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
+formatLocalDate(iso: string): string {
+  if (!iso) return '';
+  const d = this.parseServerInstant(iso);
+  if (isNaN(d.getTime())) return '';
+
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+formatLocalTime(iso: string): string {
+  if (!iso) return '';
+  const d = this.parseServerInstant(iso);
+  if (isNaN(d.getTime())) return '';
+
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mi}`;
+}
+
+
+  private parseServerInstant(iso: string): Date {
+    // If server includes timezone (Z or ±hh:mm), parse normally.
+    // If server sends "2026-01-22T18:00:00" with no timezone, assume UTC and append Z.
+    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
+    return new Date(hasTz ? iso : `${iso}Z`);
   }
 
-  formatLocalTime(iso: string): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return '';
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mi = String(d.getMinutes()).padStart(2, '0');
-    return `${hh}:${mi}`;
-  }
 }
