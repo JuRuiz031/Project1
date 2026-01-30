@@ -1,8 +1,10 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
+import { PollService } from '../../../shared/services/poll.service';
 import { PollDTO } from '../../../shared/models/polls/poll.dto';
+import { VotePollDTO } from '../../../shared/models/polls/vote-poll.dto';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
@@ -15,6 +17,7 @@ import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/cale
 })
 export class ViewPollModal implements OnInit {
   private calendarService = inject(CalendarService);
+  private pollService = inject(PollService);
 
   title = input<string>('View Poll');
   pollId = input<string>('');
@@ -26,6 +29,17 @@ export class ViewPollModal implements OnInit {
   calendarName = signal<string>('');   // ✅ add
   apiError = signal('');
   isLoading = signal(false);
+
+  // voting state
+  voteError = signal('');
+  isVoting = signal(false);
+  hasVoted = signal(false);
+
+   // selection state
+  selectedSingleOptionId = signal<number | null>(null);
+  selectedMultiOptionIds = signal<number[]>([]);
+
+  isLoggedIn = computed(() => !!this.getUserIdFromStorage());
 
   ngOnInit(): void {
     const id = (this.pollId() || '').trim();
@@ -40,11 +54,14 @@ export class ViewPollModal implements OnInit {
 
   private loadPoll(id: string): void {
     this.apiError.set('');
+    this.voteError.set('');
     this.isLoading.set(true);
 
     this.calendarService.getByPollIds([id]).subscribe({
       next: (res: CalendarFilterResponseDTO) => {
-        const found = (res.polls ?? []).find(p => p.poll_id === id) ?? (res.polls?.[0] ?? null);
+        const found =
+          (res.polls ?? []).find(p => p.poll_id === id) ??
+          (res.polls?.[0] ?? null);
 
         if (!found) {
           this.isLoading.set(false);
@@ -54,9 +71,10 @@ export class ViewPollModal implements OnInit {
         }
 
         this.poll.set(found);
-
-        // ✅ now resolve calendar name
         this.resolveCalendarName(found.calendar_id);
+
+        // initialize selection defaults
+        this.initSelectionFromPoll(found);
 
         this.isLoading.set(false);
       },
@@ -70,6 +88,17 @@ export class ViewPollModal implements OnInit {
         );
       },
     });
+  }
+
+  private initSelectionFromPoll(p: PollDTO): void {
+    // reset selections when poll loads/reloads
+    this.selectedSingleOptionId.set(null);
+    this.selectedMultiOptionIds.set([]);
+
+    // optional: preselect first option for single-vote polls
+    if (!p.allow_multiple_votes && p.options?.length) {
+      this.selectedSingleOptionId.set(p.options[0].option_id);
+    }
   }
 
   private resolveCalendarName(calendarId: string): void {
@@ -126,4 +155,111 @@ formatLocalTime(iso: string): string {
     return new Date(hasTz ? iso : `${iso}Z`);
   }
 
+
+  // -------------------------
+  // Auth helper
+  // -------------------------
+  private getUserIdFromStorage(): string | null {
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return null;
+      const u = JSON.parse(raw);
+      return u?.user_id ?? u?.id ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // -------------------------
+  // Option selection handlers
+  // -------------------------
+  selectSingle(optionId: number): void {
+    this.voteError.set('');
+    this.selectedSingleOptionId.set(optionId);
+  }
+
+  toggleMulti(optionId: number): void {
+    this.voteError.set('');
+    const curr = this.selectedMultiOptionIds();
+    const next = curr.includes(optionId)
+      ? curr.filter(id => id !== optionId)
+      : [...curr, optionId];
+    this.selectedMultiOptionIds.set(next);
+  }
+
+  // vote counts
+  getTotalVotesForOption(opt: { user_votes: string[] | null; guest_votes: string[] | null }): number {
+    return (opt.user_votes?.length ?? 0) + (opt.guest_votes?.length ?? 0);
+  }
+
+  canShowResults(p: PollDTO): boolean {
+    // show results if poll allows results visibility OR user has just voted
+    return !!p.results_visible || this.hasVoted();
+  }
+
+  // -------------------------
+  // Submit vote
+  // -------------------------
+  submitVote(): void {
+    this.voteError.set('');
+
+    const p = this.poll();
+    if (!p) return;
+
+    const userId = this.getUserIdFromStorage();
+    if (!userId) {
+      this.voteError.set('You must be logged in to vote.');
+      return;
+    }
+
+    // build selected option ids
+    const selected = p.allow_multiple_votes
+      ? this.selectedMultiOptionIds()
+      : (this.selectedSingleOptionId() !== null ? [this.selectedSingleOptionId()!] : []);
+
+    if (selected.length === 0) {
+      this.voteError.set('Please select at least one option.');
+      return;
+    }
+    if (!p.allow_multiple_votes && selected.length !== 1) {
+      this.voteError.set('This poll allows only one vote.');
+      return;
+    }
+
+    const dto: VotePollDTO = {
+      user_id: String(userId),
+      calendar_id: String(p.calendar_id),
+      options: selected,
+    };
+
+    this.isVoting.set(true);
+
+    this.pollService.vote(p.poll_id, dto).subscribe({
+      next: (updated: PollDTO) => {
+        this.isVoting.set(false);
+        this.hasVoted.set(true);
+        this.poll.set(updated);
+
+        // keep selection consistent after update
+        if (!updated.allow_multiple_votes) {
+          // keep single selection (or reset to first)
+          const keep = selected[0] ?? (updated.options?.[0]?.option_id ?? null);
+          this.selectedSingleOptionId.set(keep);
+          this.selectedMultiOptionIds.set([]);
+        } else {
+          this.selectedMultiOptionIds.set(selected);
+          this.selectedSingleOptionId.set(null);
+        }
+      },
+      error: (err: any) => {
+        this.isVoting.set(false);
+        this.voteError.set(
+          err?.error?.message ||
+            (typeof err?.error === 'string' ? err.error : '') ||
+            err?.message ||
+            'Could not submit vote'
+        );
+      },
+    });
+  }
 }
