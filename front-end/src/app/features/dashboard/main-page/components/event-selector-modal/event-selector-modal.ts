@@ -1,7 +1,7 @@
 import { Component, input, output, signal, computed, effect, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CALENDAR_COLOR_PALETTE } from '../../../../../config/calendar-colors';
+import { getCalendarColor } from '../../../../../config/calendar-colors';
 
 type CalendarOption = { calendar_id: string; name: string };
 
@@ -36,9 +36,6 @@ export class EventSelectorModal implements OnDestroy {
   selectedTags = signal<string[]>([]);
   selectedCalendarIds = signal<string[]>([]);
 
-  // Color map for calendars
-  colorMap = new Map<string, { primary: string; secondary: string }>();
-
   // Computed: extract all unique tags from events
   allTags = computed(() => {
     const tagSet = new Set<string>();
@@ -58,11 +55,11 @@ export class EventSelectorModal implements OnDestroy {
       filtered = filtered.filter(e => selectedCals.includes(e.calendar_id));
     }
     
-    // Filter by selected tags (events must have ALL selected tags)
+    // Filter by selected tags (events must have AT LEAST ONE selected tag)
     const selected = this.selectedTags();
     if (selected.length > 0) {
       filtered = filtered.filter(e =>
-        selected.every(tag => e.tags.includes(tag))
+        selected.some(tag => e.tags.includes(tag))
       );
     }
     
@@ -83,14 +80,6 @@ export class EventSelectorModal implements OnDestroy {
   constructor() {
     // Disable body scroll when modal opens
     document.body.style.overflow = 'hidden';
-
-    // Build color map when calendars change
-    effect(() => {
-      this.colorMap.clear();
-      this.calendars().forEach((c, index) => {
-        this.colorMap.set(c.calendar_id, CALENDAR_COLOR_PALETTE[index % CALENDAR_COLOR_PALETTE.length]);
-      });
-    });
   }
 
   ngOnDestroy(): void {
@@ -143,7 +132,7 @@ export class EventSelectorModal implements OnDestroy {
   }
 
   getCalendarColor(calendarId: string): { primary: string; secondary: string } {
-    return this.colorMap.get(calendarId) || { primary: '#666', secondary: '#eee' };
+    return getCalendarColor(calendarId);
   }
 
   /**

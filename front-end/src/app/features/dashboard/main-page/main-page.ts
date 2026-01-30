@@ -86,15 +86,21 @@ export class MainPageComponent implements OnInit {
       const ids = this.selectedCalendarIds();
       const calendars = this.calendars();
       
-      if (!ids || ids.length === 0) {
-        console.log('[MainPage] No calendars selected -> cleared events/polls');
+      // If no calendars selected, fetch ALL calendars (show everything)
+      // If calendars selected, fetch only those calendars
+      const calendarIdsToFetch = (ids && ids.length > 0) 
+        ? ids 
+        : calendars.map(c => c.calendar_id);
+      
+      if (calendarIdsToFetch.length === 0) {
+        console.log('[MainPage] No calendars available -> cleared events/polls');
         this.events.set([]);
         this.polls.set([]);
         return;
       }
 
-      console.log('[MainPage] Fetching events for calendars:', ids);
-      this.calendarService.getByCalendarIds(ids).pipe(
+      console.log('[MainPage] Fetching events for calendars:', calendarIdsToFetch);
+      this.calendarService.getByCalendarIds(calendarIdsToFetch).pipe(
         map((filtered: CalendarFilterResponseDTO) => ({
           events: (filtered.events ?? []).map(e => {
             // Add calendar name to event based on calendar_id

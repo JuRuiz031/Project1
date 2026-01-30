@@ -36,16 +36,6 @@ export class DisplayOptions implements OnDestroy {
   private destroy$ = new Subject<void>();
 
   constructor() {
-    effect(() => {
-      const cals = this.calendars();
-
-      // Select all calendars by default on first load
-      if (cals.length > 0 && this.selectedCalendarIds().length === 0) {
-        const allIds = cals.map(c => c.calendar_id);
-        this.selectedCalendarIds.set(allIds);
-        this.selectedCalendarIdsChange.emit(allIds);
-      }
-    });
   }
 
   ngOnDestroy(): void {
