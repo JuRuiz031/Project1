@@ -45,8 +45,8 @@ export class NavigationService {
   }
 
   // Navigate to user account/profile view
-  goToAccount(): void {
-    this.navigateTo('/account');
+  goToAccount(state?: any): void {
+    this.router.navigate(['/account'], { state });
   }
 
   // Navigate to edit user/profile page

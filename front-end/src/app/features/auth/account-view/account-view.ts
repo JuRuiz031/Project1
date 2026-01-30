@@ -1,5 +1,6 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
 import { NavigationService } from '../../../shared/services/navigation.service';
 
@@ -17,11 +18,14 @@ type AccountViewModel = {
   templateUrl: './account-view.html',
   styleUrl: './account-view.css',
 })
-export class AccountView {
+export class AccountView implements OnInit {
   private navigation = inject(NavigationService);
   private userApi = inject(UserApiService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   apiError = signal('');
+  showNotification = signal(false);
   user = signal<AccountViewModel>({
     id: '',
     name: '',
@@ -31,6 +35,17 @@ export class AccountView {
 
   constructor() {
     this.loadUserData();
+  }
+
+  ngOnInit(): void {
+    // Check for success in navigation state
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state || window.history.state;
+    
+    if (state?.['success']) {
+      this.showNotification.set(true);
+      setTimeout(() => this.showNotification.set(false), 3000);
+    }
   }
 
   private loadUserData(): void {

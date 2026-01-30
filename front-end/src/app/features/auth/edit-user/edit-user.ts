@@ -1,7 +1,8 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, finalize, of } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { UserApiService, UpdateUserDTO } from '../../../shared/services/api/user-api.service';
 import { NavigationService } from '../../../shared/services/navigation.service';
@@ -22,12 +23,37 @@ export class EditUser {
   apiError = signal('');
   isSubmitting = signal(false);
   userId = signal('');
+  originalUsername = signal('');
+  originalEmail = signal('');
+
+  // Convert form value changes to a signal (initialized after form)
+  formValues = signal<any>({});
+
+  // Computed: check if any actual changes were made
+  hasChanges = computed(() => {
+    const values = this.formValues();
+    const currentName = values?.name || '';
+    const currentEmail = values?.email || '';
+    const newPassword = values?.newPassword || '';
+
+    return (
+      currentName !== this.originalUsername() ||
+      currentEmail !== this.originalEmail() ||
+      newPassword.length > 0
+    );
+  });
 
   constructor() {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
+      currentPassword: ['', [Validators.required, Validators.minLength(8)]],
       newPassword: ['', [Validators.minLength(8)]],
+    });
+
+    // Subscribe to form changes and update signal
+    this.form.valueChanges.subscribe(values => {
+      this.formValues.set(values);
     });
 
     this.loadUserData();
@@ -52,6 +78,8 @@ export class EditUser {
 
       this.userApi.getUserById(userId).subscribe({
         next: (fullUser: any) => {
+          this.originalUsername.set(fullUser.username ?? '');
+          this.originalEmail.set(fullUser.email ?? '');
           this.form.patchValue({
             name: fullUser.username ?? '',
             email: fullUser.email ?? '',
@@ -77,32 +105,75 @@ export class EditUser {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.apiError.set('Please fix validation errors.');
       return;
     }
 
-    const { name, email, newPassword } = this.form.getRawValue();
+    const { name, email, currentPassword, newPassword } = this.form.getRawValue();
+    const usernameChanged = name !== this.originalUsername();
 
-    const dto: UpdateUserDTO = {
-      username: name,
-      email,
-      ...(newPassword ? { password: newPassword } : {}),
-    };
+    this.isSubmitting.set(true);
 
-    this.isSubmitting.set(true); // UI Updates immediately
+    // First, verify the current password by attempting to login
+    this.userApi.login({
+      username: this.originalUsername(),
+      password: currentPassword || '',
+    }).pipe(
+      catchError((err) => {
+        this.isSubmitting.set(false);
+        this.apiError.set('Incorrect password.');
+        return of(null);
+      })
+    ).subscribe((loginResult) => {
+      if (!loginResult) return; // Login failed, error already set
 
-    this.userApi
-      .updateUser(this.userId(), dto)
-      .pipe(
-        catchError(() => {
-          this.apiError.set('Could not update profile. Please try again.');
-          return of(null);
-        }),
-        finalize(() => this.isSubmitting.set(false))
-      )
-      .subscribe((res) => {
-        if (res) this.navigation.goToAccount();
-      });
+      // Password verified, now update the profile
+      const dto: UpdateUserDTO = {
+        username: name,
+        email,
+        ...(newPassword ? { password: newPassword } : {}),
+      };
+
+      this.userApi
+        .updateUser(this.userId(), dto)
+        .pipe(
+          catchError((err) => {
+            this.apiError.set('Could not update profile. Please try again.');
+            return of(null);
+          }),
+          finalize(() => this.isSubmitting.set(false))
+        )
+        .subscribe((res) => {
+          if (res) {
+            // If username changed, re-login to get fresh token
+            if (usernameChanged) {
+              const loginDto = {
+                username: name,
+                password: newPassword || currentPassword || '',
+              };
+
+              this.userApi.login(loginDto).subscribe({
+                next: (loginResponse) => {
+                  localStorage.setItem('token', loginResponse.token);
+                  localStorage.setItem('user', JSON.stringify(loginResponse.user));
+                  localStorage.setItem('expiresAt', loginResponse.expires_at);
+                  this.navigation.goToAccount({ success: true });
+                },
+                error: () => {
+                  this.apiError.set('Profile updated but could not re-authenticate. Please login again.');
+                  setTimeout(() => {
+                    localStorage.clear();
+                    this.navigation.goToLogin();
+                  }, 2000);
+                },
+              });
+            } else {
+              // Username didn't change, just update localStorage with new data
+              localStorage.setItem('user', JSON.stringify(res));
+              this.navigation.goToAccount({ success: true });
+            }
+          }
+        });
+    });
   }
 
   cancel(): void {
