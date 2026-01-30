@@ -158,6 +158,16 @@ public class Poll {
     }
 
     // Direct access to the internal map when callers need to add/remove by id
-    public Map<Integer, Option> getOptionsMap() { return options; }
+    public Map<Integer, Option> getOptionsMap() { 
+        options = optionsList.stream().collect(
+            java.util.stream.Collectors.toMap(
+                Option::getOptionId,
+                o -> o,
+                (o1, o2) -> o1,
+                LinkedHashMap::new
+            )
+        );
+        return options; 
+    }
 
 }
