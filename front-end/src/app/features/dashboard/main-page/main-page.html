@@ -26,7 +26,11 @@
         (selectedTagsChange)="onSelectedTagsChange($event)">
       </app-display-options>
 
-      <app-polls-window class="card"></app-polls-window>
+      <app-polls-window
+        class="card"
+        (createPoll)="openCreatePoll()">
+      </app-polls-window>
+
     </aside>
   </section>
 
@@ -127,4 +131,13 @@
       (eventDeleted)="onEventDeleted($event)">
     </app-delete-event-modal>
   }
+
+  <!-- Create Poll Modal -->
+@if (modalState() === 'create-poll') {
+  <app-create-poll-modal
+    (close)="closeAllModals()"
+    (pollCreated)="onPollCreated($event)">
+  </app-create-poll-modal>
+}
+
 </main>

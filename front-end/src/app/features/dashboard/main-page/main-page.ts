@@ -12,6 +12,7 @@ import { ViewEventModal } from '../../event/view-event-modal/view-event-modal';
 import { CreateEventModal } from '../../event/create-event-modal/create-event-modal';
 import { EditEventModal } from '../../event/edit-event-modal/edit-event-modal';
 import { DeleteEventModal } from '../../event/delete-event-modal/delete-event-modal';
+import { CreatePollModal } from '../../poll/create-poll-modal/create-poll-modal';
 import { CreateCalendarModal } from '../../calendar/create-calendar-modal/create-calendar-modal';
 import { CalendarSelectorModal } from '../../calendar/calendar-selector-modal/calendar-selector-modal';
 import { ViewCalendarModal } from '../../calendar/view-calendar-modal/view-calendar-modal';
@@ -23,6 +24,7 @@ import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.
 import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/calendar-filter-response.dto';
 
 type CalendarOptionDTO = { calendar_id: string; name: string };
+
 type ModalState =
   | 'none'
   | 'create-calendar'
@@ -34,11 +36,13 @@ type ModalState =
   | 'calendar-selector'
   | 'view-calendar'
   | 'edit-calendar'
-  | 'delete-calendar';
+  | 'delete-calendar'
+  | 'create-poll';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
+
     imports: [
     CalendarDisplay,
     CalendarOptions,
@@ -54,7 +58,9 @@ type ModalState =
     ViewCalendarModal,
     EditCalendarModal,
     DeleteCalendarModal,
+    CreatePollModal,
   ],
+  
   templateUrl: './main-page.html',
   styleUrl: './main-page.css',
 })
@@ -453,4 +459,23 @@ export class MainPageComponent implements OnInit {
     const currentIds = this.selectedCalendarIds();
     this.selectedCalendarIds.set([...currentIds]);
   }
+
+  openCreatePoll(): void {
+    console.log('[MainPage] Opening create poll modal');
+    this.modalState.set('create-poll');
+  }
+
+  onPollCreated(pollId: string): void {
+    console.log('[MainPage] Poll created:', pollId);
+    this.refreshPolls();
+  }
+
+  private refreshPolls(): void {
+    console.log('[MainPage] Refreshing polls...');
+    const currentIds = this.selectedCalendarIds();
+    this.selectedCalendarIds.set([...currentIds]);
+  }
+
+
+
 }

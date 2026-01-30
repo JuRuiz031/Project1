@@ -1,0 +1,194 @@
+<app-base-modal
+  [title]="title()"
+  [showBackButton]="false"
+  [size]="'large'"
+  (close)="onClose()"
+>
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-secondary">
+    Loading...
+  </div>
+
+  <!-- API error -->
+  <div *ngIf="!isLoading() && apiError()" class="alert alert-danger mb-3">
+    {{ apiError() }}
+  </div>
+
+  <!-- Main content -->
+  <ng-container *ngIf="!isLoading() && poll() as p">
+
+    <!-- Calendar -->
+    <div class="mb-3">
+      <label class="form-label">Calendar</label>
+      <input
+        class="form-control app-input"
+        [value]="calendarName() || p.calendar_id"
+        disabled
+      />
+    </div>
+
+    <!-- Title -->
+    <div class="mb-3">
+      <label class="form-label">Poll Title</label>
+      <input
+        class="form-control app-input"
+        [value]="p.title"
+        disabled
+      />
+    </div>
+
+    <!-- Description -->
+    <div class="mb-3" *ngIf="p.description">
+      <label class="form-label">Description</label>
+      <textarea
+        class="form-control app-input"
+        rows="3"
+        [value]="p.description"
+        disabled
+      ></textarea>
+    </div>
+
+    <!-- Dates -->
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label">Start</label>
+        <input
+          class="form-control app-input"
+          [value]="formatLocalDate(p.start_time) + ' ' + formatLocalTime(p.start_time)"
+          disabled
+        />
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">End</label>
+        <input
+          class="form-control app-input"
+          [value]="formatLocalDate(p.end_time) + ' ' + formatLocalTime(p.end_time)"
+          disabled
+        />
+      </div>
+    </div>
+
+    <!-- Voting rules -->
+    <div class="border rounded p-3 mb-3">
+      <div class="fw-semibold mb-2">Voting Rules</div>
+
+      <span
+        class="badge"
+        [class.text-bg-success]="p.allow_multiple_votes"
+        [class.text-bg-secondary]="!p.allow_multiple_votes"
+      >
+        {{ p.allow_multiple_votes ? 'Multiple votes allowed' : 'Single vote only' }}
+      </span>
+
+      <div class="form-text text-secondary mt-2">
+        {{ p.allow_multiple_votes
+          ? 'You may select more than one option.'
+          : 'You must select exactly one option.' }}
+      </div>
+    </div>
+
+    <!-- Login warning -->
+    <div *ngIf="!isLoggedIn()" class="alert alert-warning mb-3">
+      You must be logged in to vote.
+    </div>
+
+    <!-- Vote error -->
+    <div *ngIf="voteError()" class="alert alert-danger mb-3">
+      {{ voteError() }}
+    </div>
+
+    <!-- OPTIONS + VOTING -->
+    <div class="border rounded p-3 mb-3">
+      <div class="fw-semibold mb-2">Options</div>
+
+      <!-- Single vote -->
+      <div *ngIf="!p.allow_multiple_votes">
+        <div
+          class="form-check mb-2"
+          *ngFor="let opt of p.options"
+        >
+          <input
+            class="form-check-input"
+            type="radio"
+            name="singleVote"
+            [checked]="selectedSingleOptionId() === opt.option_id"
+            [disabled]="!isLoggedIn() || isVoting()"
+            (change)="selectSingle(opt.option_id)"
+          />
+
+          <label class="form-check-label">
+            {{ opt.description }}
+
+            <span
+              *ngIf="canShowResults(p)"
+              class="text-secondary ms-2"
+            >
+              ({{ getTotalVotesForOption(opt) }} votes)
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Multiple vote -->
+      <div *ngIf="p.allow_multiple_votes">
+        <div
+          class="form-check mb-2"
+          *ngFor="let opt of p.options"
+        >
+          <input
+            class="form-check-input"
+            type="checkbox"
+            [checked]="selectedMultiOptionIds().includes(opt.option_id)"
+            [disabled]="!isLoggedIn() || isVoting()"
+            (change)="toggleMulti(opt.option_id)"
+          />
+
+          <label class="form-check-label">
+            {{ opt.description }}
+
+            <span
+              *ngIf="canShowResults(p)"
+              class="text-secondary ms-2"
+            >
+              ({{ getTotalVotesForOption(opt) }} votes)
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit vote -->
+    <div class="d-flex justify-content-end mb-4">
+      <button
+        class="btn btn-success"
+        type="button"
+        (click)="submitVote()"
+        [disabled]="!isLoggedIn() || isVoting()"
+      >
+        {{ isVoting() ? 'Submitting…' : 'Submit Vote' }}
+      </button>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        (click)="onClose()"
+      >
+        Close
+      </button>
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="onEdit()"
+        [disabled]="!poll()"
+      >
+        Edit Poll
+      </button>
+    </div>
+
+  </ng-container>
+</app-base-modal>
