@@ -49,11 +49,11 @@ export class CalendarDisplay implements OnInit {
   calendarEvents = computed(() => {
     let filteredEvents = this.events();
     
-    // Filter by selected tags (events must have ALL selected tags)
+    // Filter by selected tags (events must have AT LEAST ONE selected tag)
     const tags = this.selectedTags();
     if (tags && tags.length > 0) {
       filteredEvents = filteredEvents.filter(e =>
-        tags.every(tag => e.tags?.includes(tag))
+        tags.some(tag => e.tags?.includes(tag))
       );
     }
     
