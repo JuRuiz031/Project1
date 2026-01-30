@@ -1,6 +1,14 @@
 <div class="container py-4 app-page">
   <h1 class="h3 mb-3">Profile</h1>
 
+  <!-- Success Notification Toast -->
+  @if (showNotification()) {
+    <div class="success-notification">
+      <span class="notification-icon">✓</span>
+      Profile updated successfully!
+    </div>
+  }
+
   <div class="card app-card shadow-sm">
     <div class="card-body">
       <div class="row g-3">
