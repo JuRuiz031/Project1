@@ -54,7 +54,6 @@ export class EditPollModal implements OnInit {
   tagInput = '';
   optionInput = '';
 
-  selectedTagIndex = signal<number | null>(null);
   selectedOptionIndex = signal<number | null>(null);
 
   // ✅ keeps option_id aligned with each FormArray index
@@ -242,9 +241,6 @@ export class EditPollModal implements OnInit {
   // ----------------------------
   // Selection
   // ----------------------------
-  selectTag(i: number): void {
-    this.selectedTagIndex.set(i);
-  }
   selectOption(i: number): void {
     this.selectedOptionIndex.set(i);
   }
@@ -269,14 +265,10 @@ export class EditPollModal implements OnInit {
 
     this.tags.push(this.fb.control(value, [Validators.required, Validators.maxLength(30)]));
     this.tagInput = '';
-    this.selectedTagIndex.set(null);
   }
 
-  deleteSelectedTag(): void {
-    const idx = this.selectedTagIndex();
-    if (idx === null) return;
-    this.tags.removeAt(idx);
-    this.selectedTagIndex.set(null);
+  removeTag(i: number): void {
+    this.tags.removeAt(i);
   }
 
   // ----------------------------

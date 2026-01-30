@@ -1,69 +1,104 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
 import { DeleteCalendarModal } from './delete-calendar-modal';
 
+// Test wrapper component to set signal inputs
+@Component({
+  standalone: true,
+  imports: [DeleteCalendarModal],
+  template: `
+    <app-delete-calendar-modal
+      [targetId]="targetId()"
+      [targetName]="targetName()"
+      [isDeleting]="isDeleting()"
+      [apiError]="apiError()"
+      (cancel)="onCancel()"
+      (confirmDelete)="onConfirmDelete($event)"
+    />
+  `,
+})
+class TestHostComponent {
+  targetId = signal<string | null>(null);
+  targetName = signal('Test Item');
+  isDeleting = signal(false);
+  apiError = signal('');
+
+  cancelCalled = false;
+  confirmDeleteCalledWith: string | null = null;
+
+  onCancel() {
+    this.cancelCalled = true;
+  }
+
+  onConfirmDelete(id: string) {
+    this.confirmDeleteCalledWith = id;
+  }
+}
+
 describe('DeleteCalendarModal', () => {
-  let component: DeleteCalendarModal;
-  let fixture: ComponentFixture<DeleteCalendarModal>;
+  let hostComponent: TestHostComponent;
+  let hostFixture: ComponentFixture<TestHostComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeleteCalendarModal],
+      imports: [TestHostComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DeleteCalendarModal);
-    component = fixture.componentInstance;
+    hostFixture = TestBed.createComponent(TestHostComponent);
+    hostComponent = hostFixture.componentInstance;
 
-    fixture.detectChanges();
-    await fixture.whenStable();
+    hostFixture.detectChanges();
+    await hostFixture.whenStable();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(hostComponent).toBeTruthy();
   });
 
   it('should emit cancel when onCancel is called', () => {
-    const cancelSpy = jasmine.createSpy('cancelSpy');
-    component.cancel.subscribe(cancelSpy);
+    const cancelBtn = hostFixture.nativeElement.querySelector('.btn-outline-secondary');
+    cancelBtn.click();
+    hostFixture.detectChanges();
 
-    component.onCancel();
-
-    expect(cancelSpy).toHaveBeenCalledTimes(1);
+    expect(hostComponent.cancelCalled).toBeTrue();
   });
 
-  it('should emit confirmDelete with targetId when onConfirm is called', () => {
-    const confirmSpy = jasmine.createSpy('confirmSpy');
-    component.confirmDelete.subscribe(confirmSpy);
+  it('should emit confirmDelete with targetId when onConfirm is called', async () => {
+    hostComponent.targetId.set('cg-123');
+    hostComponent.isDeleting.set(false);
+    hostFixture.detectChanges();
+    await hostFixture.whenStable();
 
-    component.targetId = 'cg-123';
-    component.isDeleting = false;
+    const confirmBtn = hostFixture.nativeElement.querySelector('.btn-danger');
+    confirmBtn.click();
+    hostFixture.detectChanges();
 
-    component.onConfirm();
-
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
-    expect(confirmSpy).toHaveBeenCalledWith('cg-123');
+    expect(hostComponent.confirmDeleteCalledWith).toBe('cg-123');
   });
 
-  it('should not emit confirmDelete if targetId is missing', () => {
-    const confirmSpy = jasmine.createSpy('confirmSpy');
-    component.confirmDelete.subscribe(confirmSpy);
+  it('should not emit confirmDelete if targetId is missing', async () => {
+    hostComponent.targetId.set(null);
+    hostComponent.isDeleting.set(false);
+    hostFixture.detectChanges();
+    await hostFixture.whenStable();
 
-    component.targetId = null;
-    component.isDeleting = false;
+    const confirmBtn = hostFixture.nativeElement.querySelector('.btn-danger');
+    confirmBtn.click();
+    hostFixture.detectChanges();
 
-    component.onConfirm();
-
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(hostComponent.confirmDeleteCalledWith).toBeNull();
   });
 
-  it('should not emit confirmDelete if isDeleting is true', () => {
-    const confirmSpy = jasmine.createSpy('confirmSpy');
-    component.confirmDelete.subscribe(confirmSpy);
+  it('should not emit confirmDelete if isDeleting is true', async () => {
+    hostComponent.targetId.set('cg-123');
+    hostComponent.isDeleting.set(true);
+    hostFixture.detectChanges();
+    await hostFixture.whenStable();
 
-    component.targetId = 'cg-123';
-    component.isDeleting = true;
+    const confirmBtn = hostFixture.nativeElement.querySelector('.btn-danger');
+    confirmBtn.click();
+    hostFixture.detectChanges();
 
-    component.onConfirm();
-
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(hostComponent.confirmDeleteCalledWith).toBeNull();
   });
 });

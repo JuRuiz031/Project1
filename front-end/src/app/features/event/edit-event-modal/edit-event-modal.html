@@ -14,85 +14,93 @@
         </div>
       </div>
     } @else {
-      <!-- Calendar dropdown -->
-      <div class="mb-3">
-        <label class="form-label">Calendar (admin only)</label>
-        <select class="form-select app-select" formControlName="calendarId" [class.is-invalid]="hasError('calendarId')">
-          <option value="" disabled>Select calendar (admin only)</option>
-          @for (c of adminCalendars(); track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
-          }
-        </select>
-        <div class="invalid-feedback">Please select an admin calendar.</div>
-      </div>
-
-      <!-- Title -->
-      <div class="mb-3">
-        <label class="form-label">Event Title</label>
-        <input type="text" class="form-control app-input" placeholder="Event Title" formControlName="title" [class.is-invalid]="hasError('title')" />
-        <div class="invalid-feedback">Title is required (min 2 chars).</div>
-      </div>
-
-      <!-- Dates / times -->
       <div class="row g-3">
-        <div class="col-12 col-md-6">
-          <label class="form-label">Start date</label>
-          <input type="date" class="form-control app-input" formControlName="startDate" [class.is-invalid]="hasError('startDate')" />
-          <div class="invalid-feedback">Start date required.</div>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label">Start time ({{ getTimezoneAbbr() }})</label>
-          <input type="time" class="form-control app-input" formControlName="startTime" [class.is-invalid]="hasError('startTime')" />
-          <div class="invalid-feedback">Start time required.</div>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label">End date</label>
-          <input type="date" class="form-control app-input" formControlName="endDate" [class.is-invalid]="hasError('endDate')" />
-          <div class="invalid-feedback">End date required.</div>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label">End time ({{ getTimezoneAbbr() }})</label>
-          <input type="time" class="form-control app-input" formControlName="endTime" [class.is-invalid]="hasError('endTime')" />
-          <div class="invalid-feedback">End time required.</div>
-        </div>
-      </div>
+        <!-- LEFT COLUMN -->
+        <div class="col-12 col-lg-8">
+          <!-- Calendar dropdown -->
+          <div class="mb-3">
+            <label class="form-label">Calendar (admin only)</label>
+            <select class="form-select app-select" formControlName="calendarId" [class.is-invalid]="hasError('calendarId')">
+              <option value="" disabled>Select calendar (admin only)</option>
+              @for (c of adminCalendars(); track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            </select>
+            <div class="invalid-feedback">Please select an admin calendar.</div>
+          </div>
 
-      <!-- Description -->
-      <div class="mt-3 mb-3">
-        <label class="form-label">Description</label>
-        <textarea rows="4" class="form-control app-textarea" placeholder="Description" formControlName="description"></textarea>
-      </div>
+          <!-- Title -->
+          <div class="mb-3">
+            <label class="form-label">Event Title</label>
+            <input type="text" class="form-control app-input" placeholder="Event Title" formControlName="title" [class.is-invalid]="hasError('title')" />
+            <div class="invalid-feedback">Title is required (min 2 chars).</div>
+          </div>
 
-      <!-- Notes -->
-      <div class="mb-3">
-        <label class="form-label">Notes</label>
-        <textarea rows="4" class="form-control app-textarea" placeholder="Notes" formControlName="notes"></textarea>
-      </div>
+          <!-- Dates / times -->
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Start date</label>
+              <input type="date" class="form-control app-input" formControlName="startDate" [class.is-invalid]="hasError('startDate')" />
+              <div class="invalid-feedback">Start date required.</div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Start time ({{ getTimezoneAbbr() }})</label>
+              <input type="time" class="form-control app-input" formControlName="startTime" [class.is-invalid]="hasError('startTime')" />
+              <div class="invalid-feedback">Start time required.</div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">End date</label>
+              <input type="date" class="form-control app-input" formControlName="endDate" [class.is-invalid]="hasError('endDate')" />
+              <div class="invalid-feedback">End date required.</div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">End time ({{ getTimezoneAbbr() }})</label>
+              <input type="time" class="form-control app-input" formControlName="endTime" [class.is-invalid]="hasError('endTime')" />
+              <div class="invalid-feedback">End time required.</div>
+            </div>
+          </div>
 
-      <!-- Tags -->
-      <div class="mb-3">
-        <label class="form-label">Tags</label>
-        <div class="tag-input-container">
-          <input 
-            type="text" 
-            class="form-control app-input" 
-            placeholder="Add a tag..." 
-            [(ngModel)]="tagInput" 
-            [ngModelOptions]="{standalone: true}"
-            (keypress)="onTagKeyPress($event)" 
-          />
-          <button type="button" class="btn btn-outline-primary" (click)="addTag()">Add</button>
+          <!-- Description -->
+          <div class="mt-3 mb-3">
+            <label class="form-label">Description</label>
+            <textarea rows="4" class="form-control app-textarea" placeholder="Description" formControlName="description"></textarea>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea rows="4" class="form-control app-textarea" placeholder="Notes" formControlName="notes"></textarea>
+          </div>
         </div>
-        @if (tags().length > 0) {
-          <div class="tags-list">
-            @for (tag of tags(); track tag) {
-              <span class="tag-chip-editable">
-                {{ tag }}
-                <button type="button" class="tag-remove" (click)="removeTag(tag)" title="Remove tag">×</button>
-              </span>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-12 col-lg-4">
+          <!-- Tags -->
+          <div class="mb-3">
+            <label class="form-label">Tags</label>
+            <div class="tag-input-container">
+              <input 
+                type="text" 
+                class="form-control app-input" 
+                placeholder="Add a tag..." 
+                [(ngModel)]="tagInput" 
+                [ngModelOptions]="{standalone: true}"
+                (keypress)="onTagKeyPress($event)" 
+              />
+              <button type="button" class="btn btn-sm btn-outline-primary mt-2 w-100" (click)="addTag()">Add</button>
+            </div>
+            @if (tags().length > 0) {
+              <div class="tags-list">
+                @for (tag of tags(); track tag) {
+                  <span class="tag-chip-editable">
+                    {{ tag }}
+                    <button type="button" class="tag-remove" (click)="removeTag(tag)" title="Remove tag">×</button>
+                  </span>
+                }
+              </div>
             }
           </div>
-        }
+        </div>
       </div>
 
       <!-- Action buttons -->

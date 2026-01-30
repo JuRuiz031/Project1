@@ -5,21 +5,23 @@
     </span>
 
     <div class="d-flex gap-2">
-      <a
-        *ngIf="showProfile"
-        class="btn btn-outline-light btn-sm"
-        routerLink="/account"
-      >
-        Profile
-      </a>
+      @if (showProfile()) {
+        <a
+          class="btn btn-outline-light btn-sm"
+          routerLink="/account"
+        >
+          Profile
+        </a>
+      }
 
-      <a
-        *ngIf="showHome"
-        class="btn btn-outline-light btn-sm"
-        routerLink="/main-page"
-      >
-        Home
-      </a>
+      @if (showHome()) {
+        <a
+          class="btn btn-outline-light btn-sm"
+          routerLink="/main-page"
+        >
+          Home
+        </a>
+      }
     </div>
   </div>
 </header>

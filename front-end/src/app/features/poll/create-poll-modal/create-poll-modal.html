@@ -5,9 +5,11 @@
   (close)="onClose()"
 >
   <!-- API error -->
-  <div *ngIf="apiError()" class="alert alert-danger mb-3">
-    {{ apiError() }}
-  </div>
+  @if (apiError()) {
+    <div class="alert alert-danger mb-3">
+      {{ apiError() }}
+    </div>
+  }
 
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <div class="row g-3">
@@ -23,9 +25,11 @@
             [ngClass]="{ 'is-invalid': hasError('calendarId') }"
           >
             <option value="" disabled>Select calendar (admin only)</option>
-            <option *ngFor="let c of adminCalendars()" [value]="c.id">
-              {{ c.name }}
-            </option>
+            @for (c of adminCalendars(); track c.id) {
+              <option [value]="c.id">
+                {{ c.name }}
+              </option>
+            }
           </select>
           <div class="invalid-feedback">Select an admin calendar.</div>
         </div>
@@ -133,19 +137,18 @@
           <div class="fw-semibold mb-2">Options</div>
 
           <div class="d-grid gap-2">
-            <div
-              class="input-group"
-              *ngFor="let optCtrl of options.controls; let i = index"
-            >
-              <input class="form-control app-input" [formControl]="optCtrl" />
-              <button
-                class="btn btn-outline-secondary"
-                type="button"
-                (click)="removeOption(i)"
-              >
-                ✕
-              </button>
-            </div>
+            @for (optCtrl of options.controls; track $index; let i = $index) {
+              <div class="input-group">
+                <input class="form-control app-input" [formControl]="optCtrl" />
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  (click)="removeOption(i)"
+                >
+                  ✕
+                </button>
+              </div>
+            }
           </div>
 
           <div class="input-group mt-3">
@@ -155,9 +158,10 @@
               placeholder="Option text"
               [(ngModel)]="optionInput"
               [ngModelOptions]="{ standalone: true }"
+              (keydown.enter)="addOption()"
             />
-            <button class="btn btn-outline-secondary" type="button" (click)="addOption()">
-              Add Option
+            <button class="btn btn-outline-primary" type="button" (click)="addOption()">
+              Add
             </button>
           </div>
         </div>
@@ -166,34 +170,37 @@
       <!-- RIGHT COLUMN -->
       <div class="col-12 col-lg-5">
         <div class="border rounded p-3">
-          <div class="fw-semibold mb-2">Tags</div>
+          <div class="fw-semibold mb-3">Tags</div>
 
-          <div class="d-flex flex-wrap gap-2">
-            <span
-              class="badge rounded-pill text-bg-secondary d-inline-flex align-items-center gap-2"
-              *ngFor="let tagCtrl of tags.controls; let i = index"
-            >
-              {{ tagCtrl.value }}
-              <button
-                type="button"
-                class="btn btn-sm btn-link p-0"
-                (click)="removeTag(i)"
-              >
-                ✕
-              </button>
-            </span>
-          </div>
+          @if (tags.controls.length > 0) {
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              @for (tagCtrl of tags.controls; track $index; let i = $index) {
+                <span class="badge d-inline-flex align-items-center">
+                  {{ tagCtrl.value }}
+                  <button
+                    type="button"
+                    class="btn-sm"
+                    (click)="removeTag(i)"
+                    aria-label="Remove tag"
+                  >
+                    ×
+                  </button>
+                </span>
+              }
+            </div>
+          }
 
-          <div class="input-group mt-3">
+          <div class="input-group">
             <input
               class="form-control app-input"
               type="text"
-              placeholder="Tag text"
+              placeholder="Add a tag..."
               [(ngModel)]="tagInput"
               [ngModelOptions]="{ standalone: true }"
+              (keydown.enter)="addTag()"
             />
-            <button class="btn btn-outline-secondary" type="button" (click)="addTag()">
-              Add Tag
+            <button class="btn btn-outline-primary" type="button" (click)="addTag()">
+              Add
             </button>
           </div>
         </div>

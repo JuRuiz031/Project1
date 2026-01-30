@@ -183,10 +183,6 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.calendar-filter-chip.active .calendar-color-dot {
-  background-color: white !important;
-}
-
 .tag-filter-chip {
   padding: 8px 12px;
   background-color: white;
@@ -217,11 +213,11 @@
   border-color: #1565c0;
 }
 
-.events-list {
+.polls-list {
   padding: 10px;
 }
 
-.event-item {
+.poll-item {
   padding: 12px 15px;
   border: 1px solid #e0e0e0;
   border-radius: 6px;
@@ -230,13 +226,13 @@
   transition: all 0.2s;
 }
 
-.event-item:hover {
+.poll-item:hover {
   background-color: #f5f5f5;
   border-color: #007bff;
   box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
 }
 
-.event-header {
+.poll-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -244,14 +240,14 @@
   margin-bottom: 4px;
 }
 
-.event-title {
+.poll-title {
   font-weight: 600;
   font-size: 15px;
   color: #333;
   flex: 1;
 }
 
-.event-calendar {
+.poll-calendar {
   font-size: 11px;
   color: #888;
   background: #f0f0f0;
@@ -261,19 +257,20 @@
   flex-shrink: 0;
 }
 
-.event-time {
+.poll-time {
   font-size: 12px;
   color: #888;
   margin-bottom: 6px;
 }
 
-.event-description {
+.poll-description {
   font-size: 13px;
   color: #666;
   line-height: 1.4;
+  margin-top: 4px;
 }
 
-.event-tags {
+.poll-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -290,7 +287,7 @@
   font-weight: 500;
 }
 
-.no-events {
+.no-polls {
   padding: 40px 20px;
   text-align: center;
   color: #999;
@@ -325,19 +322,23 @@
 }
 
 /* Scrollbar styling */
-.modal-body::-webkit-scrollbar {
+.modal-body::-webkit-scrollbar,
+.filter-sidebar::-webkit-scrollbar {
   width: 8px;
 }
 
-.modal-body::-webkit-scrollbar-track {
+.modal-body::-webkit-scrollbar-track,
+.filter-sidebar::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
 
-.modal-body::-webkit-scrollbar-thumb {
+.modal-body::-webkit-scrollbar-thumb,
+.filter-sidebar::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
 
-.modal-body::-webkit-scrollbar-thumb:hover {
+.modal-body::-webkit-scrollbar-thumb:hover,
+.filter-sidebar::-webkit-scrollbar-thumb:hover {
   background: #555;
 }

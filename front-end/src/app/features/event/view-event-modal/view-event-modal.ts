@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { map, catchError, tap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { CalendarApiService } from '../../../shared/services/api/calendar-api.service';
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { InviteService } from '../../../shared/services/invite.service';
@@ -26,7 +27,7 @@ type EventDisplay = {
 @Component({
   selector: 'app-view-event-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BaseModal],
   templateUrl: './view-event-modal.html',
   styleUrls: ['./view-event-modal.css'],
 })

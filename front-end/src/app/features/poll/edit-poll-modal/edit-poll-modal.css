@@ -4,7 +4,193 @@
   margin: 0 auto;
 }
 
-/* Make Bootstrap active state fit your dark theme a bit better */
+/* Tag styles matching event modals */
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tag-chip-editable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 12px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.tag-chip-editable:hover {
+  background-color: #bbdefb;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.tag-remove:hover {
+  background-color: #ef5350;
+  color: white;
+}
+
+/* List group styling to match event design */
+.list-group-item {
+  background-color: transparent;
+  border: 1px solid #e0e0e0;
+  color: #333;
+  padding: 10px 15px;
+  transition: all 0.2s;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
 .list-group-item.active {
-  border-color: rgba(255, 255, 255, 0.35);
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.list-group-item.active:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Section borders */
+.border.rounded,
+.border.border-secondary.rounded {
+  border-color: #e0e0e0 !important;
+}
+
+/* Voting settings section */
+.border.border-secondary.rounded.p-3 {
+  background-color: #f8f9fa;
+  border-color: #e0e0e0 !important;
+}
+
+/* Form controls */
+.form-control.app-input,
+.form-select.app-select {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control.app-input:focus,
+.form-select.app-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Button styling to match event modals */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border: 1px solid #007bff;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-outline-secondary {
+  background: white;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: #999;
+}
+
+.btn-outline-primary {
+  background: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.btn-outline-primary:hover {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.btn-outline-danger {
+  background: white;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border: 1px solid #dc3545;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+/* Input group styling */
+.input-group .btn-outline-secondary {
+  border-left: none;
+}
+
+/* Form check styling */
+.form-check-input {
+  cursor: pointer;
+}
+
+.form-check-input:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
 }

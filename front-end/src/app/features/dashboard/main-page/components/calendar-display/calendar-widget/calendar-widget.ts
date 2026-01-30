@@ -1,11 +1,10 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  input,
+  output,
+  signal,
+  effect,
   ChangeDetectionStrategy,
-  OnChanges,
-  SimpleChanges,
   AfterViewInit,
   ViewChild,
   ElementRef,
@@ -45,12 +44,30 @@ import {
   ],
   templateUrl: './calendar-widget.html',
 })
-export class CalendarWidget implements OnChanges, AfterViewInit {
-  @Input() viewDate: Date = new Date();
-  @Output() viewDateChange = new EventEmitter<Date>();
+export class CalendarWidget implements AfterViewInit {
+  // Signal inputs from parent
+  initialViewDate = input<Date>(new Date(), { alias: 'viewDate' });
+  events = input<CalendarEvent[]>([]);
 
-  @Input() events: CalendarEvent[] = [];
-  @Output() eventClicked = new EventEmitter<CalendarEvent>();
+  // Outputs to parent
+  viewDateChange = output<Date>();
+  eventClicked = output<CalendarEvent>();
+
+  // Local mutable state for the calendar library's two-way binding
+  currentViewDate = signal<Date>(new Date());
+
+  constructor() {
+    // Sync input changes to local state
+    effect(() => {
+      this.currentViewDate.set(this.initialViewDate());
+    });
+
+    // Trigger refresh when events change
+    effect(() => {
+      this.events(); // read to track
+      this.refresh.next();
+    });
+  }
 
   CalendarView = CalendarView;
   view: CalendarView = CalendarView.Month;
@@ -74,7 +91,7 @@ export class CalendarWidget implements OnChanges, AfterViewInit {
   }
 
   onViewDateChange(date: Date) {
-    this.viewDate = date;
+    this.currentViewDate.set(date);
     this.viewDateChange.emit(date);
     this.activeDayIsOpen = false;
     this.scrollToStartHour();
@@ -86,16 +103,12 @@ export class CalendarWidget implements OnChanges, AfterViewInit {
 
   dayClicked({ date }: { date: Date; events: CalendarEvent[] }): void {
     if (this.view === CalendarView.Month) {
-      this.viewDate = date;
+      this.currentViewDate.set(date);
       this.viewDateChange.emit(date);
       this.view = CalendarView.Day;
       this.activeDayIsOpen = false;
       this.scrollToStartHour();
     }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['events']) this.refresh.next();
   }
 
   ngAfterViewInit(): void {

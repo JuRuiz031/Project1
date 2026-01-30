@@ -13,6 +13,9 @@ import { CreateEventModal } from '../../event/create-event-modal/create-event-mo
 import { EditEventModal } from '../../event/edit-event-modal/edit-event-modal';
 import { DeleteEventModal } from '../../event/delete-event-modal/delete-event-modal';
 import { CreatePollModal } from '../../poll/create-poll-modal/create-poll-modal';
+import { PollSelectorModal } from '../../poll/poll-selector-modal/poll-selector-modal';
+import { ViewPollModal } from '../../poll/view-poll-modal/view-poll-modal';
+import { EditPollModal } from '../../poll/edit-poll-modal/edit-poll-modal';
 import { CreateCalendarModal } from '../../calendar/create-calendar-modal/create-calendar-modal';
 import { CalendarSelectorModal } from '../../calendar/calendar-selector-modal/calendar-selector-modal';
 import { ViewCalendarModal } from '../../calendar/view-calendar-modal/view-calendar-modal';
@@ -37,7 +40,10 @@ type ModalState =
   | 'view-calendar'
   | 'edit-calendar'
   | 'delete-calendar'
-  | 'create-poll';
+  | 'create-poll'
+  | 'poll-selector'
+  | 'view-poll'
+  | 'edit-poll';
 
 @Component({
   selector: 'app-main-page',
@@ -59,6 +65,9 @@ type ModalState =
     EditCalendarModal,
     DeleteCalendarModal,
     CreatePollModal,
+    PollSelectorModal,
+    ViewPollModal,
+    EditPollModal,
   ],
   
   templateUrl: './main-page.html',
@@ -80,6 +89,7 @@ export class MainPageComponent implements OnInit {
   // Modal state machine
   modalState = signal<ModalState>('none');
   selectedEventId = signal<string | null>(null);
+  selectedPollId = signal<string | null>(null);
   showEventSuccessMessage = signal(false);
 
   // User info
@@ -467,6 +477,43 @@ export class MainPageComponent implements OnInit {
 
   onPollCreated(pollId: string): void {
     console.log('[MainPage] Poll created:', pollId);
+    this.refreshPolls();
+  }
+
+  openPollSelector(): void {
+    console.log('[MainPage] Opening poll selector modal');
+    this.modalState.set('poll-selector');
+  }
+
+  onPollSelected(pollId: string): void {
+    console.log('[MainPage] Poll selected:', pollId);
+    this.selectedPollId.set(pollId);
+    this.modalState.set('view-poll');
+  }
+
+  onViewPollFromList(pollId: string): void {
+    console.log('[MainPage] Opening poll directly:', pollId);
+    this.selectedPollId.set(pollId);
+    this.modalState.set('view-poll');
+  }
+
+  openEditPoll(pollId: string): void {
+    console.log('[MainPage] Opening edit poll modal:', pollId);
+    this.selectedPollId.set(pollId);
+    this.modalState.set('edit-poll');
+  }
+
+  onPollUpdated(pollId: string): void {
+    console.log('[MainPage] Poll updated:', pollId);
+    this.selectedPollId.set(pollId);
+    this.modalState.set('view-poll');
+    this.refreshPolls();
+  }
+
+  onPollDeleted(): void {
+    console.log('[MainPage] Poll deleted');
+    this.selectedPollId.set(null);
+    this.closeAllModals();
     this.refreshPolls();
   }
 
