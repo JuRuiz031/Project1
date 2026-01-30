@@ -1,118 +1,54 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CalendarService } from '../../../../../shared/services/calendar.service';
+import { Component, inject, signal, output, input, computed } from '@angular/core';
 import { PollDTO } from '../../../../../shared/models/polls/poll.dto';
-import { CalendarHomeDTO } from '../../../../../shared/models/calendars/calendar-home.dto';
 import { CommonModule } from '@angular/common';
-import { ViewPollModal } from '../../../../poll/view-poll-modal/view-poll-modal';
-import { CreatePollModal } from '../../../../poll/create-poll-modal/create-poll-modal';
-import { EditPollModal } from '../../../../poll/edit-poll-modal/edit-poll-modal';
 
 
 @Component({
   selector: 'app-polls-window',
   standalone: true,
-  imports: [CommonModule, ViewPollModal, CreatePollModal, EditPollModal],
+  imports: [CommonModule],
   templateUrl: './polls-window.html',
   styleUrls: ['./polls-window.css'],
 })
-export class PollsWindow implements OnInit {
-  private calendarService = inject(CalendarService);
+export class PollsWindow {
+  // Inputs from parent
+  polls = input<PollDTO[]>([]);
 
-  // modal state
-  isCreatePollOpen = signal(false);
-  isViewPollOpen = signal(false);
+  // Outputs to parent
+  createPoll = output<void>();
+  viewPolls = output<void>();
+  viewPoll = output<string>();
 
-  // data state
-  isLoading = signal(false);
-  apiError = signal('');
-
-  polls = signal<PollDTO[]>([]);
+  // Local state
   selectedPollId = signal('');
 
-  ngOnInit(): void {
-    this.loadPolls();
-  }
-
-  loadPolls(): void {
-    this.apiError.set('');
-    this.isLoading.set(true);
-
-    this.calendarService.getHomepage().subscribe({
-      next: (home: CalendarHomeDTO) => {
-        const calendarIds = (home.calendars ?? []).map(c => c.calendar_id);
-
-        if (calendarIds.length === 0) {
-          this.isLoading.set(false);
-          this.polls.set([]);
-          return;
-        }
-
-        this.calendarService.getByCalendarIds(calendarIds).subscribe({
-          next: (res) => {
-            this.isLoading.set(false);
-            const list = res.polls ?? [];
-            this.polls.set(list);
-
-            // default-select first poll
-            if (!this.selectedPollId() && list.length > 0) {
-              this.selectedPollId.set(list[0].poll_id);
-            }
-          },
-          error: (err: any) => {
-            this.isLoading.set(false);
-            this.apiError.set(
-              err?.error?.message ||
-                (typeof err?.error === 'string' ? err.error : '') ||
-                err?.message ||
-                'Could not load polls'
-            );
-          },
-        });
-      },
-      error: (err: any) => {
-        this.isLoading.set(false);
-        this.apiError.set(
-          err?.error?.message ||
-            (typeof err?.error === 'string' ? err.error : '') ||
-            err?.message ||
-            'Could not load calendars'
-        );
-      },
-    });
-  }
+  // Computed: auto-select first poll when polls change
+  firstPollId = computed(() => {
+    const pollList = this.polls();
+    if (pollList.length > 0 && !this.selectedPollId()) {
+      return pollList[0].poll_id;
+    }
+    return this.selectedPollId();
+  });
 
   onCreatePoll(): void {
-    this.isCreatePollOpen.set(true);
+    this.createPoll.emit();
   }
 
-  onPollCreated(pollId: string): void {
-    this.isCreatePollOpen.set(false);
-    this.selectedPollId.set(pollId);
-    this.isViewPollOpen.set(true);
-
-    // refresh list so new poll appears
-    this.loadPolls();
+  onViewPolls(): void {
+    this.viewPolls.emit();
   }
 
   onSelectPoll(p: PollDTO): void {
     this.selectedPollId.set(p.poll_id);
   }
 
-  onViewPoll(): void {
-    if (!this.selectedPollId()) {
-      this.apiError.set('Select a poll first.');
-      return;
-    }
-    this.isViewPollOpen.set(true);
+  onDoubleClickPoll(p: PollDTO): void {
+    this.selectedPollId.set(p.poll_id);
+    this.viewPoll.emit(p.poll_id);
   }
 
-  // onEditPoll(pollId: string): void {
-  //   this.isViewPollOpen.set(false);
-  //   // Later: open edit modal or route
-  //   // this.router.navigate(['/edit-poll', pollId]);
-  // }
-
-  formatEventTime(iso: string): string {
+  formatPollTime(iso: string): string {
     if (!iso) return '';
 
     const d = this.parseServerInstant(iso);
@@ -141,38 +77,4 @@ export class PollsWindow implements OnInit {
     const tzPart = parts.find(p => p.type === 'timeZoneName');
     return tzPart?.value ?? 'UTC';
   }
-
-  isEditPollOpen = signal(false);
-
-openEditPoll(pollId: string) {
-  const id = (pollId || '').trim();
-  if (!id) {
-    this.apiError.set('Missing poll id.');
-    return;
-  }
-
-  this.selectedPollId.set(id);
-  this.isViewPollOpen.set(false);
-  this.isEditPollOpen.set(true);
-}
-
-onPollSaved(pollId: string) {
-  this.isEditPollOpen.set(false);
-  this.selectedPollId.set(pollId);
-  this.isViewPollOpen.set(true);
-  // this.loadPolls(); // optional
-}
-
-onPollDeleted(_pollId: string) {
-  this.isEditPollOpen.set(false);
-  this.isViewPollOpen.set(false);
-  this.selectedPollId.set('');
-  // this.loadPolls(); // optional
-}
-
-closeViewPoll() { this.isViewPollOpen.set(false); }
-closeEditPoll() { this.isEditPollOpen.set(false); }
-
-
-
 }

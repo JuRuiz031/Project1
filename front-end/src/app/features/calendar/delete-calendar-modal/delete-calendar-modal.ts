@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 
@@ -15,27 +15,28 @@ export class DeleteCalendarModal {
    * Parent passes the selected calendar/group info into the modal.
    * (Keep names generic so main-page can reuse this for calendars or groups.)
    */
-  @Input() targetId: string | null = null;
-  @Input() targetName = 'this item';
+  targetId = input<string | null>(null);
+  targetName = input('this item');
 
   /**
    * Parent-controlled request state (so parent owns the API call).
    */
-  @Input() isDeleting = false;
-  @Input() apiError = '';
+  isDeleting = input(false);
+  apiError = input('');
 
   /**
    * Modal -> parent events (parent decides what to do).
    */
-  @Output() cancel = new EventEmitter<void>();
-  @Output() confirmDelete = new EventEmitter<string>();
+  cancel = output<void>();
+  confirmDelete = output<string>();
 
   onCancel(): void {
     this.cancel.emit();
   }
 
   onConfirm(): void {
-    if (!this.targetId || this.isDeleting) return;
-    this.confirmDelete.emit(this.targetId);
+    const id = this.targetId();
+    if (!id || this.isDeleting()) return;
+    this.confirmDelete.emit(id);
   }
 }

@@ -5,6 +5,8 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { of } from 'rxjs';
 
 import {
+  CalendarA11y,
+  CalendarUtils,
   DateAdapter,
   CalendarDateFormatter,
   CalendarNativeDateFormatter,
@@ -36,6 +38,8 @@ describe('MainPageComponent', () => {
         // ✅ Keep these for angular-calendar views
         { provide: DateAdapter, useFactory: adapterFactory },
         { provide: CalendarDateFormatter, useClass: CalendarNativeDateFormatter },
+        CalendarUtils,
+        CalendarA11y,
       ],
     }).compileComponents();
 

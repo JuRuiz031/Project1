@@ -4,13 +4,7 @@
 }
 
 .tag-input-container {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.tag-input-container input {
-  flex: 1;
+  /* Vertical stacked layout */
 }
 
 .tags-list {

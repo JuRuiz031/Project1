@@ -1,6 +1,9 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
+// Use Puppeteer's bundled Chrome for headless testing
+process.env.CHROME_BIN = require('puppeteer').executablePath();
+
 /**
  * IMPORTANT:
  * This project is currently configured to run tests using Firefox:
@@ -57,6 +60,19 @@ module.exports = function (config) {
         // for example, you can disable the random execution with `random: false`
         // or set a specific seed with `seed: 4321`
       },
+      clearContext: false, // leave Jasmine Spec Runner output visible in browser
+    },
+    // Custom launcher for WSL/Linux environments
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-software-rasterizer',
+        ],
+      },
     },
     jasmineHtmlReporter: {
       suppressAll: true // removes the duplicated traces
@@ -70,7 +86,11 @@ module.exports = function (config) {
       ]
     },
     reporters: ['progress', 'kjhtml'],
-    browsers: ['Firefox'], // Browser Karma will try to launch to run the tests
-    restartOnFileChange: true
+    browsers: ['ChromeHeadlessNoSandbox'], // Browser Karma will try to launch to run the tests
+    singleRun: false,
+    restartOnFileChange: true,
+    browserNoActivityTimeout: 60000,
+    browserDisconnectTimeout: 10000,
+    browserDisconnectTolerance: 3,
   });
 };

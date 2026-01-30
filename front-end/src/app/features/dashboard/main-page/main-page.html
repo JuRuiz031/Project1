@@ -28,7 +28,10 @@
 
       <app-polls-window
         class="card"
-        (createPoll)="openCreatePoll()">
+        [polls]="polls()"
+        (createPoll)="openCreatePoll()"
+        (viewPolls)="openPollSelector()"
+        (viewPoll)="onViewPollFromList($event)">
       </app-polls-window>
 
     </aside>
@@ -138,6 +141,35 @@
     (close)="closeAllModals()"
     (pollCreated)="onPollCreated($event)">
   </app-create-poll-modal>
+}
+
+<!-- Poll Selector Modal -->
+@if (modalState() === 'poll-selector') {
+  <app-poll-selector-modal
+    [polls]="polls()"
+    [calendars]="calendars()"
+    (pollSelected)="onPollSelected($event)"
+    (closeModal)="closeAllModals()">
+  </app-poll-selector-modal>
+}
+
+<!-- View Poll Modal -->
+@if (modalState() === 'view-poll') {
+  <app-view-poll-modal
+    [pollId]="selectedPollId()!"
+    (close)="closeAllModals()"
+    (edit)="openEditPoll($event)">
+  </app-view-poll-modal>
+}
+
+<!-- Edit Poll Modal -->
+@if (modalState() === 'edit-poll') {
+  <app-edit-poll-modal
+    [pollId]="selectedPollId()!"
+    (close)="closeAllModals()"
+    (saved)="onPollUpdated($event)"
+    (deleted)="onPollDeleted()">
+  </app-edit-poll-modal>
 }
 
 </main>

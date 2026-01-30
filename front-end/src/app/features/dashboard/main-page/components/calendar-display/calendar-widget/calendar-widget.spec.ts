@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CalendarWidget } from './calendar-widget';
 
-// ✅ angular-calendar needs a DateAdapter provider
-import { DateAdapter } from 'angular-calendar';
+// ✅ angular-calendar needs these providers
+import { CalendarA11y, CalendarUtils, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
 describe('CalendarWidget', () => {
@@ -15,6 +15,8 @@ describe('CalendarWidget', () => {
       imports: [CalendarWidget],
       providers: [
         { provide: DateAdapter, useFactory: adapterFactory },
+        CalendarUtils,
+        CalendarA11y,
       ],
     }).compileComponents();
 

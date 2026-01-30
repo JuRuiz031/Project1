@@ -5,67 +5,96 @@
   (close)="onClose()"
 >
   <!-- Loading -->
-  <div *ngIf="isLoading()" class="text-secondary">
-    Loading...
-  </div>
+  @if (isLoading()) {
+    <div class="text-secondary">
+      Loading...
+    </div>
+  }
 
   <!-- API error -->
-  <div *ngIf="!isLoading() && apiError()" class="alert alert-danger mb-3">
-    {{ apiError() }}
-  </div>
+  @if (!isLoading() && apiError()) {
+    <div class="alert alert-danger mb-3">
+      {{ apiError() }}
+    </div>
+  }
 
   <!-- Main content -->
-  <ng-container *ngIf="!isLoading() && poll() as p">
+  @if (!isLoading() && poll(); as p) {
+    <div class="row g-3">
+      <!-- LEFT COLUMN -->
+      <div class="col-12 col-lg-7">
+        <!-- Calendar -->
+        <div class="mb-3">
+          <label class="form-label">Calendar</label>
+          <input
+            class="form-control app-input"
+            [value]="calendarName() || p.calendar_id"
+            disabled
+          />
+        </div>
 
-    <!-- Calendar -->
-    <div class="mb-3">
-      <label class="form-label">Calendar</label>
-      <input
-        class="form-control app-input"
-        [value]="calendarName() || p.calendar_id"
-        disabled
-      />
-    </div>
+        <!-- Title -->
+        <div class="mb-3">
+          <label class="form-label">Poll Title</label>
+          <input
+            class="form-control app-input"
+            [value]="p.title"
+            disabled
+          />
+        </div>
 
-    <!-- Title -->
-    <div class="mb-3">
-      <label class="form-label">Poll Title</label>
-      <input
-        class="form-control app-input"
-        [value]="p.title"
-        disabled
-      />
-    </div>
+        <!-- Description -->
+        @if (p.description) {
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea
+              class="form-control app-input"
+              rows="3"
+              [value]="p.description"
+              disabled
+            ></textarea>
+          </div>
+        }
 
-    <!-- Description -->
-    <div class="mb-3" *ngIf="p.description">
-      <label class="form-label">Description</label>
-      <textarea
-        class="form-control app-input"
-        rows="3"
-        [value]="p.description"
-        disabled
-      ></textarea>
-    </div>
+        <!-- Dates -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Start</label>
+            <input
+              class="form-control app-input"
+              [value]="formatLocalDate(p.start_time) + ' ' + formatLocalTime(p.start_time)"
+              disabled
+            />
+          </div>
 
-    <!-- Dates -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-md-6">
-        <label class="form-label">Start</label>
-        <input
-          class="form-control app-input"
-          [value]="formatLocalDate(p.start_time) + ' ' + formatLocalTime(p.start_time)"
-          disabled
-        />
+          <div class="col-12 col-md-6">
+            <label class="form-label">End</label>
+            <input
+              class="form-control app-input"
+              [value]="formatLocalDate(p.end_time) + ' ' + formatLocalTime(p.end_time)"
+              disabled
+            />
+          </div>
+        </div>
       </div>
 
-      <div class="col-12 col-md-6">
-        <label class="form-label">End</label>
-        <input
-          class="form-control app-input"
-          [value]="formatLocalDate(p.end_time) + ' ' + formatLocalTime(p.end_time)"
-          disabled
-        />
+      <!-- RIGHT COLUMN -->
+      <div class="col-12 col-lg-5">
+        <!-- Tags -->
+        <div class="mb-3">
+          <label class="form-label">Tags</label>
+          @if (p.tags && p.tags.length > 0) {
+            <div class="tags-display">
+              @for (tag of p.tags; track tag) {
+                <span class="tag-chip">
+                  {{ tag }}
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">No tags</p>
+          }
+        </div>
       </div>
     </div>
 
@@ -75,8 +104,8 @@
 
       <span
         class="badge"
-        [class.text-bg-success]="p.allow_multiple_votes"
-        [class.text-bg-secondary]="!p.allow_multiple_votes"
+        [class.badge-success]="p.allow_multiple_votes"
+        [class.badge-secondary]="!p.allow_multiple_votes"
       >
         {{ p.allow_multiple_votes ? 'Multiple votes allowed' : 'Single vote only' }}
       </span>
@@ -89,73 +118,77 @@
     </div>
 
     <!-- Login warning -->
-    <div *ngIf="!isLoggedIn()" class="alert alert-warning mb-3">
-      You must be logged in to vote.
-    </div>
+    @if (!isLoggedIn()) {
+      <div class="alert alert-warning mb-3">
+        You must be logged in to vote.
+      </div>
+    }
 
     <!-- Vote error -->
-    <div *ngIf="voteError()" class="alert alert-danger mb-3">
-      {{ voteError() }}
-    </div>
+    @if (voteError()) {
+      <div class="alert alert-danger mb-3">
+        {{ voteError() }}
+      </div>
+    }
 
     <!-- OPTIONS + VOTING -->
     <div class="border rounded p-3 mb-3">
       <div class="fw-semibold mb-2">Options</div>
 
       <!-- Single vote -->
-      <div *ngIf="!p.allow_multiple_votes">
-        <div
-          class="form-check mb-2"
-          *ngFor="let opt of p.options"
-        >
-          <input
-            class="form-check-input"
-            type="radio"
-            name="singleVote"
-            [checked]="selectedSingleOptionId() === opt.option_id"
-            [disabled]="!isLoggedIn() || isVoting()"
-            (change)="selectSingle(opt.option_id)"
-          />
+      @if (!p.allow_multiple_votes) {
+        <div>
+          @for (opt of p.options; track opt.option_id) {
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="singleVote"
+                [checked]="selectedSingleOptionId() === opt.option_id"
+                [disabled]="!isLoggedIn() || isVoting()"
+                (change)="selectSingle(opt.option_id)"
+              />
 
-          <label class="form-check-label">
-            {{ opt.description }}
+              <label class="form-check-label">
+                {{ opt.description }}
 
-            <span
-              *ngIf="canShowResults(p)"
-              class="text-secondary ms-2"
-            >
-              ({{ getTotalVotesForOption(opt) }} votes)
-            </span>
-          </label>
+                @if (canShowResults(p)) {
+                  <span class="text-secondary ms-2">
+                    ({{ getTotalVotesForOption(opt) }} votes)
+                  </span>
+                }
+              </label>
+            </div>
+          }
         </div>
-      </div>
+      }
 
       <!-- Multiple vote -->
-      <div *ngIf="p.allow_multiple_votes">
-        <div
-          class="form-check mb-2"
-          *ngFor="let opt of p.options"
-        >
-          <input
-            class="form-check-input"
-            type="checkbox"
-            [checked]="selectedMultiOptionIds().includes(opt.option_id)"
-            [disabled]="!isLoggedIn() || isVoting()"
-            (change)="toggleMulti(opt.option_id)"
-          />
+      @if (p.allow_multiple_votes) {
+        <div>
+          @for (opt of p.options; track opt.option_id) {
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [checked]="selectedMultiOptionIds().includes(opt.option_id)"
+                [disabled]="!isLoggedIn() || isVoting()"
+                (change)="toggleMulti(opt.option_id)"
+              />
 
-          <label class="form-check-label">
-            {{ opt.description }}
+              <label class="form-check-label">
+                {{ opt.description }}
 
-            <span
-              *ngIf="canShowResults(p)"
-              class="text-secondary ms-2"
-            >
-              ({{ getTotalVotesForOption(opt) }} votes)
-            </span>
-          </label>
+                @if (canShowResults(p)) {
+                  <span class="text-secondary ms-2">
+                    ({{ getTotalVotesForOption(opt) }} votes)
+                  </span>
+                }
+              </label>
+            </div>
+          }
         </div>
-      </div>
+      }
     </div>
 
     <!-- Submit vote -->
@@ -189,6 +222,5 @@
         Edit Poll
       </button>
     </div>
-
-  </ng-container>
+  }
 </app-base-modal>

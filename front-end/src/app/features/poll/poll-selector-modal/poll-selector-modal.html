@@ -1,0 +1,122 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Select Poll</h2>
+      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
+        ✕
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="modal-search">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search polls by title, description, calendar, or tags..."
+        [(ngModel)]="searchQuery"
+        aria-label="Search polls"
+      />
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="modal-body-wrapper">
+      <!-- Left Sidebar: Calendar Filter -->
+      @if (calendars().length > 0) {
+        <div class="filter-sidebar left-sidebar">
+          <div class="sidebar-header">
+            <h3>Calendars</h3>
+            @if (selectedCalendarIds().length > 0) {
+              <button class="clear-btn" (click)="clearCalendarFilters()" title="Clear calendar filters">
+                Clear
+              </button>
+            }
+          </div>
+          <div class="filter-list">
+            @for (calendar of calendars(); track calendar.calendar_id) {
+              <button 
+                class="calendar-filter-chip" 
+                [class.active]="isCalendarSelected(calendar.calendar_id)"
+                [style.background-color]="isCalendarSelected(calendar.calendar_id) ? getCalendarColor(calendar.calendar_id).primary : 'white'"
+                [style.border-color]="getCalendarColor(calendar.calendar_id).primary"
+                [style.color]="isCalendarSelected(calendar.calendar_id) ? 'white' : getCalendarColor(calendar.calendar_id).primary"
+                (click)="toggleCalendar(calendar.calendar_id)"
+                title="Click to filter by {{ calendar.name }}">
+                <span class="calendar-color-dot" [style.background-color]="isCalendarSelected(calendar.calendar_id) ? 'white' : getCalendarColor(calendar.calendar_id).primary"></span>
+                {{ calendar.name }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Middle: Polls List -->
+      <div class="modal-body">
+        @if (filteredPolls().length === 0) {
+          <div class="no-polls">
+            @if (polls().length === 0) {
+              <p>No polls available</p>
+            } @else {
+              <p>No polls match your search</p>
+            }
+          </div>
+        } @else {
+          <div class="polls-list">
+            @for (poll of filteredPolls(); track poll.poll_id) {
+              <div class="poll-item" (click)="onPollSelect(poll.poll_id)">
+                <div class="poll-header">
+                  <div class="poll-title">{{ poll.title }}</div>
+                </div>
+                <div class="poll-time">
+                  {{ formatPollTime(poll.start_time) }} - {{ formatPollTime(poll.end_time) }}
+                </div>
+                @if (poll.description) {
+                  <div class="poll-description">{{ poll.description }}</div>
+                }
+                @if (poll.tags && poll.tags.length > 0) {
+                  <div class="poll-tags">
+                    @for (tag of poll.tags; track tag) {
+                      <span class="tag-chip">{{ tag }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Right Sidebar: Tag Filter -->
+      @if (allTags().length > 0) {
+        <div class="filter-sidebar right-sidebar">
+          <div class="sidebar-header">
+            <h3>Tags</h3>
+            @if (selectedTags().length > 0) {
+              <button class="clear-btn" (click)="clearTagFilters()" title="Clear tag filters">
+                Clear
+              </button>
+            }
+          </div>
+          <div class="filter-list">
+            @for (tag of allTags(); track tag) {
+              <button 
+                class="tag-filter-chip" 
+                [class.active]="isTagSelected(tag)"
+                (click)="toggleTag(tag)"
+                title="Click to filter by {{ tag }}">
+                {{ tag }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-outline-secondary" (click)="onClose()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

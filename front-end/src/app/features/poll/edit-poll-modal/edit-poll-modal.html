@@ -5,14 +5,18 @@
   (close)="onClose()"
 >
   <!-- Loading -->
-  <div *ngIf="isLoading()" class="text-secondary mb-3">
-    Loading...
-  </div>
+  @if (isLoading()) {
+    <div class="text-secondary mb-3">
+      Loading...
+    </div>
+  }
 
   <!-- API error -->
-  <div *ngIf="apiError()" class="alert alert-danger mb-3">
-    {{ apiError() }}
-  </div>
+  @if (apiError()) {
+    <div class="alert alert-danger mb-3">
+      {{ apiError() }}
+    </div>
+  }
 
   <form [formGroup]="form" novalidate>
     <div class="row g-3">
@@ -27,9 +31,11 @@
             [ngClass]="{ 'is-invalid': hasError('calendarId') }"
           >
             <option value="" disabled>Select calendar (admin only)</option>
-            <option *ngFor="let c of adminCalendars()" [value]="c.id">
-              {{ c.name }}
-            </option>
+            @for (c of adminCalendars(); track c.id) {
+              <option [value]="c.id">
+                {{ c.name }}
+              </option>
+            }
           </select>
           <div class="invalid-feedback">Select an admin calendar.</div>
         </div>
@@ -107,7 +113,7 @@
         </div>
 
         <!-- Voting settings -->
-        <div class="border border-secondary rounded p-3 mb-3">
+        <div class="border rounded p-3 mb-3">
           <div class="fw-semibold mb-2">Voting</div>
 
           <div class="form-check">
@@ -129,43 +135,44 @@
 
 
         <!-- OPTIONS MENU -->
-        <div class="border border-secondary rounded p-3">
+        <div class="border rounded p-3">
           <div class="fw-semibold mb-2">Options</div>
 
-          <div class="list-group">
-            <button
-              type="button"
-              class="list-group-item list-group-item-action bg-transparent border-secondary"
-              *ngFor="let optCtrl of options.controls; let i = index"
-              (click)="selectOption(i)"
-              [class.active]="selectedOptionIndex() === i"
-            >
-              {{ optCtrl.value }}
-            </button>
-
-            <div
-              class="list-group-item bg-transparent text-secondary border-secondary"
-              *ngIf="options.length === 0"
-            >
-              Options list
+          @if (options.controls.length > 0) {
+            <div class="list-group mb-3">
+              @for (optCtrl of options.controls; track $index; let i = $index) {
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  (click)="selectOption(i)"
+                  [class.active]="selectedOptionIndex() === i"
+                >
+                  {{ optCtrl.value }}
+                </button>
+              }
             </div>
-          </div>
+          } @else {
+            <div class="text-secondary text-center py-3 mb-3">
+              No options yet
+            </div>
+          }
 
-          <div class="input-group mt-3">
+          <div class="input-group mb-2">
             <input
               class="form-control app-input"
               type="text"
-              placeholder="Option text"
+              placeholder="Add an option..."
               [(ngModel)]="optionInput"
               [ngModelOptions]="{ standalone: true }"
+              (keydown.enter)="addOption()"
             />
-            <button class="btn btn-outline-secondary" type="button" (click)="addOption()">
-              Add Option
+            <button class="btn btn-outline-primary" type="button" (click)="addOption()">
+              Add
             </button>
           </div>
 
           <button
-            class="btn btn-outline-danger w-100 mt-2"
+            class="btn btn-outline-danger w-100"
             type="button"
             (click)="deleteSelectedOption()"
             [disabled]="selectedOptionIndex() === null"
@@ -177,50 +184,32 @@
 
       <!-- RIGHT COLUMN -->
       <div class="col-12 col-lg-5">
-        <!-- TAGS MENU -->
-        <div class="border border-secondary rounded p-3">
-          <div class="fw-semibold mb-2">Tags</div>
-
-          <div class="list-group">
-            <button
-              type="button"
-              class="list-group-item list-group-item-action bg-transparent border-secondary"
-              *ngFor="let tagCtrl of tags.controls; let i = index"
-              (click)="selectTag(i)"
-              [class.active]="selectedTagIndex() === i"
-            >
-              {{ tagCtrl.value }}
-            </button>
-
-            <div
-              class="list-group-item bg-transparent text-secondary border-secondary"
-              *ngIf="tags.length === 0"
-            >
-              Tags list
-            </div>
-          </div>
-
-          <div class="input-group mt-3">
+        <!-- TAGS -->
+        <div class="mb-3">
+          <label class="form-label">Tags</label>
+          <div class="tag-input-container">
             <input
               class="form-control app-input"
               type="text"
-              placeholder="Tag text"
+              placeholder="Add a tag..."
               [(ngModel)]="tagInput"
               [ngModelOptions]="{ standalone: true }"
+              (keydown.enter)="addTag()"
             />
-            <button class="btn btn-outline-secondary" type="button" (click)="addTag()">
-              Add Tag
+            <button class="btn btn-sm btn-outline-primary mt-2 w-100" type="button" (click)="addTag()">
+              Add
             </button>
           </div>
-
-          <button
-            class="btn btn-outline-danger w-100 mt-2"
-            type="button"
-            (click)="deleteSelectedTag()"
-            [disabled]="selectedTagIndex() === null"
-          >
-            Delete Selected Tag
-          </button>
+          @if (tags.controls.length > 0) {
+            <div class="tags-list">
+              @for (tagCtrl of tags.controls; track $index) {
+                <span class="tag-chip-editable">
+                  {{ tagCtrl.value }}
+                  <button type="button" class="tag-remove" (click)="removeTag($index)" title="Remove tag">×</button>
+                </span>
+              }
+            </div>
+          }
         </div>
       </div>
     </div>

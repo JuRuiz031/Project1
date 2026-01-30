@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AccountView } from './account-view';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
@@ -19,6 +20,14 @@ describe('AccountView', () => {
     getUserById: jasmine.createSpy('getUserById'),
   };
 
+  const routerMock = {
+    getCurrentNavigation: jasmine.createSpy('getCurrentNavigation').and.returnValue(null),
+  };
+
+  const activatedRouteMock = {
+    snapshot: { params: {} },
+  };
+
   beforeEach(async () => {
     localStorage.clear();
 
@@ -26,12 +35,15 @@ describe('AccountView', () => {
     navigationMock.goToEditUser.calls.reset();
     navigationMock.goToLogin.calls.reset();
     userApiMock.getUserById.calls.reset();
+    routerMock.getCurrentNavigation.calls.reset();
 
     await TestBed.configureTestingModule({
       imports: [AccountView],
       providers: [
         { provide: NavigationService, useValue: navigationMock },
         { provide: UserApiService, useValue: userApiMock },
+        { provide: Router, useValue: routerMock },
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
       ],
     }).compileComponents();
   });
