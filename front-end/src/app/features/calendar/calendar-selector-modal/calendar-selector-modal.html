@@ -39,8 +39,7 @@
               [style.border-color]="getColor(cal.calendar_id).primary"
               [style.color]="selectedCalendarId() === cal.calendar_id ? 'white' : getColor(cal.calendar_id).primary"
               [style.background-color]="selectedCalendarId() === cal.calendar_id ? getColor(cal.calendar_id).primary : 'white'"
-              (click)="onSelect(cal.calendar_id)"
-              (dblclick)="onActivate(cal.calendar_id)"
+              (click)="onActivate(cal.calendar_id)"
               [attr.data-secondary]="getColor(cal.calendar_id).secondary"
             >
               <span
@@ -57,7 +56,7 @@
 
     <!-- Footer -->
     <div class="modal-footer">
-      <div class="footer-hint"><i>Double-click a Calendar to open</i></div>
+      <div class="footer-hint"><i>Click a Calendar to open</i></div>
       <button class="btn btn-outline-secondary" (click)="onClose()">Cancel</button>
     </div>
   </div>

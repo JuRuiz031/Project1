@@ -150,12 +150,12 @@ describe('EditEventModal', () => {
     expect(dto.calendar_id).toBe('2');
     expect(dto.title).toBe('Updated Title');
 
-    // Build expected ISO the same way component does (LOCAL date parts -> toISOString)
-    const expectedStartIso = new Date(2026, 0, 26, 12, 0, 0, 0).toISOString();
-    const expectedEndIso = new Date(2026, 0, 26, 13, 0, 0, 0).toISOString();
+    // Timestamps are now local datetime strings (YYYY-MM-DDTHH:mm:ss format), not UTC ISO
+    const expectedStartLocal = '2026-01-26T12:00:00';
+    const expectedEndLocal = '2026-01-26T13:00:00';
 
-    expect(dto.start_time).toBe(expectedStartIso);
-    expect(dto.end_time).toBe(expectedEndIso);
+    expect(dto.start_time).toBe(expectedStartLocal);
+    expect(dto.end_time).toBe(expectedEndLocal);
 
     expect(eventUpdatedSpy).toHaveBeenCalledOnceWith('e1');
     expect(closeSpy).toHaveBeenCalled();

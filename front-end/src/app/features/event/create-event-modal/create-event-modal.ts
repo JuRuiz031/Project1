@@ -147,23 +147,18 @@ export class CreateEventModal implements OnInit {
       return;
     }
 
-    // Log timezone conversion for verification
-    console.log('[CreateEvent] User entered (local):', {
-      start: `${v.startDate}T${v.startTime}`,
-      end: `${v.endDate}T${v.endTime}`,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-    });
-    console.log('[CreateEvent] Sending to backend (UTC):', {
-      start: start.toISOString(),
-      end: end.toISOString()
-    });
+    // Format as local datetime string (YYYY-MM-DDTHH:mm:ss) without timezone conversion
+    const formatLocalDateTime = (d: Date): string => {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
 
     const dto: CreateEventDTO = {
       user_id: String(userId),
       calendar_id: String(v.calendarId),
       title: String(v.title),
-      start_time: start.toISOString(),
-      end_time: end.toISOString(),
+      start_time: formatLocalDateTime(start),
+      end_time: formatLocalDateTime(end),
       description: v.description ?? '',
       notes: v.notes ?? '',
       tags: this.tags(),

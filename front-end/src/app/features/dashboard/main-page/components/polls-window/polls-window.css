@@ -12,8 +12,12 @@
   display: grid;
   place-items: center;
   margin-bottom: 12px;
+  user-select: none; /* Prevent text selection on double-click */
 }
-
+/* Hover effect for poll items */
+.polls-window__panel .list-group-item:hover {
+  background-color: #f8f9fa;
+}
 .polls-window__placeholder {
   opacity: 0.65;
   font-weight: 600;

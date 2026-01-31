@@ -67,6 +67,22 @@
   color: var(--color-text-secondary);
 }
 
+/* Disabled inputs - keep readable with white background */
+.app-input:disabled,
+.app-select:disabled,
+.app-textarea:disabled,
+.form-control:disabled,
+.form-select:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background-color: #ffffff !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border-default) !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+
 /* Bootstrap invalid feedback is fine; but you can align color */
 .invalid-feedback,
 .alert-danger {

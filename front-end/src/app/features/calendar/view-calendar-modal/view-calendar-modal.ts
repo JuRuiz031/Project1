@@ -154,7 +154,8 @@ export class ViewCalendarModal implements OnDestroy {
         name: String(c.name ?? c.title ?? c.calendar_name ?? 'Untitled'),
         isAdmin: c.isAdmin ?? c.is_admin ?? false,
       }))
-      .filter(c => c.id);
+      .filter(c => c.id)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   onEditCalendar(): void {

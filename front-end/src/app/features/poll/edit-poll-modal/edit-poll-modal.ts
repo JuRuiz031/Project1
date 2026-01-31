@@ -212,14 +212,11 @@ export class EditPollModal implements OnInit {
   // ----------------------------
   // Time helpers
   // ----------------------------
-  private parseServerInstant(iso: string): Date {
-    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
-    return new Date(hasTz ? iso : `${iso}Z`);
-  }
-
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
-    const d = this.parseServerInstant(iso);
+    // Backend sends local datetime without timezone info
+    // Parse directly without timezone conversion
+    const d = new Date(iso);
     if (isNaN(d.getTime())) return { date: '', time: '' };
 
     const pad = (n: number) => String(n).padStart(2, '0');
@@ -375,14 +372,20 @@ export class EditPollModal implements OnInit {
       return;
     }
 
+    // Format as local datetime string (YYYY-MM-DDTHH:mm:ss) without timezone conversion
+    const formatLocalDateTime = (d: Date): string => {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+
     const dto: UpdatePollDTO = {
       user_id: String(userId),
       calendar_id: String(v.calendarId),
       title: String(v.title),
       description: (String(v.description ?? '')).trim() || undefined,
       notes: (String(v.notes ?? '')).trim() || undefined,
-      start_time: start.toISOString(),
-      end_time: end.toISOString(),
+      start_time: formatLocalDateTime(start),
+      end_time: formatLocalDateTime(end),
       results_visible: Boolean(v.results_visible),
       allow_multiple_votes: Boolean(v.allow_multiple_votes),
       options,
