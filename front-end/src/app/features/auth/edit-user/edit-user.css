@@ -1,53 +1,201 @@
-.card {
-  max-width: 900px;
-  margin: 0 auto;
+/* =====================================================
+   Edit Profile Page - Page-specific styles only
+   Shared profile styles are in global styles.css
+   ===================================================== */
+
+/* Form Layout */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
 }
 
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: #6c757d !important;
-  border-color: #6c757d !important;
+.form-group {
+  margin-bottom: 0;
 }
 
-.success-notification {
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #4caf50;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.optional-tag {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.input-wrapper:focus-within .input-icon {
+  color: var(--color-accent-primary);
+}
+
+.profile-input {
+  width: 100%;
+  padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+.profile-input:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px rgba(32, 129, 195, 0.15);
+}
+
+.profile-input.is-invalid {
+  border-color: var(--color-feedback-error);
+  background: var(--color-feedback-error-bg);
+}
+
+.profile-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.error-text {
+  display: block;
+  color: var(--color-feedback-error);
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+}
+
+/* Alert */
+.alert-danger {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: var(--color-feedback-error-bg);
+  border: 1px solid rgba(185, 28, 28, 0.2);
+  border-radius: 10px;
+  color: var(--color-feedback-error);
+  font-size: 0.875rem;
+  margin: 0 2rem 1rem;
+}
+
+.alert-danger svg {
+  flex-shrink: 0;
+}
+
+/* Footer Groups */
+.footer-left,
+.footer-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Buttons */
+.btn-cancel {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  z-index: 1050;
-  animation: slideDown 0.3s ease-out;
+  background: transparent;
+  border: 2px solid var(--color-border-default);
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+.btn-cancel:hover {
+  border-color: var(--color-text-secondary);
+  background: rgba(0, 0, 0, 0.03);
 }
 
-.notification-icon {
-  display: inline-flex;
+.btn-save {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  font-size: 14px;
-  font-weight: bold;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.btn-save:disabled {
+  cursor: not-allowed;
+}
+
+.btn-save.btn-ready {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(32, 129, 195, 0.3);
+}
+
+.btn-save.btn-ready:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(32, 129, 195, 0.4);
+}
+
+.btn-delete {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid var(--color-feedback-error);
+  border-radius: 8px;
+  color: var(--color-feedback-error);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-delete:hover {
+  background: var(--color-feedback-error);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .footer-left,
+  .footer-right {
+    width: 100%;
+  }
+  
+  .footer-left {
+    order: 2;
+  }
+  
+  .footer-right {
+    order: 1;
+    flex-direction: column;
+  }
+  
+  .btn-cancel,
+  .btn-save,
+  .btn-delete {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }

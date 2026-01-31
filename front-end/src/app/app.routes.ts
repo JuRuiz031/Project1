@@ -9,14 +9,10 @@ import { Login } from './features/auth/login/login';
 import { CreateAccount } from './features/auth/create-account/create-account';
 import { AccountView } from './features/auth/account-view/account-view';
 import { EditUser } from './features/auth/edit-user/edit-user';
-import { DeleteUser } from './features/auth/delete-user/delete-user';
 
 import { MainPageComponent } from './features/dashboard/main-page/main-page';
 
 import { ViewEvent } from './features/event/view-event/view-event';
-
-// import { CreatePoll } from './features/poll/create-poll/create-poll';
-import { DeletePoll } from './features/poll/delete-poll/delete-poll';
 
 export const routes: Routes = [
   /**
@@ -67,11 +63,8 @@ export const routes: Routes = [
 
       { path: 'account', component: AccountView },
       { path: 'edit-user', component: EditUser },
-      { path: 'delete-user', component: DeleteUser },
 
-      // Event routes removed - now all modals from main-page
-
-      { path: 'delete-poll/:pollId', component: DeletePoll },
+      // Event and Poll routes removed - now all modals from main-page
     ],
   },
 ];

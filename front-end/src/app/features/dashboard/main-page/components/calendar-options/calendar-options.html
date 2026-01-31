@@ -1,21 +1,23 @@
 <section class="calendar-options" aria-label="Calendar Options">
-  <h2 class="h6 mb-3"><strong>Calendar Options</strong></h2>
+  <div class="d-flex align-items-center gap-3">
+    <h2 class="mb-0" style="font-size: 16px; font-weight: 700;">Calendar Options</h2>
+    
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-primary-solid btn-sm"
+        (click)="onCreateCalendar()"
+      >
+        Create New Calendar
+      </button>
 
-  <div class="d-grid gap-2">
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="onCreateCalendar()"
-    >
-      Create New Calendar
-    </button>
-
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="onViewCalendars()"
-    >
-      View Calendars
-    </button>
+      <button
+        type="button"
+        class="btn btn-primary-solid btn-sm"
+        (click)="onViewCalendars()"
+      >
+        View Calendars
+      </button>
+    </div>
   </div>
 </section>

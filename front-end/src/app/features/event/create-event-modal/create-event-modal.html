@@ -1,5 +1,7 @@
 <app-base-modal 
-  [title]="'Create Event'" 
+  [title]="'Create Event'"
+  [size]="'large'"
+  [headerStyle]="'gradient'"
   (close)="onClose()">
 
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -18,132 +20,148 @@
         </div>
       </div>
     } @else {
-      <!-- Calendar dropdown -->
-      <div class="mb-3">
-        <label class="form-label">Calendar (admin only)</label>
-        <select
-          class="form-select app-select"
-          formControlName="calendarId"
-          [class.is-invalid]="hasError('calendarId')"
-        >
-          <option value="" disabled>Select calendar (admin only)</option>
-          @for (c of adminCalendars(); track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
-          }
-        </select>
-        <div class="invalid-feedback">Please select an admin calendar.</div>
-      </div>
-
-      <!-- Title -->
-      <div class="mb-3">
-        <label class="form-label">Event Title</label>
-        <input
-          type="text"
-          class="form-control app-input"
-          placeholder="Event Title"
-          formControlName="title"
-          [class.is-invalid]="hasError('title')"
-        />
-        <div class="invalid-feedback">Title is required (min 2 chars).</div>
-      </div>
-
-      <!-- Dates / times -->
       <div class="row g-3">
-        <div class="col-12 col-md-6">
-          <label class="form-label">Start date</label>
-          <input
-            type="date"
-            class="form-control app-input"
-            formControlName="startDate"
-            [class.is-invalid]="hasError('startDate')"
-          />
-          <div class="invalid-feedback">Start date required.</div>
-        </div>
-
-        <div class="col-12 col-md-6">
-          <label class="form-label">Start time</label>
-          <input
-            type="time"
-            class="form-control app-input"
-            formControlName="startTime"
-            [class.is-invalid]="hasError('startTime')"
-          />
-          <div class="invalid-feedback">Start time required.</div>
-        </div>
-
-        <div class="col-12 col-md-6">
-          <label class="form-label">End date</label>
-          <input
-            type="date"
-            class="form-control app-input"
-            formControlName="endDate"
-            [class.is-invalid]="hasError('endDate')"
-          />
-          <div class="invalid-feedback">End date required.</div>
-        </div>
-
-        <div class="col-12 col-md-6">
-          <label class="form-label">End time</label>
-          <input
-            type="time"
-            class="form-control app-input"
-            formControlName="endTime"
-            [class.is-invalid]="hasError('endTime')"
-          />
-          <div class="invalid-feedback">End time required.</div>
-        </div>
-      </div>
-
-      <!-- Description -->
-      <div class="mt-3 mb-3">
-        <label class="form-label">Description</label>
-        <textarea
-          rows="4"
-          class="form-control app-textarea"
-          placeholder="Description"
-          formControlName="description"
-        ></textarea>
-      </div>
-
-      <!-- Notes -->
-      <div class="mb-3">
-        <label class="form-label">Notes</label>
-        <textarea
-          rows="4"
-          class="form-control app-textarea"
-          placeholder="Notes"
-          formControlName="notes"
-        ></textarea>
-      </div>
-
-      <!-- Tags -->
-      <div class="mb-3">
-        <label class="form-label">Tags</label>
-        <div class="tag-input-container">
-          <input
-            type="text"
-            class="form-control app-input"
-            placeholder="Type a tag and press Enter"
-            [(ngModel)]="tagInput"
-            [ngModelOptions]="{standalone: true}"
-            (keypress)="onTagKeyPress($event)"
-          />
-          <button type="button" class="btn btn-sm btn-outline-primary" (click)="addTag()">
-            Add
-          </button>
-        </div>
-        @if (tags().length > 0) {
-          <div class="tags-list">
-            @for (tag of tags(); track tag) {
-              <span class="tag-chip-editable">
-                {{ tag }}
-                <button type="button" class="tag-remove" (click)="removeTag(tag)" aria-label="Remove tag">
-                  ×
-                </button>
-              </span>
-            }
+        <!-- LEFT COLUMN -->
+        <div class="col-12 col-lg-7">
+          <!-- Calendar dropdown -->
+          <div class="mb-3">
+            <label class="form-label">Calendar (admin only)</label>
+            <select
+              class="form-select app-select"
+              formControlName="calendarId"
+              [class.is-invalid]="hasError('calendarId')"
+            >
+              <option value="" disabled>Select calendar (admin only)</option>
+              @for (c of adminCalendars(); track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            </select>
+            <div class="invalid-feedback">Please select an admin calendar.</div>
           </div>
-        }
+
+          <!-- Title -->
+          <div class="mb-3">
+            <label class="form-label">Event Title</label>
+            <input
+              type="text"
+              class="form-control app-input"
+              placeholder="Event Title"
+              formControlName="title"
+              [class.is-invalid]="hasError('title')"
+            />
+            <div class="invalid-feedback">Title is required (min 2 chars).</div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea
+              rows="4"
+              class="form-control app-textarea"
+              placeholder="Description"
+              formControlName="description"
+            ></textarea>
+          </div>
+
+          <!-- Dates / times -->
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">Start date</label>
+              <input
+                type="date"
+                class="form-control app-input"
+                formControlName="startDate"
+                [class.is-invalid]="hasError('startDate')"
+              />
+              <div class="invalid-feedback">Start date required.</div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Start time</label>
+              <input
+                type="time"
+                class="form-control app-input"
+                formControlName="startTime"
+                [class.is-invalid]="hasError('startTime')"
+              />
+              <div class="invalid-feedback">Start time required.</div>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label">End date</label>
+              <input
+                type="date"
+                class="form-control app-input"
+                formControlName="endDate"
+                [class.is-invalid]="hasError('endDate')"
+              />
+              <div class="invalid-feedback">End date required.</div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">End time</label>
+              <input
+                type="time"
+                class="form-control app-input"
+                formControlName="endTime"
+                [class.is-invalid]="hasError('endTime')"
+              />
+              <div class="invalid-feedback">End time required.</div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea
+              rows="4"
+              class="form-control app-textarea"
+              placeholder="Notes"
+              formControlName="notes"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-12 col-lg-5">
+          <div class="border rounded p-3">
+            <div class="fw-semibold mb-3">Tags</div>
+
+            @if (tags().length > 0) {
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                @for (tag of tags(); track tag) {
+                  <span class="badge d-inline-flex align-items-center">
+                    {{ tag }}
+                    <button
+                      type="button"
+                      class="btn-sm"
+                      (click)="removeTag(tag)"
+                      aria-label="Remove tag"
+                    >
+                      ×
+                    </button>
+                  </span>
+                }
+              </div>
+            }
+
+            <div class="input-group">
+              <input
+                class="form-control app-input"
+                type="text"
+                placeholder="Add a tag..."
+                [(ngModel)]="tagInput"
+                [ngModelOptions]="{ standalone: true }"
+                (keydown.enter)="addTag()"
+              />
+              <button class="btn btn-outline-primary" type="button" (click)="addTag()">
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Action buttons -->

@@ -1,23 +1,36 @@
 <main class="page">
-  <section class="layout">
-    <!-- LEFT: Calendar display area -->
-    <app-calendar-display 
-      class="card card--calendar"
-      [events]="events()"
-      [selectedTags]="selectedTags()"
-      (openEventSelector)="openEventSelector()"
-      (eventClicked)="onEventClicked($event)"
-      (createEvent)="openCreateEvent()">
-    </app-calendar-display>
+  <!-- Toast Notification for success messages on main page -->
+  @if (showToast()) {
+    <div class="toast-notification toast-success">
+      <span class="toast-icon">✓</span>
+      <span class="toast-message">{{ toastMessage() }}</span>
+      <button class="toast-close" (click)="dismissToast()">✕</button>
+    </div>
+  }
 
-    <!-- RIGHT: Side panel stack -->
-    <aside class="side">
+  <section class="layout">
+    <!-- LEFT: Calendar area with options above -->
+    <div class="calendar-column">
       <app-calendar-options
-        class="card"
+        class="card card--calendar-options"
         (createCalendar)="openCreateCalendar()"
         (viewCalendars)="openCalendarSelector()">
       </app-calendar-options>
 
+      <app-calendar-display 
+        class="card card--calendar"
+        [events]="events()"
+        [polls]="polls()"
+        [selectedTags]="selectedTags()"
+        (openEventSelector)="openEventSelector()"
+        (eventClicked)="onEventClicked($event)"
+        (pollClicked)="onPollClicked($event)"
+        (createEvent)="openCreateEvent()">
+      </app-calendar-display>
+    </div>
+
+    <!-- RIGHT: Side panel stack -->
+    <aside class="side">
       <app-display-options
         class="card"
         [calendars]="calendars()"
@@ -102,7 +115,6 @@
   @if (modalState() === 'view-event') {
     <app-view-event-modal
       [eventId]="selectedEventId()"
-      [showSuccessMessage]="showEventSuccessMessage()"
       (back)="onViewEventBack()"
       (close)="closeAllModals()"
       (editEvent)="openEditEvent(selectedEventId()!)">
@@ -127,11 +139,11 @@
     </app-edit-event-modal>
   }
 
-  <!-- Delete Event Modal -->
-  @if (modalState() === 'delete-event') {
+  <!-- Delete Event Overlay (appears on top of edit modal) -->
+  @if (showDeleteEventOverlay()) {
     <app-delete-event-modal
       [eventId]="selectedEventId()!"
-      (close)="closeAllModals()"
+      (close)="closeDeleteEventOverlay()"
       (eventDeleted)="onEventDeleted($event)">
     </app-delete-event-modal>
   }
@@ -170,8 +182,17 @@
     [pollId]="selectedPollId()!"
     (close)="closeAllModals()"
     (saved)="onPollUpdated($event)"
-    (deleted)="onPollDeleted()">
+    (deleted)="openDeletePoll($event)">
   </app-edit-poll-modal>
+}
+
+<!-- Delete Poll Overlay (appears on top of edit modal) -->
+@if (showDeletePollOverlay()) {
+  <app-delete-poll-modal
+    [pollId]="selectedPollId()!"
+    (close)="closeDeletePollOverlay()"
+    (pollDeleted)="onPollDeleted($event)">
+  </app-delete-poll-modal>
 }
 
 </main>

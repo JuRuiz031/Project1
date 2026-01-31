@@ -1,19 +1,25 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
 import { NavigationService } from '../../../shared/services/navigation.service';
+import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 
 @Component({
-  selector: 'app-delete-user',
+  selector: 'app-delete-user-modal',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './delete-user.html',
-  styleUrls: ['./delete-user.css'],
+  imports: [CommonModule, BaseModal],
+  templateUrl: './delete-user-modal.component.html',
+  styleUrls: ['./delete-user-modal.component.css'],
 })
-export class DeleteUser {
+export class DeleteUserModalComponent {
   private navigation = inject(NavigationService);
   private userApi = inject(UserApiService);
 
+  // Outputs (cancelled for parent, userDeleted for confirmation)
+  cancelled = output<void>();
+  confirmed = output<void>();
+
+  // State
   userName = signal('');
   userId = signal('');
   apiError = signal('');
@@ -59,7 +65,9 @@ export class DeleteUser {
 
     this.userApi.deleteUser(userId).subscribe({
       next: () => {
+        // Clear local storage and navigate to login
         localStorage.clear();
+        this.confirmed.emit();
         this.navigation.goToLogin();
       },
       error: (err) => {
@@ -71,6 +79,6 @@ export class DeleteUser {
   }
 
   cancelDelete(): void {
-    this.navigation.goToEditUser();
+    this.cancelled.emit();
   }
 }

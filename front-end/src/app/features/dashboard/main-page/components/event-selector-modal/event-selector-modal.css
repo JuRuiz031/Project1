@@ -23,18 +23,79 @@
   overflow: hidden;
 }
 
+/* Success banner styling */
+.success-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #d4edda;
+  border-bottom: 1px solid #c3e6cb;
+  color: #155724;
+  font-weight: 500;
+}
+
+.success-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid #e0e0e0;
+  gap: 20px;
+}
+
+.modal-header-gradient {
+  background: var(--gradient-primary);
+  border-bottom: none;
+  padding: 24px 20px;
 }
 
 .modal-title {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
+}
+
+.modal-header-gradient .modal-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.status-tabs {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+.status-tab {
+  padding: 6px 16px;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: var(--color-text-secondary);
+}
+
+.status-tab:hover {
+  background: var(--color-background-primary);
+  border-color: var(--color-accent-secondary);
+  color: var(--color-text-primary);
+}
+
+.status-tab.active {
+  background: var(--color-accent-primary);
+  color: white;
+  border-color: var(--color-accent-primary);
 }
 
 .modal-close-btn {
@@ -58,6 +119,15 @@
 
 .modal-close-btn:active {
   color: #c82333;
+}
+
+.modal-close-btn-gradient {
+  color: white;
+}
+
+.modal-close-btn-gradient:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-search {

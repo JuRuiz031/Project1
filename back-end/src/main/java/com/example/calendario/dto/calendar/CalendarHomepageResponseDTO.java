@@ -23,12 +23,23 @@ public class CalendarHomepageResponseDTO {
         @JsonProperty("is_admin")
         private Boolean isAdmin;
         
+        @JsonProperty("users")
+        private List<UserInfo> users;
+        
         public CalendarInfo() {}
         
         public CalendarInfo(String calendarId, String name, Boolean isAdmin) {
             this.calendarId = calendarId;
             this.name = name;
             this.isAdmin = isAdmin;
+            this.users = new java.util.ArrayList<>();
+        }
+        
+        public CalendarInfo(String calendarId, String name, Boolean isAdmin, List<UserInfo> users) {
+            this.calendarId = calendarId;
+            this.name = name;
+            this.isAdmin = isAdmin;
+            this.users = users;
         }
         
         public String getCalendarId() { return calendarId; }
@@ -37,6 +48,44 @@ public class CalendarHomepageResponseDTO {
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
 
+        public Boolean getIsAdmin() { return isAdmin; }
+        public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
+        
+        public List<UserInfo> getUsers() { return users; }
+        public void setUsers(List<UserInfo> users) { this.users = users; }
+    }
+    
+    // Inner class for user info
+    public static class UserInfo {
+        @JsonProperty("user_id")
+        private String userId;
+        
+        @JsonProperty("username")
+        private String username;
+        
+        @JsonProperty("is_admin")
+        private Boolean isAdmin;
+        
+        public UserInfo() {}
+        
+        public UserInfo(String userId, String username) {
+            this.userId = userId;
+            this.username = username;
+            this.isAdmin = false;
+        }
+        
+        public UserInfo(String userId, String username, Boolean isAdmin) {
+            this.userId = userId;
+            this.username = username;
+            this.isAdmin = isAdmin;
+        }
+        
+        public String getUserId() { return userId; }
+        public void setUserId(String userId) { this.userId = userId; }
+        
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+        
         public Boolean getIsAdmin() { return isAdmin; }
         public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
     }

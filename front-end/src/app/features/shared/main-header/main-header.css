@@ -5,3 +5,69 @@
 .app-navbar .navbar-brand {
   font-size: 20px;
 }
+
+/* Nav Actions Container */
+.nav-actions {
+  margin-right: 20px;
+}
+
+/* Nav Buttons - Highly visible on gradient */
+.btn-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 8px;
+  color: var(--color-steel-blue);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-nav:hover {
+  background: white;
+  color: var(--color-accent-tertiary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-nav:active {
+  transform: translateY(0);
+}
+
+.btn-nav svg {
+  flex-shrink: 0;
+}
+
+/* Logout button - subtle danger hint */
+.btn-nav--logout {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.btn-nav--logout:hover {
+  background: white;
+  color: var(--color-feedback-error);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .btn-nav {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .btn-nav svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .nav-actions {
+    margin-right: 10px;
+    gap: 0.35rem !important;
+  }
+}

@@ -1,11 +1,36 @@
-<div class="container py-4 app-page">
-  <div class="card app-card shadow-sm calendar-display-card">
-    <div class="card-body">
+<div class="calendar-display-wrapper">
+  <div class="card app-card shadow-sm">
+    <div class="card-body p-2">
       <section class="calendar-display" aria-label="Calendar Display Area">
         <!-- Top controls -->
         <header class="calendar-display__header">
           <div class="calendar-display__title">
             Calendar Display
+          </div>
+          
+          <!-- Calendar Display Filter Tabs -->
+          <div class="calendar-filter-tabs">
+            <button
+              class="calendar-filter-tab"
+              [class.active]="calendarFilter() === 'all'"
+              (click)="setCalendarFilter('all')"
+            >
+              All ({{ totalCount() }})
+            </button>
+            <button
+              class="calendar-filter-tab"
+              [class.active]="calendarFilter() === 'events'"
+              (click)="setCalendarFilter('events')"
+            >
+              Events ({{ eventsCount() }})
+            </button>
+            <button
+              class="calendar-filter-tab"
+              [class.active]="calendarFilter() === 'polls'"
+              (click)="setCalendarFilter('polls')"
+            >
+              Polls ({{ pollsCount() }})
+            </button>
           </div>
         </header>
 
@@ -22,7 +47,7 @@
         <footer class="calendar-display__footer">
           <button
             type="button"
-            class="btn btn-primary"
+            class="btn btn-primary-solid"
             (click)="createEvent.emit()"
           >
             Create Event
@@ -30,7 +55,7 @@
 
           <button
             type="button"
-            class="btn btn-primary"
+            class="btn btn-primary-solid"
             (click)="onOpenEventSelector()"
           >
             View Events

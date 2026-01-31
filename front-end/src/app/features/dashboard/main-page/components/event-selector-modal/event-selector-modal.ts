@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { getCalendarColor } from '../../../../../config/calendar-colors';
 
 type CalendarOption = { calendar_id: string; name: string };
+type EventStatus = 'all' | 'upcoming' | 'past';
 
 type EventDTO = {
   event_id: string;
@@ -28,6 +29,8 @@ export class EventSelectorModal implements OnDestroy {
   // Inputs & Outputs
   events = input<EventDTO[]>([]);
   calendars = input<CalendarOption[]>([]);
+  showSuccessMessage = input<boolean>(false);
+  successMessageText = input<string>('');
   eventSelected = output<string>();  // Emit event ID instead of navigating
   closeModal = output<void>();
 
@@ -35,6 +38,7 @@ export class EventSelectorModal implements OnDestroy {
   searchQuery = signal('');
   selectedTags = signal<string[]>([]);
   selectedCalendarIds = signal<string[]>([]);
+  selectedStatus = signal<EventStatus>('all');
 
   // Computed: extract all unique tags from events
   allTags = computed(() => {
@@ -45,9 +49,29 @@ export class EventSelectorModal implements OnDestroy {
     return Array.from(tagSet).sort();
   });
 
-  // Computed: filter events by search query (title, description, calendar name, or tags) AND selected tags AND selected calendars
+  // Computed: count events by status
+  upcomingCount = computed(() => {
+    const now = new Date();
+    return this.events().filter(e => new Date(e.end_time) > now).length;
+  });
+
+  pastCount = computed(() => {
+    const now = new Date();
+    return this.events().filter(e => new Date(e.end_time) <= now).length;
+  });
+
+  // Computed: filter events by search query (title, description, calendar name, or tags) AND selected tags AND selected calendars AND status
   filteredEvents = computed(() => {
+    const now = new Date();
     let filtered = this.events();
+    
+    // Filter by status
+    const status = this.selectedStatus();
+    if (status === 'upcoming') {
+      filtered = filtered.filter(e => new Date(e.end_time) > now);
+    } else if (status === 'past') {
+      filtered = filtered.filter(e => new Date(e.end_time) <= now);
+    }
     
     // Filter by selected calendars
     const selectedCals = this.selectedCalendarIds();
@@ -129,6 +153,10 @@ export class EventSelectorModal implements OnDestroy {
 
   clearCalendarFilters(): void {
     this.selectedCalendarIds.set([]);
+  }
+
+  setStatusFilter(status: EventStatus): void {
+    this.selectedStatus.set(status);
   }
 
   getCalendarColor(calendarId: string): { primary: string; secondary: string } {

@@ -219,7 +219,7 @@ export class EditEventModal implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.eventUpdated.emit(this.eventIdValue);
-        this.close.emit();
+        // Don't emit close - parent's onEventUpdated handler changes modal state
       },
       error: (err) => {
         this.isSubmitting.set(false);

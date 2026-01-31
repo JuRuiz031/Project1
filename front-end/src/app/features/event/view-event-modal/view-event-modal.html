@@ -1,6 +1,8 @@
 <app-base-modal 
-  [title]="'View Event'" 
+  [title]="'View Event'"
+  [subtitle]="'Event details and information'"
   [size]="'large'"
+  [headerStyle]="'gradient'"
   (close)="onClose()">
 
   <!-- Header Actions (Share button) -->
@@ -153,10 +155,6 @@
 
     @if (canEdit()) {
       <button class="btn btn-primary" (click)="onEditEvent()">
-        Edit Event
-      </button>
-    } @else {
-      <button class="btn btn-primary" disabled title="You don't have permission to edit this event">
         Edit Event
       </button>
     }

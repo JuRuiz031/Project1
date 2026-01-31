@@ -70,12 +70,35 @@
   gap: 12px;
 }
 
+/* Gradient Header Variant */
+.modal-header-gradient {
+  background: var(--gradient-primary);
+  border-bottom: none;
+  padding: 24px 20px;
+}
+
+.modal-title-container {
+  flex: 1;
+  text-align: center;
+}
+
 .modal-title {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  flex: 1;
-  text-align: center;
+}
+
+.modal-header-gradient .modal-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.modal-subtitle {
+  margin: 6px 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  color: white;
 }
 
 /* Back Button */
@@ -102,6 +125,15 @@
   background-color: #e0e0e0;
 }
 
+.modal-back-btn-gradient {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modal-back-btn-gradient:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* Close Button */
 .modal-close-btn {
   background: none;
@@ -116,7 +148,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: color 0.2s;
+  transition: color 0.2s, background-color 0.2s;
 }
 
 .modal-close-btn:hover {
@@ -125,6 +157,15 @@
 
 .modal-close-btn:active {
   color: #c82333;
+}
+
+.modal-close-btn-gradient {
+  color: white;
+}
+
+.modal-close-btn-gradient:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Modal Body - scrollable content area */

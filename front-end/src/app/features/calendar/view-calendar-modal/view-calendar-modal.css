@@ -33,6 +33,12 @@
   flex-shrink: 0;
 }
 
+.modal-header-gradient {
+  background: var(--gradient-primary);
+  border-bottom: none;
+  padding: 24px 20px;
+}
+
 .header-left {
   display: flex;
   align-items: center;
@@ -41,6 +47,12 @@
 
 .modal-title {
   margin: 0;
+}
+
+.modal-header-gradient .modal-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .modal-body {
@@ -91,7 +103,7 @@
 
 /* Share overlay inside modal */
 .share-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -101,7 +113,6 @@
   align-items: center;
   justify-content: center;
   z-index: 1002;
-  border-radius: 8px;
 }
 
 .share-popup {
@@ -126,6 +137,36 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #dc3545;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.modal-close-btn-gradient {
+  color: white;
+}
+
+.modal-close-btn-gradient:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .popup-close-btn {
@@ -249,6 +290,13 @@
 
 .user-name {
   font-weight: 500;
+}
+
+.admin-badge {
+  font-size: 0.85rem;
+  color: #6c757d !important;
+  font-style: italic;
+  font-weight: 400;
 }
 
 .calendar-name-input:disabled {

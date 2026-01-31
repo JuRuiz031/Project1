@@ -23,17 +23,82 @@
   overflow: hidden;
 }
 
+/* Success banner styling */
+.success-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #d4edda;
+  border-bottom: 1px solid #c3e6cb;
+  color: #155724;
+  font-weight: 500;
+}
+
+.success-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid #e0e0e0;
+  gap: 20px;
+}
+
+.modal-header-gradient {
+  background: var(--gradient-primary);
+  border-bottom: none;
+  padding: 24px 20px;
 }
 
 .modal-title {
   margin: 0;
   font-size: 20px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.modal-header-gradient .modal-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Status filter tabs in header */
+.status-tabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+
+.status-tab {
+  padding: 8px 16px;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all 0.2s;
+}
+
+.status-tab:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-background-primary);
+  border-color: var(--color-accent-secondary);
+}
+
+.status-tab.active {
+  color: white;
+  background-color: var(--color-accent-primary);
+  border-color: var(--color-accent-primary);
   font-weight: 600;
 }
 
@@ -46,6 +111,7 @@
   padding: 0;
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,6 +124,15 @@
 
 .modal-close-btn:active {
   color: #c82333;
+}
+
+.modal-close-btn-gradient {
+  color: white;
+}
+
+.modal-close-btn-gradient:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-search {

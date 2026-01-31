@@ -32,10 +32,22 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
+.modal-header-gradient {
+  background: var(--gradient-primary);
+  border-bottom: none;
+  padding: 24px 20px;
+}
+
 .modal-title {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
+}
+
+.modal-header-gradient .modal-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .modal-close-btn {
@@ -59,6 +71,15 @@
 
 .modal-close-btn:active {
   color: #c82333;
+}
+
+.modal-close-btn-gradient {
+  color: white;
+}
+
+.modal-close-btn-gradient:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-search {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input, output, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal, computed, effect, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
@@ -15,12 +15,30 @@ import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/cale
   templateUrl: './view-poll-modal.html',
   styleUrls: ['./view-poll-modal.css'],
 })
-export class ViewPollModal implements OnInit {
+export class ViewPollModal implements OnInit, OnDestroy {
   private calendarService = inject(CalendarService);
   private pollService = inject(PollService);
 
+  constructor() {
+    document.body.style.overflow = 'hidden';
+
+    // Show notification when success message input is true
+    effect(() => {
+      const showSuccess = this.showSuccessMessage();
+      if (showSuccess) {
+        this.showNotification.set(true);
+        setTimeout(() => this.showNotification.set(false), 3000);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+  }
+
   title = input<string>('View Poll');
   pollId = input<string>('');
+  showSuccessMessage = input<boolean>(false);
 
   back = output<void>();
   close = output<void>();
@@ -30,6 +48,15 @@ export class ViewPollModal implements OnInit {
   calendarName = signal<string>('');   // ✅ add
   apiError = signal('');
   isLoading = signal(false);
+  showNotification = signal(false);
+
+  // Admin calendars for permission checking
+  private adminCalendarIds = signal<string[]>([]);
+  canEdit = computed(() => {
+    const p = this.poll();
+    if (!p) return false;
+    return this.adminCalendarIds().includes(p.calendar_id);
+  });
 
   // voting state
   voteError = signal('');
@@ -96,9 +123,16 @@ export class ViewPollModal implements OnInit {
     this.selectedSingleOptionId.set(null);
     this.selectedMultiOptionIds.set([]);
 
-    // optional: preselect first option for single-vote polls
-    if (!p.allow_multiple_votes && p.options?.length) {
-      this.selectedSingleOptionId.set(p.options[0].option_id);
+    // check if user has already voted
+    const userId = this.getUserIdFromStorage();
+    if (userId) {
+      const userHasVoted = this.checkIfUserVoted(p, userId);
+      this.hasVoted.set(userHasVoted);
+      
+      // if user has voted, preselect their choices
+      if (userHasVoted) {
+        this.preselectUserVotes(p, userId);
+      }
     }
   }
 
@@ -109,6 +143,12 @@ export class ViewPollModal implements OnInit {
       next: (home: CalendarHomeDTO) => {
         const match = (home.calendars ?? []).find(c => c.calendar_id === calendarId);
         this.calendarName.set(match?.name ?? calendarId); // fallback to id
+        
+        // Store admin calendar IDs for permission checking
+        const adminIds = (home.calendars ?? [])
+          .filter(c => c.is_admin)
+          .map(c => c.calendar_id);
+        this.adminCalendarIds.set(adminIds);
       },
       error: () => {
         // fallback: just show id if homepage load fails
@@ -173,12 +213,49 @@ formatLocalTime(iso: string): string {
     }
   }
 
+  /**
+   * Check if the user has already voted in this poll
+   */
+  private checkIfUserVoted(p: PollDTO, userId: string): boolean {
+    return (p.options ?? []).some(opt => 
+      (opt.user_votes ?? []).includes(userId)
+    );
+  }
+
+  /**
+   * Preselect the options that the user has already voted for
+   */
+  private preselectUserVotes(p: PollDTO, userId: string): void {
+    const votedOptions = (p.options ?? [])
+      .filter(opt => (opt.user_votes ?? []).includes(userId))
+      .map(opt => opt.option_id);
+
+    if (!p.allow_multiple_votes && votedOptions.length > 0) {
+      this.selectedSingleOptionId.set(votedOptions[0]);
+    } else if (p.allow_multiple_votes) {
+      this.selectedMultiOptionIds.set(votedOptions);
+    }
+  }
+
   // -------------------------
   // Option selection handlers
   // -------------------------
+  isOptionSelected(optionId: number): boolean {
+    const p = this.poll();
+    if (!p) return false;
+    
+    if (p.allow_multiple_votes) {
+      return this.selectedMultiOptionIds().includes(optionId);
+    } else {
+      return this.selectedSingleOptionId() === optionId;
+    }
+  }
+
   selectSingle(optionId: number): void {
     this.voteError.set('');
-    this.selectedSingleOptionId.set(optionId);
+    // Toggle: if already selected, deselect it
+    const current = this.selectedSingleOptionId();
+    this.selectedSingleOptionId.set(current === optionId ? null : optionId);
   }
 
   toggleMulti(optionId: number): void {
@@ -193,6 +270,51 @@ formatLocalTime(iso: string): string {
   // vote counts
   getTotalVotesForOption(opt: { user_votes: string[] | null; guest_votes: string[] | null }): number {
     return (opt.user_votes?.length ?? 0) + (opt.guest_votes?.length ?? 0);
+  }
+
+  isWinningOption(optionId: number): boolean {
+    const p = this.poll();
+    if (!p || !p.options || p.options.length === 0) return false;
+
+    // Calculate max votes
+    const maxVotes = Math.max(...p.options.map(opt => this.getTotalVotesForOption(opt)));
+    
+    // If no votes yet, no winner
+    if (maxVotes === 0) return false;
+
+    // Check if this option has the max votes
+    const thisOption = p.options.find(opt => opt.option_id === optionId);
+    if (!thisOption) return false;
+
+    return this.getTotalVotesForOption(thisOption) === maxVotes;
+  }
+
+  /**
+   * Only show winning indicators if user has voted OR poll has ended
+   */
+  shouldShowWinningIndicator(): boolean {
+    return this.hasVoted() || this.isPollEnded();
+  }
+
+  isPollEnded(): boolean {
+    const p = this.poll();
+    if (!p || !p.end_time) return false;
+    
+    const now = new Date();
+    const endTime = new Date(p.end_time);
+    return now > endTime;
+  }
+
+  getVoteLabel(): string {
+    return '✓ Your Vote';
+  }
+
+  getWinningLabel(): string {
+    return this.isPollEnded() ? '🏆 Winner' : '🏆 Leading';
+  }
+
+  getVotedAndWinningLabel(): string {
+    return this.isPollEnded() ? '✓ Your Vote 🏆 Winner' : '✓ Your Vote 🏆 Leading';
   }
 
   canShowResults(p: PollDTO): boolean {

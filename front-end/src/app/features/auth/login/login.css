@@ -1,58 +1,66 @@
-.page-container {
-  min-height: 100vh;
-  padding: 32px 16px;
+/* =====================================================
+   Login Page - Page-specific overrides only
+   Shared styles are in global styles.css
+   ===================================================== */
 
-  background: radial-gradient(
-    circle at top,
-    var(--color-background-secondary) 0%,
-    var(--color-background-primary) 55%,
-    var(--color-background-primary) 100%
-  );
-  color: var(--color-text-primary);
+/* Login gradient - steel blue to tertiary */
+.auth-page {
+  background: linear-gradient(135deg, var(--color-steel-blue) 0%, var(--color-accent-tertiary) 100%);
 }
 
-.title-box,
-.login-box {
-  max-width: 520px;
-  margin: 0 auto;
-  border: 2px solid var(--color-border-default);
-  background: var(--color-background-secondary);
-}
-
-.title-box h1 {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: var(--color-text-primary);
-}
-
-.login-box h2 {
-  font-size: 20px;
-  color: var(--color-text-primary);
-}
-
-.welcome-text {
+/* Login button uses primary gradient */
+.btn-sign-in {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--color-border-default);
   color: var(--color-text-secondary);
-  font-size: 13px;
-  line-height: 1.35;
 }
 
-.error-text {
-  display: inline-block;
-  margin-top: 6px;
-  color: var(--color-feedback-error);
-  font-size: 12px;
+.btn-sign-in:disabled {
+  cursor: not-allowed;
 }
 
-.app-input {
-  border: 1px solid var(--color-border-default);
-  background: var(--color-background-primary);
+.btn-sign-in.btn-ready {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(32, 129, 195, 0.4);
+}
+
+.btn-sign-in.btn-ready:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(32, 129, 195, 0.5);
+}
+
+.btn-sign-in.btn-ready:active {
+  transform: translateY(0);
+}
+
+/* Create account secondary button */
+.btn-create-account {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
   color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.btn-sign-in,
-.btn-create {
-  width: 200px;
-  height: 36px;
-  border-radius: 8px;
+.btn-create-account:hover {
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  background: rgba(32, 129, 195, 0.05);
 }

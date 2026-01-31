@@ -16,6 +16,7 @@ import { CreatePollModal } from '../../poll/create-poll-modal/create-poll-modal'
 import { PollSelectorModal } from '../../poll/poll-selector-modal/poll-selector-modal';
 import { ViewPollModal } from '../../poll/view-poll-modal/view-poll-modal';
 import { EditPollModal } from '../../poll/edit-poll-modal/edit-poll-modal';
+import { DeletePollModal } from '../../poll/delete-poll-modal/delete-poll-modal';
 import { CreateCalendarModal } from '../../calendar/create-calendar-modal/create-calendar-modal';
 import { CalendarSelectorModal } from '../../calendar/calendar-selector-modal/calendar-selector-modal';
 import { ViewCalendarModal } from '../../calendar/view-calendar-modal/view-calendar-modal';
@@ -43,7 +44,8 @@ type ModalState =
   | 'create-poll'
   | 'poll-selector'
   | 'view-poll'
-  | 'edit-poll';
+  | 'edit-poll'
+  | 'delete-poll';
 
 @Component({
   selector: 'app-main-page',
@@ -68,6 +70,7 @@ type ModalState =
     PollSelectorModal,
     ViewPollModal,
     EditPollModal,
+    DeletePollModal,
   ],
   
   templateUrl: './main-page.html',
@@ -90,7 +93,19 @@ export class MainPageComponent implements OnInit {
   modalState = signal<ModalState>('none');
   selectedEventId = signal<string | null>(null);
   selectedPollId = signal<string | null>(null);
-  showEventSuccessMessage = signal(false);
+
+  // Delete confirmation overlay (shown on top of edit modal)
+  showDeleteEventOverlay = signal(false);
+  showDeletePollOverlay = signal(false);
+  
+  // Track where user came from for navigation after deletion
+  cameFromEventSelector = signal(false);
+  cameFromPollSelector = signal(false);
+
+  // Toast notification for main page
+  showToast = signal(false);
+  toastMessage = signal('');
+  private toastTimeout: any = null;
 
   // User info
   userId: string | null = null;
@@ -259,6 +274,8 @@ export class MainPageComponent implements OnInit {
     } else {
       this.selectedCalendarIds.set([...current]);
     }
+    
+    this.showToastNotification('Calendar created successfully!');
   }
 
   openCalendarSelector(): void {
@@ -315,6 +332,7 @@ export class MainPageComponent implements OnInit {
           // refresh calendar list + close
           this.loadCalendarHome();
           this.closeAllModals();
+          this.showToastNotification('Calendar deleted successfully!');
         },
         error: (err) => {
           this.isDeletingCalendar.set(false);
@@ -332,6 +350,7 @@ export class MainPageComponent implements OnInit {
     console.log('[MainPage] Calendar updated:', calendarId);
     this.loadCalendarHome(); // refresh calendar list names
     this.closeAllModals();
+    this.showToastNotification('Calendar updated successfully!');
   }
 
   onDeleteCalendarRequested(calendarId: string): void {
@@ -359,8 +378,19 @@ export class MainPageComponent implements OnInit {
    */
   onEventClicked(eventId: string): void {
     console.log('[MainPage] Event clicked from calendar:', eventId);
+    this.cameFromEventSelector.set(false);
     this.selectedEventId.set(eventId);
     this.modalState.set('view-event');
+  }
+
+  /**
+   * When user clicks on poll directly in calendar
+   */
+  onPollClicked(pollId: string): void {
+    console.log('[MainPage] Poll clicked from calendar:', pollId);
+    this.cameFromPollSelector.set(false);
+    this.selectedPollId.set(pollId);
+    this.modalState.set('view-poll');
   }
 
   /**
@@ -368,6 +398,7 @@ export class MainPageComponent implements OnInit {
    */
   onEventSelected(eventId: string): void {
     console.log('[MainPage] Event selected from modal:', eventId);
+    this.cameFromEventSelector.set(true);
     this.selectedEventId.set(eventId);
     this.modalState.set('view-event');
   }
@@ -397,7 +428,40 @@ export class MainPageComponent implements OnInit {
     this.selectedEventId.set(null);
     this.selectedCalendarId.set(null);
     this.selectedPollId.set(null);
-    this.showEventSuccessMessage.set(false);
+    this.showDeleteEventOverlay.set(false);
+    this.showDeletePollOverlay.set(false);
+    this.cameFromEventSelector.set(false);
+    this.cameFromPollSelector.set(false);
+  }
+
+  /**
+   * Show a toast notification on the main page
+   */
+  showToastNotification(message: string, duration: number = 4000): void {
+    // Clear any existing timeout
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+    
+    this.toastMessage.set(message);
+    this.showToast.set(true);
+    
+    // Auto-dismiss after duration
+    this.toastTimeout = setTimeout(() => {
+      this.dismissToast();
+    }, duration);
+  }
+
+  /**
+   * Dismiss the toast notification
+   */
+  dismissToast(): void {
+    this.showToast.set(false);
+    this.toastMessage.set('');
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+      this.toastTimeout = null;
+    }
   }
 
   /**
@@ -426,12 +490,20 @@ export class MainPageComponent implements OnInit {
   }
 
   /**
-   * Open delete event modal
+   * Open delete event overlay (on top of edit modal)
    */
   openDeleteEvent(eventId: string): void {
-    console.log('[MainPage] Opening delete event modal:', eventId);
+    console.log('[MainPage] Opening delete event overlay:', eventId);
     this.selectedEventId.set(eventId);
-    this.modalState.set('delete-event');
+    this.showDeleteEventOverlay.set(true);
+  }
+
+  /**
+   * Close just the delete event overlay (cancel)
+   */
+  closeDeleteEventOverlay(): void {
+    console.log('[MainPage] Closing delete event overlay');
+    this.showDeleteEventOverlay.set(false);
   }
 
   /**
@@ -444,22 +516,32 @@ export class MainPageComponent implements OnInit {
   }
 
   /**
-   * Handle event updated - refresh and show view modal
+   * Handle event updated - refresh and show toast
    */
   onEventUpdated(eventId: string): void {
     console.log('[MainPage] Event updated:', eventId);
     this.loadCalendarHome();
     this.refreshEvents();
-    this.selectedEventId.set(eventId);
-    this.showEventSuccessMessage.set(true);
-    this.modalState.set('view-event');
+    this.closeAllModals();
+    this.showToastNotification('Event updated successfully!');
   }
 
   /**
-   * Handle event deleted - refresh and close
+   * Handle event deleted - show toast and navigate back
    */
   onEventDeleted(eventId: string): void {
     console.log('[MainPage] Event deleted:', eventId);
+    this.showDeleteEventOverlay.set(false);
+    this.selectedEventId.set(null);
+    
+    // Navigate based on where user came from
+    if (this.cameFromEventSelector()) {
+      this.modalState.set('event-selector');
+    } else {
+      this.modalState.set('none');
+    }
+    
+    this.showToastNotification('Event deleted successfully!');
     this.loadCalendarHome();
     this.refreshEvents();
   }
@@ -501,12 +583,14 @@ export class MainPageComponent implements OnInit {
 
   onPollSelected(pollId: string): void {
     console.log('[MainPage] Poll selected:', pollId);
+    this.cameFromPollSelector.set(true);
     this.selectedPollId.set(pollId);
     this.modalState.set('view-poll');
   }
 
   onViewPollFromList(pollId: string): void {
     console.log('[MainPage] Opening poll directly:', pollId);
+    this.cameFromPollSelector.set(false);
     this.selectedPollId.set(pollId);
     this.modalState.set('view-poll');
   }
@@ -519,16 +603,45 @@ export class MainPageComponent implements OnInit {
 
   onPollUpdated(pollId: string): void {
     console.log('[MainPage] Poll updated:', pollId);
-    this.selectedPollId.set(pollId);
-    this.modalState.set('view-poll');
+    this.closeAllModals();
+    this.showToastNotification('Poll updated successfully!');
     this.loadCalendarHome();
     this.refreshPolls();
   }
 
-  onPollDeleted(): void {
-    console.log('[MainPage] Poll deleted');
+  /**
+   * Open delete poll overlay (on top of edit modal)
+   */
+  openDeletePoll(pollId: string): void {
+    console.log('[MainPage] Opening delete poll overlay:', pollId);
+    this.selectedPollId.set(pollId);
+    this.showDeletePollOverlay.set(true);
+  }
+
+  /**
+   * Close just the delete poll overlay (cancel)
+   */
+  closeDeletePollOverlay(): void {
+    console.log('[MainPage] Closing delete poll overlay');
+    this.showDeletePollOverlay.set(false);
+  }
+
+  /**
+   * Handle poll deleted - show toast and navigate back
+   */
+  onPollDeleted(pollId: string): void {
+    console.log('[MainPage] Poll deleted:', pollId);
+    this.showDeletePollOverlay.set(false);
     this.selectedPollId.set(null);
-    this.closeAllModals();
+    
+    // Navigate based on where user came from
+    if (this.cameFromPollSelector()) {
+      this.modalState.set('poll-selector');
+    } else {
+      this.modalState.set('none');
+    }
+    
+    this.showToastNotification('Poll deleted successfully!');
     this.loadCalendarHome();
     this.refreshPolls();
   }

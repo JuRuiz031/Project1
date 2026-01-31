@@ -1,11 +1,9 @@
 // db_creation.js
 // Usage (in mongosh):
-//   load("C:/absolute/path/to/db_creation.js")
+//   mongosh --file "/absolute/path/to/db_creation_2.js"
 //
-// IMPORTANT: Update the require() path below to point to your db_connection.js file.
-const { connection } = require(
-  `C:/Users/Ethan Chen/Documents/Revature/project1/database/database_alternate/db_connection.js`
-);
+// Connection string for MongoDB
+const connection = "mongodb://root:password@127.0.0.1:27017/calendario?authSource=admin";
 
 db = connect(connection);
 

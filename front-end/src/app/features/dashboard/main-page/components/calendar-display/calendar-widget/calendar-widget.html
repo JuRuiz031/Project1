@@ -1,9 +1,9 @@
-<div class="row text-center">
+<div class="row text-center mb-2">
   <div class="col-md-4">
     <div class="btn-group">
       <button
         type="button"
-        class="btn btn-primary"
+        class="btn btn-primary-solid btn-sm"
         mwlCalendarPreviousView
         [view]="view"
         [viewDate]="currentViewDate()"
@@ -14,7 +14,7 @@
 
       <button
         type="button"
-        class="btn btn-outline-secondary"
+        class="btn btn-outline-secondary btn-sm"
         mwlCalendarToday
         [viewDate]="currentViewDate()"
         (viewDateChange)="onViewDateChange($event)"
@@ -24,7 +24,7 @@
 
       <button
         type="button"
-        class="btn btn-primary"
+        class="btn btn-primary-solid btn-sm"
         mwlCalendarNextView
         [view]="view"
         [viewDate]="currentViewDate()"
@@ -36,14 +36,14 @@
   </div>
 
   <div class="col-md-4">
-    <h3>{{ currentViewDate() | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
+    <h3 class="mb-0" style="font-size: 1.25rem;">{{ currentViewDate() | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
   </div>
 
   <div class="col-md-4">
     <div class="btn-group">
       <button
         type="button"
-        class="btn btn-primary"
+        class="btn btn-primary-solid btn-sm"
         (click)="setView(CalendarView.Month)"
         [class.active]="view === CalendarView.Month"
       >
@@ -52,7 +52,7 @@
 
       <button
         type="button"
-        class="btn btn-primary"
+        class="btn btn-primary-solid btn-sm"
         (click)="setView(CalendarView.Week)"
         [class.active]="view === CalendarView.Week"
       >
@@ -61,7 +61,7 @@
 
       <button
         type="button"
-        class="btn btn-primary"
+        class="btn btn-primary-solid btn-sm"
         (click)="setView(CalendarView.Day)"
         [class.active]="view === CalendarView.Day"
       >
@@ -71,7 +71,7 @@
   </div>
 </div>
 
-<div class="mt-3">
+<div class="mt-1">
   @switch (view) {
     @case (CalendarView.Month) {
       <mwl-calendar-month-view

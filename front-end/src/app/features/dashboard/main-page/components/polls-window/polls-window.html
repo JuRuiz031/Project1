@@ -1,14 +1,43 @@
 <section class="polls-window" aria-label="Polls Window">
-  <h2 class="polls-window__title">Polls Window</h2>
+  <h2 class="polls-window__title">Polls</h2>
+
+  <!-- Status Filter Tabs -->
+  <div class="status-tabs">
+    <button
+      class="status-tab"
+      [class.active]="selectedStatus() === 'all'"
+      (click)="setStatusFilter('all')"
+    >
+      All ({{ polls().length }})
+    </button>
+    <button
+      class="status-tab"
+      [class.active]="selectedStatus() === 'in-progress'"
+      (click)="setStatusFilter('in-progress')"
+    >
+      In Progress ({{ inProgressCount() }})
+    </button>
+    <button
+      class="status-tab"
+      [class.active]="selectedStatus() === 'completed'"
+      (click)="setStatusFilter('completed')"
+    >
+      Completed ({{ completedCount() }})
+    </button>
+  </div>
 
   <div class="polls-window__panel">
     @if (polls().length === 0) {
       <div class="polls-window__placeholder">
         No polls yet.
       </div>
+    } @else if (filteredPolls().length === 0) {
+      <div class="polls-window__placeholder">
+        No {{ selectedStatus() === 'in-progress' ? 'in progress' : 'completed' }} polls.
+      </div>
     } @else {
       <ul class="list-group">
-        @for (p of polls(); track p.poll_id) {
+        @for (p of filteredPolls(); track p.poll_id) {
           <li
             class="list-group-item d-flex justify-content-between align-items-center"
             (click)="onViewPoll(p)"

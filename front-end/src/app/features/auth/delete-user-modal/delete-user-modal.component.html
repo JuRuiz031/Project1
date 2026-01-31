@@ -1,0 +1,77 @@
+<app-base-modal 
+  [title]="'Delete Account'"
+  [size]="'small'"
+  [headerStyle]="'gradient'"
+  (close)="cancelDelete()">
+
+  <div class="text-center">
+    @if (apiError()) {
+      <div class="alert alert-danger mb-3">{{ apiError() }}</div>
+    }
+
+    <!-- Warning Header -->
+    <div class="delete-warning-header mb-4">
+      <div class="header-icon header-icon--danger">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <h3 class="modal-subtitle">This action cannot be undone</h3>
+    </div>
+
+    <!-- Warning Message -->
+    <div class="warning-message mb-4">
+      <p class="mb-3">Are you sure you want to permanently delete your account:</p>
+      <div class="user-info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <strong>{{ userName() }}</strong>
+      </div>
+    </div>
+
+    <!-- Consequences List -->
+    <div class="consequences-section mb-4">
+      <p class="consequences-title">This will permanently:</p>
+      <ul class="consequences-list">
+        <li>Delete all your personal data</li>
+        <li>Remove you from all shared calendars</li>
+        <li>Cancel all your events and polls</li>
+        <li>Revoke access to your account</li>
+      </ul>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-center gap-3">
+      <button 
+        type="button" 
+        class="btn btn-delete" 
+        (click)="confirmDelete()" 
+        [disabled]="isDeleting()">
+        @if (isDeleting()) {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-deleting">
+            <path d="M21 12a9 9 0 11-6.219-8.56"></path>
+          </svg>
+          Deleting...
+        } @else {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3,6 5,6 21,6"></polyline>
+            <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+          </svg>
+          Delete Account
+        }
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-cancel" 
+        (click)="cancelDelete()" 
+        [disabled]="isDeleting()">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+</app-base-modal>

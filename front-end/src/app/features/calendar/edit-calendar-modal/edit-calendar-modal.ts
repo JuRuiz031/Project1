@@ -168,7 +168,7 @@ export class EditCalendarModal implements OnInit {
         next: () => {
           this.isSubmitting.set(false);
           this.calendarUpdated.emit(id);
-          this.close.emit();
+          // Don't emit close - parent's onCalendarUpdated handler closes modals
         },
         error: (err) => {
           this.isSubmitting.set(false);

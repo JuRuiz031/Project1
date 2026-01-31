@@ -27,6 +27,7 @@ export class ViewEvent implements OnInit {
 
   apiError = signal('');
   isLoading = signal(false);
+  tags = signal<string[]>([]);
 
   form = this.fb.group({
     title: [{ value: '', disabled: true }],
@@ -108,6 +109,9 @@ export class ViewEvent implements OnInit {
       },
       { emitEvent: false }
     );
+
+    // Set tags
+    this.tags.set(event.tags ?? []);
 
     this.form.disable({ emitEvent: false });
     console.log('[ViewEvent] Form patched and disabled. Form value:', this.form.value);
