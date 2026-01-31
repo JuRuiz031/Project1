@@ -13,6 +13,7 @@ import { EditUser } from './features/auth/edit-user/edit-user';
 import { MainPageComponent } from './features/dashboard/main-page/main-page';
 
 import { ViewEvent } from './features/event/view-event/view-event';
+import { ViewPoll } from './features/poll/view-poll/view-poll';
 
 export const routes: Routes = [
   /**
@@ -23,6 +24,10 @@ export const routes: Routes = [
   {
     path: 'invitelink',
     component: ViewEvent, // Guest-only event viewing
+  },
+  {
+    path: 'polllink',
+    component: ViewPoll, // Guest-only poll viewing
   },
 
   /**

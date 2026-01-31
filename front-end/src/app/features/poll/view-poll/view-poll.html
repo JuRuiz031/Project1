@@ -1,0 +1,160 @@
+<header class="app-navbar navbar" role="banner">
+  <div class="container-fluid px-3 py-2">
+    <span class="navbar-brand mb-0 h1">CalendarIO</span>
+
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-white me-2">Enjoying CalendarIO?</span>
+      <a class="btn btn-outline-light btn-sm" routerLink="/create-account">
+        Create account here
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="page-container">
+  <div class="content-wrapper">
+    <div class="card poll-card">
+      <div class="card-header">
+        <h1 class="card-title">Poll Details</h1>
+        <p class="card-subtitle">You've been invited to view this poll</p>
+      </div>
+
+      <div class="card-body">
+        @if (apiError()) {
+          <div class="alert alert-danger mb-3">
+            {{ apiError() }}
+          </div>
+        }
+
+        @if (isLoading()) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading poll...</p>
+          </div>
+        }
+
+        @if (!isLoading() && !apiError() && poll(); as p) {
+          <div class="row g-4">
+            <!-- LEFT COLUMN -->
+            <div class="col-12 col-lg-7">
+              <!-- Title -->
+              <div class="form-group">
+                <label class="form-label">Poll Title</label>
+                <input
+                  type="text"
+                  class="form-control app-input"
+                  [value]="p.title"
+                  disabled
+                />
+              </div>
+
+              <!-- Description -->
+              @if (p.description) {
+                <div class="form-group">
+                  <label class="form-label">Description</label>
+                  <textarea
+                    rows="3"
+                    class="form-control app-textarea"
+                    [value]="p.description"
+                    disabled
+                  ></textarea>
+                </div>
+              }
+
+              <!-- Dates -->
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Start</label>
+                    <input
+                      type="text"
+                      class="form-control app-input"
+                      [value]="formatLocalDate(p.start_time) + ' ' + formatLocalTime(p.start_time)"
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">End</label>
+                    <input
+                      type="text"
+                      class="form-control app-input"
+                      [value]="formatLocalDate(p.end_time) + ' ' + formatLocalTime(p.end_time)"
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notes -->
+              @if (p.notes) {
+                <div class="form-group">
+                  <label class="form-label">Notes</label>
+                  <textarea
+                    rows="3"
+                    class="form-control app-textarea"
+                    [value]="p.notes"
+                    disabled
+                  ></textarea>
+                </div>
+              }
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="col-12 col-lg-5">
+              <!-- Tags -->
+              <div class="form-group">
+                <label class="form-label">Tags</label>
+                @if (p.tags && p.tags.length > 0) {
+                  <div class="tags-display">
+                    @for (tag of p.tags; track tag) {
+                      <span class="tag-chip">{{ tag }}</span>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-muted">No tags</p>
+                }
+              </div>
+
+              <!-- Voting Rules -->
+              <div class="form-group">
+                <label class="form-label">Voting Rules</label>
+                <div>
+                  <span
+                    class="badge"
+                    [class.badge-success]="p.allow_multiple_votes"
+                    [class.badge-secondary]="!p.allow_multiple_votes"
+                  >
+                    {{ p.allow_multiple_votes ? 'Multiple votes allowed' : 'Single vote only' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Poll Options -->
+          <div class="form-group mt-4">
+            <label class="form-label">Options</label>
+            @for (opt of p.options; track opt.option_id) {
+              <div class="poll-option" [class.winning-option]="isWinningOption(opt.option_id)">
+                <div class="option-content">
+                  {{ opt.description }}
+                  <span class="text-secondary ms-2">
+                    ({{ getTotalVotesForOption(opt) }} votes)
+                  </span>
+                  @if (isWinningOption(opt.option_id) && getTotalVotesForOption(opt) > 0) {
+                    <span class="vote-label winning-label">{{ getWinningLabel() }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-main-footer></app-main-footer>
