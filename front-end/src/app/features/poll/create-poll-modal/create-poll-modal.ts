@@ -139,8 +139,7 @@ export class CreatePollModal implements OnInit {
     }
   }
 
-  // ---- Timezone-safe: Local inputs -> local Date -> UTC instant string ----
-  // This matches your working event fix and avoids the +6 hour incremental bug.
+  // ---- Build local Date from date/time inputs (no timezone conversion) ----
   private toLocalDate(date: string, time: string): Date | null {
     if (!date || !time) return null;
 
@@ -250,6 +249,12 @@ export class CreatePollModal implements OnInit {
       return;
     }
 
+    // Format as local datetime string (YYYY-MM-DDTHH:mm:ss) without timezone conversion
+    const formatLocalDateTime = (d: Date): string => {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+
     const dto: CreatePollDTO = {
       user_id: String(userId),
       calendar_id: String(v.calendarId),
@@ -258,9 +263,8 @@ export class CreatePollModal implements OnInit {
       description: (String(v.description ?? '')).trim() || undefined,
       notes: (String(v.notes ?? '')).trim() || undefined,
 
-      // store UTC instants
-      start_time: start.toISOString(),
-      end_time: end.toISOString(),
+      start_time: formatLocalDateTime(start),
+      end_time: formatLocalDateTime(end),
 
       results_visible: Boolean(v.results_visible),
       allow_multiple_votes: Boolean(v.allow_multiple_votes),

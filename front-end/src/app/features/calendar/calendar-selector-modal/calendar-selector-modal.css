@@ -21,6 +21,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  user-select: none; /* Prevent text selection on clicks */
 }
 
 .modal-header {

@@ -13,8 +13,9 @@ describe('ViewEvent', () => {
   const toLocalDateTime = (iso: string): { date: string; time: string } => {
     if (!iso) return { date: '', time: '' };
 
-    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
-    const d = new Date(hasTz ? iso : `${iso}Z`);
+    // Backend now sends local datetime strings without timezone (e.g., "2026-01-26T10:15:00")
+    // Parse directly without any timezone conversion
+    const d = new Date(iso);
     if (isNaN(d.getTime())) return { date: '', time: '' };
 
     const pad = (n: number) => String(n).padStart(2, '0');

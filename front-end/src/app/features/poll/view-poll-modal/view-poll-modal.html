@@ -204,23 +204,33 @@
     </div>
 
     <!-- Footer actions -->
-    <div class="d-flex justify-content-end gap-2">
+    <div class="d-flex justify-content-between gap-2">
       <button
         class="btn btn-outline-secondary"
         type="button"
-        (click)="onClose()"
+        (click)="onBack()"
       >
-        Close
+        ← Back to Polls
       </button>
 
-      <button
-        class="btn btn-primary"
-        type="button"
-        (click)="onEdit()"
-        [disabled]="!poll()"
-      >
-        Edit Poll
-      </button>
+      <div class="d-flex gap-2">
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="onClose()"
+        >
+          Close
+        </button>
+
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="onEdit()"
+          [disabled]="!poll()"
+        >
+          Edit Poll
+        </button>
+      </div>
     </div>
   }
 </app-base-modal>

@@ -22,6 +22,7 @@ export class ViewPollModal implements OnInit {
   title = input<string>('View Poll');
   pollId = input<string>('');
 
+  back = output<void>();
   close = output<void>();
   edit = output<string>();
 
@@ -116,6 +117,10 @@ export class ViewPollModal implements OnInit {
     });
   }
 
+  onBack(): void {
+    this.back.emit();
+  }
+
   onClose(): void {
     this.close.emit();
   }
@@ -128,32 +133,30 @@ export class ViewPollModal implements OnInit {
 
 formatLocalDate(iso: string): string {
   if (!iso) return '';
-  const d = this.parseServerInstant(iso);
+  // Backend sends local datetime without timezone info
+  // Parse directly without timezone conversion
+  const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
 
-  const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  const yyyy = d.getFullYear();
+  return `${mm}/${dd}/${yyyy}`;
 }
 
 formatLocalTime(iso: string): string {
   if (!iso) return '';
-  const d = this.parseServerInstant(iso);
+  // Backend sends local datetime without timezone info
+  // Parse directly without timezone conversion
+  const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
 
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mi = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}:${mi}`;
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${ampm}`;
 }
-
-
-  private parseServerInstant(iso: string): Date {
-    // If server includes timezone (Z or ±hh:mm), parse normally.
-    // If server sends "2026-01-22T18:00:00" with no timezone, assume UTC and append Z.
-    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
-    return new Date(hasTz ? iso : `${iso}Z`);
-  }
 
 
   // -------------------------

@@ -80,8 +80,9 @@ describe('CreateCalendarModal', () => {
     component.form.patchValue({ name: 'My Calendar' });
     component.submit();
 
-    // Allow microtasks to flush
+    // Allow microtasks to flush and observable to complete
     await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(calendarServiceStub.create).toHaveBeenCalledTimes(1);
 
@@ -89,6 +90,7 @@ describe('CreateCalendarModal', () => {
     expect(dtoArg.user_id).toBe('u1');
     expect(dtoArg.name).toBe('My Calendar');
 
+    // Verify both emits were called
     expect(emittedCalendarId).toBe('c123');
     expect(closed).toBe(true);
   });

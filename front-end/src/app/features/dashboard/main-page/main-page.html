@@ -29,6 +29,7 @@
       <app-polls-window
         class="card"
         [polls]="polls()"
+        [selectedPollId]="selectedPollId()"
         (createPoll)="openCreatePoll()"
         (viewPolls)="openPollSelector()"
         (viewPoll)="onViewPollFromList($event)">
@@ -157,6 +158,7 @@
 @if (modalState() === 'view-poll') {
   <app-view-poll-modal
     [pollId]="selectedPollId()!"
+    (back)="onViewPollBack()"
     (close)="closeAllModals()"
     (edit)="openEditPoll($event)">
   </app-view-poll-modal>

@@ -134,27 +134,19 @@ export class EditEventModal implements OnInit {
     });
   }
 
-  /**
-   * If backend sends timestamps without timezone (e.g. "2026-01-26T17:30:00"),
-   * JS will treat that as LOCAL time and you get a +6 hour drift.
-   * Fix: if no timezone assume UTC and append 'Z'.
-   */
-  private parseServerInstant(iso: string): Date {
-    const hasTz = /([zZ]|[+\-]\d{2}:\d{2})$/.test(iso);
-    return new Date(hasTz ? iso : `${iso}Z`);
-  }
-
   // ✅ ISO -> Local date/time for <input type="date"> and <input type="time">
   private isoToDateTime(iso: string): { date: string; time: string } {
     if (!iso) return { date: '', time: '' };
 
-    const d = this.parseServerInstant(iso);
+    // Backend sends local datetime without timezone info
+    // Parse directly without timezone conversion
+    const d = new Date(iso);
     if (isNaN(d.getTime())) return { date: '', time: '' };
 
     const pad = (n: number) => String(n).padStart(2, '0');
 
     const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`; // LOCAL time
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
     return { date, time };
   }
 
@@ -203,11 +195,17 @@ export class EditEventModal implements OnInit {
       return;
     }
 
+    // Format as local datetime string (YYYY-MM-DDTHH:mm:ss) without timezone conversion
+    const formatLocalDateTime = (d: Date): string => {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+
     const dto: UpdateEventDTO = {
       calendar_id: String(v.calendarId ?? ''),
       title: String(v.title ?? ''),
-      start_time: start.toISOString(), // store UTC instant
-      end_time: end.toISOString(),
+      start_time: formatLocalDateTime(start),
+      end_time: formatLocalDateTime(end),
       description: (v.description ?? '') as string,
       notes: (v.notes ?? '') as string,
       tags: this.tags(),
@@ -267,17 +265,4 @@ export class EditEventModal implements OnInit {
     }
   }
 
-  /**
-   * Get user's timezone abbreviation (e.g., EST, PST, UTC)
-   */
-  getTimezoneAbbr(): string {
-    const now = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZoneName: 'short',
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
-    const parts = formatter.formatToParts(now);
-    const tzPart = parts.find(p => p.type === 'timeZoneName');
-    return tzPart?.value ?? 'UTC';
-  }
 }

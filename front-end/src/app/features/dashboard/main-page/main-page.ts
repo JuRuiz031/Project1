@@ -194,7 +194,7 @@ export class MainPageComponent implements OnInit {
     this.calendarService.getHomepage().pipe(
       map((home: CalendarHomeDTO) => ({
         calendars: this.mapCalendars(home.calendars ?? []),
-        tags: (home.tags ?? []).map(t => String(t))
+        tags: (home.tags ?? []).map(t => String(t)).sort((a, b) => a.localeCompare(b))
       })),
       tap(data => console.log('[MainPage] Calendar home loaded:', data)),
       catchError(err => {
@@ -231,7 +231,8 @@ export class MainPageComponent implements OnInit {
         calendar_id: String(c.calendar_id ?? c.id ?? c.calendarId ?? c._id ?? ''),
         name: String(c.name ?? c.title ?? c.calendar_name ?? 'Untitled')
       }))
-      .filter(c => c.calendar_id);
+      .filter(c => c.calendar_id)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
@@ -380,6 +381,14 @@ export class MainPageComponent implements OnInit {
   }
 
   /**
+   * Back button in view-poll modal
+   */
+  onViewPollBack(): void {
+    console.log('[MainPage] Back from view-poll');
+    this.modalState.set('poll-selector');
+  }
+
+  /**
    * Close all modals
    */
   closeAllModals(): void {
@@ -387,6 +396,7 @@ export class MainPageComponent implements OnInit {
     this.modalState.set('none');
     this.selectedEventId.set(null);
     this.selectedCalendarId.set(null);
+    this.selectedPollId.set(null);
     this.showEventSuccessMessage.set(false);
   }
 
@@ -429,6 +439,7 @@ export class MainPageComponent implements OnInit {
    */
   onEventCreated(eventId: string): void {
     console.log('[MainPage] Event created:', eventId);
+    this.loadCalendarHome();
     this.refreshEvents();
   }
 
@@ -437,6 +448,7 @@ export class MainPageComponent implements OnInit {
    */
   onEventUpdated(eventId: string): void {
     console.log('[MainPage] Event updated:', eventId);
+    this.loadCalendarHome();
     this.refreshEvents();
     this.selectedEventId.set(eventId);
     this.showEventSuccessMessage.set(true);
@@ -448,6 +460,7 @@ export class MainPageComponent implements OnInit {
    */
   onEventDeleted(eventId: string): void {
     console.log('[MainPage] Event deleted:', eventId);
+    this.loadCalendarHome();
     this.refreshEvents();
   }
 
@@ -477,6 +490,7 @@ export class MainPageComponent implements OnInit {
 
   onPollCreated(pollId: string): void {
     console.log('[MainPage] Poll created:', pollId);
+    this.loadCalendarHome();
     this.refreshPolls();
   }
 
@@ -507,6 +521,7 @@ export class MainPageComponent implements OnInit {
     console.log('[MainPage] Poll updated:', pollId);
     this.selectedPollId.set(pollId);
     this.modalState.set('view-poll');
+    this.loadCalendarHome();
     this.refreshPolls();
   }
 
@@ -514,6 +529,7 @@ export class MainPageComponent implements OnInit {
     console.log('[MainPage] Poll deleted');
     this.selectedPollId.set(null);
     this.closeAllModals();
+    this.loadCalendarHome();
     this.refreshPolls();
   }
 

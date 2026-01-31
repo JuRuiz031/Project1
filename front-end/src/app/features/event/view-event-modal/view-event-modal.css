@@ -212,12 +212,6 @@
   padding: 8px 12px;
 }
 
-.form-control:disabled,
-.form-select:disabled {
-  background-color: #f5f5f5;
-  color: #666;
-}
-
 .form-control:focus,
 .form-select:focus {
   outline: none;

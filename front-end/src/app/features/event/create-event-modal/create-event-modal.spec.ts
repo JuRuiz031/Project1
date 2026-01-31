@@ -193,17 +193,17 @@ describe('CreateEventModal', () => {
 
     const dtoArg = eventServiceStub.create.calls.mostRecent().args[0];
 
-    // Verify key fields (timestamps are local->UTC so we compute them the same way as the component)
-    const expectedStartIso = new Date('2026-01-26T10:00:00').toISOString();
-    const expectedEndIso = new Date('2026-01-26T11:00:00').toISOString();
+    // Verify key fields - timestamps are now local datetime strings (YYYY-MM-DDTHH:mm:ss format)
+    const expectedStartLocal = '2026-01-26T10:00:00';
+    const expectedEndLocal = '2026-01-26T11:00:00';
 
     expect(dtoArg).toEqual(
       jasmine.objectContaining({
         user_id: 'u1',
         calendar_id: '1',
         title: 'Test Title',
-        start_time: expectedStartIso,
-        end_time: expectedEndIso,
+        start_time: expectedStartLocal,
+        end_time: expectedEndLocal,
         description: 'desc',
         notes: 'notes',
         tags: ['work', 'school'],

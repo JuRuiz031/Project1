@@ -17,3 +17,8 @@
   z-index: 5;
   background: inherit;
 }
+
+/* Prevent text selection on calendar events */
+:host ::ng-deep .cal-event {
+  user-select: none;
+}
