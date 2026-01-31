@@ -1,19 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DeletePollModal } from './delete-poll-modal';
 
-import { DeletePoll } from './delete-poll';
-
-describe('DeletePoll', () => {
-  let component: DeletePoll;
-  let fixture: ComponentFixture<DeletePoll>;
+describe('DeletePollModal', () => {
+  let component: DeletePollModal;
+  let fixture: ComponentFixture<DeletePollModal>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeletePoll],
+      imports: [DeletePollModal],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DeletePoll);
+    fixture = TestBed.createComponent(DeletePollModal);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

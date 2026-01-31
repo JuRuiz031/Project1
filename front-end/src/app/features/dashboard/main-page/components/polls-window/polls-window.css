@@ -1,19 +1,74 @@
 .polls-window__title {
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   font-size: 14px;
   font-weight: 700;
+}
+
+/* Status filter tabs */
+.status-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--color-border-default);
+}
+
+.status-tab {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.status-tab:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-background-secondary);
+}
+
+.status-tab.active {
+  color: var(--color-accent-primary);
+  border-bottom-color: var(--color-accent-primary);
+  font-weight: 600;
 }
 
 .polls-window__panel {
   border: 1px solid var(--color-border-default);
   border-radius: 12px;
   background: #fff;
-  min-height: 180px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 12px;
+  min-height: 240px;
+  margin-bottom: 10px;
   user-select: none; /* Prevent text selection on double-click */
+  overflow: hidden;
 }
+
+.polls-window__panel .list-group {
+  margin-bottom: 0;
+  border-radius: 12px;
+}
+
+.polls-window__panel .list-group-item {
+  border-left: none;
+  border-right: none;
+  padding: 12px 16px;
+}
+
+.polls-window__panel .list-group-item:first-child {
+  border-top: none;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.polls-window__panel .list-group-item:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
 /* Hover effect for poll items */
 .polls-window__panel .list-group-item:hover {
   background-color: #f8f9fa;

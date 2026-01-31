@@ -1,4 +1,66 @@
-.card {
-  max-width: 900px;
-  margin: 0 auto;
+/* =====================================================
+   Create Account Page - Page-specific overrides only
+   Shared styles are in global styles.css
+   ===================================================== */
+
+/* Create account gradient - tertiary to steel blue (reversed) */
+.auth-page {
+  background: linear-gradient(135deg, var(--color-accent-tertiary) 0%, var(--color-steel-blue) 100%);
+}
+
+/* Submit button uses secondary gradient */
+.btn-submit {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.btn-submit:disabled {
+  cursor: not-allowed;
+}
+
+.btn-submit.btn-ready {
+  background: var(--gradient-secondary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(32, 129, 195, 0.4);
+}
+
+.btn-submit.btn-ready:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(32, 129, 195, 0.5);
+}
+
+.btn-submit.btn-ready:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Back to login secondary button */
+.btn-back-to-login {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back-to-login:hover {
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  background: rgba(32, 129, 195, 0.05);
 }

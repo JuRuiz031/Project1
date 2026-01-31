@@ -398,7 +398,7 @@ export class EditPollModal implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.saved.emit(pollId);
-        this.close.emit();
+        // Don't emit close - parent's onPollUpdated handler changes modal state
       },
       error: (err) => {
         this.isSubmitting.set(false);

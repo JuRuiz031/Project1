@@ -253,10 +253,20 @@ public class CalendarService {
         if (authenticatedUser.isSuperuser()) {
             // Superuser can see ALL calendars
             for (Calendar calendar : calendarRepository.findAll()) {
+                // Get users for this calendar
+                java.util.List<User> calendarUsers = userService.getUsersByCalendarMembership(calendar.getId());
+                java.util.List<com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.UserInfo> userInfos = calendarUsers.stream()
+                        .map(user -> new com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.UserInfo(
+                                user.getId(),
+                                user.getUsername()
+                        ))
+                        .collect(java.util.stream.Collectors.toList());
+                
                 calendarInfos.add(new com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.CalendarInfo(
                         calendar.getId(),
                         calendar.getName(),
-                        true // Superusers are always admin
+                        true, // Superusers are always admin
+                        userInfos
                 ));
             }
             // Get all events to collect tags
@@ -270,10 +280,25 @@ public class CalendarService {
             // Regular user - only see their calendars
             for (User.CalendarMembership membership : authenticatedUser.getCalendarIds()) {
                 Calendar calendar = getCalendarById(membership.getCalendarId());
+                
+                // Get users for this calendar
+                java.util.List<User> calendarUsers = userService.getUsersByCalendarMembership(calendar.getId());
+                java.util.List<com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.UserInfo> userInfos = calendarUsers.stream()
+                        .map(user -> {
+                            Boolean isAdminOfCalendar = user.isAdminOfCalendar(calendar.getId());
+                            return new com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.UserInfo(
+                                    user.getId(),
+                                    user.getUsername(),
+                                    isAdminOfCalendar
+                            );
+                        })
+                        .collect(java.util.stream.Collectors.toList());
+                
                 calendarInfos.add(new com.example.calendario.dto.calendar.CalendarHomepageResponseDTO.CalendarInfo(
                         calendar.getId(),
                         calendar.getName(),
-                        membership.getIsAdmin()
+                        membership.getIsAdmin(),
+                        userInfos
                 ));
             }
             // Get events from user's calendars to collect tags

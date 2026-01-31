@@ -1,46 +1,124 @@
-.card {
-  max-width: 900px;
-  margin: 0 auto;
+/* =====================================================
+   Account View Page - Page-specific styles only
+   Shared profile styles are in global styles.css
+   ===================================================== */
+
+/* Narrower container for view-only page */
+.profile-container {
+  max-width: 600px;
 }
 
-.success-notification {
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #4caf50;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* Info Grid (view mode specific) */
+.info-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  padding: 0.75rem 1rem;
+  background: var(--color-background-primary);
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+}
+
+/* Action Group */
+.action-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+/* Page-specific Buttons */
+.btn-logout {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  z-index: 1050;
-  animation: slideDown 0.3s ease-out;
+  background: transparent;
+  border: 2px solid var(--color-feedback-error);
+  border-radius: 10px;
+  color: var(--color-feedback-error);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+.btn-logout:hover {
+  background: var(--color-feedback-error);
+  color: white;
 }
 
-.notification-icon {
-  display: inline-flex;
+.btn-secondary-outline {
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary-outline:hover {
+  border-color: var(--color-text-secondary);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.btn-edit-profile {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  font-size: 14px;
-  font-weight: bold;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(32, 129, 195, 0.3);
+}
+
+.btn-edit-profile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(32, 129, 195, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .card-actions {
+    align-items: stretch;
+  }
+  
+  .action-group {
+    margin-left: 0;
+    flex-direction: column;
+  }
+  
+  .btn-logout,
+  .btn-secondary-outline,
+  .btn-edit-profile {
+    width: 100%;
+    justify-content: center;
+  }
 }

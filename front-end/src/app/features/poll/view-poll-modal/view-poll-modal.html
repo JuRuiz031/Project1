@@ -1,9 +1,18 @@
 <app-base-modal
-  [title]="title()"
+  [title]="'View Poll'"
+  [subtitle]="'Cast your vote or view results'"
   [showBackButton]="false"
   [size]="'large'"
+  [headerStyle]="'gradient'"
   (close)="onClose()"
 >
+  <!-- Success Notification Toast -->
+  @if (showNotification()) {
+    <div class="alert alert-success mb-3">
+      <span>✓</span> Poll updated successfully!
+    </div>
+  }
+
   <!-- Loading -->
   @if (isLoading()) {
     <div class="text-secondary">
@@ -139,17 +148,26 @@
       @if (!p.allow_multiple_votes) {
         <div>
           @for (opt of p.options; track opt.option_id) {
-            <div class="form-check mb-2">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="singleVote"
-                [checked]="selectedSingleOptionId() === opt.option_id"
-                [disabled]="!isLoggedIn() || isVoting()"
-                (change)="selectSingle(opt.option_id)"
-              />
+            <div class="poll-option" 
+                 [class.selected]="!hasVoted() && isOptionSelected(opt.option_id)"
+                 [class.voted-option]="hasVoted() && isOptionSelected(opt.option_id)"
+                 [class.winning-option]="shouldShowWinningIndicator() && isWinningOption(opt.option_id) && !isOptionSelected(opt.option_id)"
+                 [class.voted-and-winning]="hasVoted() && isOptionSelected(opt.option_id) && isWinningOption(opt.option_id)"
+                 [class.clickable]="!hasVoted() && isLoggedIn() && !isVoting()"
+                 (click)="!hasVoted() && isLoggedIn() && !isVoting() && selectSingle(opt.option_id)">
+              @if (!hasVoted()) {
+                <input
+                  class="form-check-input visually-hidden"
+                  type="radio"
+                  name="singleVote"
+                  [checked]="isOptionSelected(opt.option_id)"
+                  [attr.checked]="isOptionSelected(opt.option_id) ? 'checked' : null"
+                  [disabled]="!isLoggedIn() || isVoting()"
+                  (change)="selectSingle(opt.option_id)"
+                />
+              }
 
-              <label class="form-check-label">
+              <div class="option-content">
                 {{ opt.description }}
 
                 @if (canShowResults(p)) {
@@ -157,7 +175,15 @@
                     ({{ getTotalVotesForOption(opt) }} votes)
                   </span>
                 }
-              </label>
+                
+                @if (hasVoted() && isOptionSelected(opt.option_id) && isWinningOption(opt.option_id)) {
+                  <span class="vote-label voted-and-winning-label">{{ getVotedAndWinningLabel() }}</span>
+                } @else if (hasVoted() && isOptionSelected(opt.option_id)) {
+                  <span class="vote-label voted-label">{{ getVoteLabel() }}</span>
+                } @else if (shouldShowWinningIndicator() && isWinningOption(opt.option_id)) {
+                  <span class="vote-label winning-label">{{ getWinningLabel() }}</span>
+                }
+              </div>
             </div>
           }
         </div>
@@ -167,16 +193,25 @@
       @if (p.allow_multiple_votes) {
         <div>
           @for (opt of p.options; track opt.option_id) {
-            <div class="form-check mb-2">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                [checked]="selectedMultiOptionIds().includes(opt.option_id)"
-                [disabled]="!isLoggedIn() || isVoting()"
-                (change)="toggleMulti(opt.option_id)"
-              />
+            <div class="poll-option" 
+                 [class.selected]="!hasVoted() && isOptionSelected(opt.option_id)"
+                 [class.voted-option]="hasVoted() && isOptionSelected(opt.option_id)"
+                 [class.winning-option]="shouldShowWinningIndicator() && isWinningOption(opt.option_id) && !isOptionSelected(opt.option_id)"
+                 [class.voted-and-winning]="hasVoted() && isOptionSelected(opt.option_id) && isWinningOption(opt.option_id)"
+                 [class.clickable]="!hasVoted() && isLoggedIn() && !isVoting()"
+                 (click)="!hasVoted() && isLoggedIn() && !isVoting() && toggleMulti(opt.option_id)">
+              @if (!hasVoted()) {
+                <input
+                  class="form-check-input visually-hidden"
+                  type="checkbox"
+                  [checked]="isOptionSelected(opt.option_id)"
+                  [attr.checked]="isOptionSelected(opt.option_id) ? 'checked' : null"
+                  [disabled]="!isLoggedIn() || isVoting()"
+                  (change)="toggleMulti(opt.option_id)"
+                />
+              }
 
-              <label class="form-check-label">
+              <div class="option-content">
                 {{ opt.description }}
 
                 @if (canShowResults(p)) {
@@ -184,12 +219,27 @@
                     ({{ getTotalVotesForOption(opt) }} votes)
                   </span>
                 }
-              </label>
+                
+                @if (hasVoted() && isOptionSelected(opt.option_id) && isWinningOption(opt.option_id)) {
+                  <span class="vote-label voted-and-winning-label">{{ getVotedAndWinningLabel() }}</span>
+                } @else if (hasVoted() && isOptionSelected(opt.option_id)) {
+                  <span class="vote-label voted-label">{{ getVoteLabel() }}</span>
+                } @else if (shouldShowWinningIndicator() && isWinningOption(opt.option_id)) {
+                  <span class="vote-label winning-label">{{ getWinningLabel() }}</span>
+                }
+              </div>
             </div>
           }
         </div>
       }
     </div>
+
+    <!-- Already voted message -->
+    @if (hasVoted()) {
+      <div class="alert alert-info mb-3">
+        You have already voted in this poll.
+      </div>
+    }
 
     <!-- Submit vote -->
     <div class="d-flex justify-content-end mb-4">
@@ -197,9 +247,9 @@
         class="btn btn-success"
         type="button"
         (click)="submitVote()"
-        [disabled]="!isLoggedIn() || isVoting()"
+        [disabled]="!isLoggedIn() || isVoting() || hasVoted()"
       >
-        {{ isVoting() ? 'Submitting…' : 'Submit Vote' }}
+        {{ isVoting() ? 'Submitting…' : hasVoted() ? 'Already Voted' : 'Submit Vote' }}
       </button>
     </div>
 
@@ -222,14 +272,15 @@
           Close
         </button>
 
-        <button
-          class="btn btn-primary"
-          type="button"
-          (click)="onEdit()"
-          [disabled]="!poll()"
-        >
-          Edit Poll
-        </button>
+        @if (canEdit()) {
+          <button
+            class="btn btn-primary"
+            type="button"
+            (click)="onEdit()"
+          >
+            Edit Poll
+          </button>
+        }
       </div>
     </div>
   }

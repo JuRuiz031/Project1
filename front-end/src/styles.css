@@ -2,6 +2,21 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 
 /* =====================================================
+   Global Reset - Remove default margins/padding
+   ===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* =====================================================
    Project 1 – Global Color Palette 01
    ===================================================== */
 
@@ -36,6 +51,15 @@
      Global shadows
      ===================================================== */
   --shadow-elevation-2: 0 6px 18px rgba(0, 0, 0, 0.10);
+  --shadow-elevation-3: 0 12px 40px rgba(0, 0, 0, 0.15);
+
+  /* =====================================================
+     Modern Gradients (matching auth pages)
+     ===================================================== */
+  --gradient-primary: linear-gradient(135deg, var(--color-steel-blue) 0%, var(--color-frozen-lake) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--color-accent-tertiary) 0%, var(--color-steel-blue) 100%);
+  --gradient-tertiary: linear-gradient(135deg, var(--color-frozen-lake) 0%, var(--color-pearl-aqua) 100%);
+  --gradient-brand: linear-gradient(135deg, var(--color-steel-blue) 0%, var(--color-accent-tertiary) 100%);
 }
 
 /* App page background */
@@ -93,8 +117,9 @@ select:disabled {
    App Header / Navbar (Bootstrap-based)
    ===================================================== */
 .app-navbar {
-  background: var(--color-steel-blue);
+  background: var(--gradient-primary);
   border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 12px rgba(32, 129, 195, 0.2);
 }
 
 /* Brand + links on the blue header */
@@ -121,9 +146,10 @@ select:disabled {
    App Footer (Bootstrap-based, header-aligned)
    ===================================================== */
 .app-footer {
-  background: var(--color-steel-blue);
+  background: var(--gradient-primary);
   color: #fff;
   border-top: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 -2px 12px rgba(32, 129, 195, 0.15);
 }
 
 .app-footer__text {
@@ -138,15 +164,44 @@ select:disabled {
 
 /* PRIMARY BUTTON */
 .btn-primary {
-  --bs-btn-bg: var(--color-accent-primary);
-  --bs-btn-border-color: var(--color-accent-primary);
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(32, 129, 195, 0.3);
+  transition: all 0.25s ease;
+
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
   --bs-btn-color: #fff;
+}
 
-  --bs-btn-hover-bg: var(--color-accent-secondary);
-  --bs-btn-hover-border-color: var(--color-accent-secondary);
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(32, 129, 195, 0.4) !important;
+  background: var(--gradient-brand) !important;
+}
 
-  --bs-btn-active-bg: var(--color-accent-tertiary);
-  --bs-btn-active-border-color: var(--color-accent-tertiary);
+/* SOLID PRIMARY BUTTON (for calendar navigation and actions) */
+.btn-primary-solid {
+  background: var(--color-accent-primary) !important;
+  border: 1px solid var(--color-accent-primary) !important;
+  color: #fff !important;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary-solid:hover {
+  background: var(--color-accent-secondary) !important;
+  border-color: var(--color-accent-secondary) !important;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(32, 129, 195, 0.2) !important;
+}
+
+.btn-primary-solid:active,
+.btn-primary-solid.active {
+  background: var(--color-accent-tertiary) !important;
+  border-color: var(--color-accent-tertiary) !important;
+  transform: none;
 }
 
 /* OUTLINE PRIMARY BUTTON */
@@ -193,5 +248,463 @@ select:disabled {
 /* Optional: consistent focus ring */
 .btn-primary:focus-visible,
 .btn-danger:focus-visible {
-  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 0.25rem rgba(32, 129, 195, 0.25);
+}
+
+/* =====================================================
+   Angular Calendar - Global Overrides
+   ===================================================== */
+
+/* Ensure HTML in event titles renders properly */
+.cal-event-title {
+  display: inline;
+}
+
+.cal-event-title strong {
+  font-weight: 700;
+}
+
+/* =====================================================
+   Shared Auth Page Styles (Login, Create Account)
+   Reduces duplication across auth components
+   ===================================================== */
+
+.auth-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Brand Section */
+.auth-brand {
+  text-align: center;
+  color: white;
+}
+
+.brand-icon {
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.brand-icon svg {
+  color: white;
+}
+
+.brand-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.brand-tagline {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Auth Card */
+.auth-card {
+  width: 100%;
+  background: var(--color-background-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-elevation-2), 0 12px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  border: 2px solid var(--color-border-default);
+}
+
+.auth-card-header {
+  padding: 1.75rem 2rem 0;
+  text-align: center;
+}
+
+.auth-card-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem;
+}
+
+.auth-card-header p {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Auth Form */
+.auth-form {
+  padding: 1.75rem 2rem;
+}
+
+.auth-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.auth-form .form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.input-wrapper:focus-within .input-icon {
+  color: var(--color-accent-primary);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  background: var(--color-background-primary);
+  box-shadow: 0 0 0 3px rgba(32, 129, 195, 0.15);
+}
+
+.auth-input.is-invalid {
+  border-color: var(--color-feedback-error);
+  background: var(--color-feedback-error-bg);
+}
+
+.auth-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.error-text {
+  display: block;
+  color: var(--color-feedback-error);
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+}
+
+/* Auth Actions */
+.auth-actions {
+  margin-top: 1.5rem;
+}
+
+/* Shared Auth Button Base */
+.btn-auth {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.btn-auth:disabled {
+  cursor: not-allowed;
+}
+
+.btn-auth.btn-ready {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(32, 129, 195, 0.4);
+}
+
+.btn-auth.btn-ready:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(32, 129, 195, 0.5);
+}
+
+.btn-auth.btn-ready:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Auth Divider */
+.auth-divider {
+  position: relative;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.auth-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 2rem;
+  right: 2rem;
+  height: 1px;
+  background: var(--color-border-default);
+}
+
+.auth-divider span {
+  position: relative;
+  background: var(--color-background-primary);
+  padding: 0 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Auth Alternate Section */
+.auth-alternate {
+  padding: 1.5rem 2rem 2rem;
+  text-align: center;
+}
+
+.auth-alternate p {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.btn-auth-secondary {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-auth-secondary:hover {
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  background: rgba(32, 129, 195, 0.05);
+}
+
+/* Auth Footer */
+.auth-footer {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Auth Page Responsive */
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 1rem;
+  }
+  
+  .auth-form,
+  .auth-alternate,
+  .auth-card-header {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  .brand-title {
+    font-size: 1.75rem;
+  }
+}
+
+/* =====================================================
+   Shared Profile Page Styles (Account View, Edit User)
+   Reduces duplication across profile components
+   ===================================================== */
+
+.profile-page {
+  min-height: calc(100vh - 120px);
+  padding: 2rem 1rem;
+  background: var(--color-background-primary);
+}
+
+.profile-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Profile Page Header */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-border-default);
+}
+
+.profile-header .header-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--gradient-primary);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.profile-header .header-text h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 0.25rem;
+}
+
+.profile-header .header-text p {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Profile Card */
+.profile-card {
+  background: var(--color-background-secondary);
+  border: 2px solid var(--color-border-default);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-elevation-2);
+}
+
+.profile-card .card-section {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.profile-card .card-section:last-of-type {
+  border-bottom: none;
+}
+
+.profile-card .section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 1.25rem;
+}
+
+.profile-card .section-title svg {
+  color: var(--color-accent-primary);
+}
+
+/* Profile Card Actions/Footer */
+.profile-card .card-actions,
+.profile-card .card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid var(--color-border-default);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Success Notification (shared) */
+.success-notification {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  padding: 0.875rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 1050;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.success-notification .notification-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Profile Page Responsive */
+@media (max-width: 640px) {
+  .profile-page {
+    padding: 1rem;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-card .card-section {
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .profile-card .card-actions,
+  .profile-card .card-footer {
+    flex-direction: column;
+    padding: 1.25rem 1.5rem;
+  }
 }

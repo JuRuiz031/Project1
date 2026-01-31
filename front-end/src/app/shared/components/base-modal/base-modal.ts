@@ -32,8 +32,11 @@ import { CommonModule } from '@angular/common';
 export class BaseModal implements OnDestroy {
   // Inputs
   title = input<string>('');
+  subtitle = input<string>('');
   showBackButton = input<boolean>(false);
   size = input<'small' | 'medium' | 'large'>('medium'); // small: 500px, medium: 700px, large: 900px
+  headerStyle = input<'default' | 'gradient'>('default');
+  zIndex = input<number>(1000); // Allow override for overlay modals
   
   // Outputs
   close = output<void>();

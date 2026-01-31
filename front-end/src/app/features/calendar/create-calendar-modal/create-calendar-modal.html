@@ -1,5 +1,6 @@
 <app-base-modal
   [title]="'Create Calendar'"
+  [headerStyle]="'gradient'"
   (close)="onClose()"
 >
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>

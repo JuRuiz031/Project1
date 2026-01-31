@@ -3,17 +3,16 @@
   margin: 0 auto;
 }
 
-/* Tag chips matching event modal style */
+/* Tag chips matching gradient style */
 .tag-chip {
-  display: inline-block;
-  padding: 4px 12px;
-  background-color: #e3f2fd;
-  color: #1976d2;
-  border-radius: 12px;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1565c0;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 500;
-  margin-right: 8px;
-  margin-bottom: 8px;
 }
 
 .tags-display {
@@ -23,30 +22,51 @@
 }
 
 /* Voting options styling */
-.form-check {
-  padding: 12px;
-  border-radius: 6px;
-  transition: background-color 0.2s;
-}
-
-.form-check:hover {
+.poll-option {
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   background-color: #f8f9fa;
+  border: 2px solid transparent;
 }
 
-.form-check-input {
+.poll-option.clickable {
   cursor: pointer;
-  margin-right: 10px;
 }
 
-.form-check-input:checked {
-  background-color: #007bff;
-  border-color: #007bff;
+.poll-option.clickable:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
 }
 
-.form-check-label {
-  cursor: pointer;
-  user-select: none;
+/* Selected state (before voting) */
+.poll-option.selected {
+  background-color: #cfe2ff;
+  border-color: #84b6f4;
+}
+
+.poll-option.clickable.selected:hover {
+  background-color: #b6d4fe;
+  border-color: #6ea8fe;
+}
+
+.option-content {
   font-size: 14px;
+  user-select: none;
+}
+
+/* Hide the actual radio/checkbox inputs */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 /* Badge styling to match event tags */
@@ -139,4 +159,65 @@
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   color: #721c24;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+/* Voted option styling (user's vote) */
+.poll-option.voted-option {
+  background-color: #e7f3ff !important;
+  border: 2px solid #007bff !important;
+  font-weight: 500;
+}
+
+.poll-option.voted-option .option-content {
+  color: #004085;
+  font-weight: 600;
+}
+
+/* Winning option styling (most votes) */
+.poll-option.winning-option {
+  background-color: #d4edda !important;
+  border: 2px solid #28a745 !important;
+  font-weight: 500;
+}
+
+.poll-option.winning-option .option-content {
+  color: #155724;
+  font-weight: 600;
+}
+
+/* User voted for the winning option */
+.poll-option.voted-and-winning {
+  background: linear-gradient(135deg, #e7f3ff 0%, #d4edda 100%) !important;
+  border: 2px solid #17a2b8 !important;
+  font-weight: 500;
+}
+
+.poll-option.voted-and-winning .option-content {
+  color: #004085;
+  font-weight: 600;
+}
+
+/* Vote label styling */
+.vote-label {
+  margin-left: 8px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.voted-label {
+  color: #007bff;
+}
+
+.winning-label {
+  color: #28a745;
+}
+
+.voted-and-winning-label {
+  color: #17a2b8;
 }

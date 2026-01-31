@@ -1,4 +1,4 @@
-<div class="modal-overlay" (click)="onClose()">
+<div class="modal-overlay" [style.z-index]="zIndex()" (click)="onClose()">
   <div 
     class="modal-content"
     [class.modal-small]="size() === 'small'"
@@ -7,16 +7,21 @@
     (click)="$event.stopPropagation()">
     
     <!-- Header -->
-    <div class="modal-header">
+    <div class="modal-header" [class.modal-header-gradient]="headerStyle() === 'gradient'">
       @if (showBackButton()) {
-        <button class="modal-back-btn" (click)="onBack()" aria-label="Go back">
+        <button class="modal-back-btn" [class.modal-back-btn-gradient]="headerStyle() === 'gradient'" (click)="onBack()" aria-label="Go back">
           ← Back
         </button>
       }
       
-      <h2 class="modal-title">{{ title() }}</h2>
+      <div class="modal-title-container">
+        <h2 class="modal-title">{{ title() }}</h2>
+        @if (subtitle()) {
+          <p class="modal-subtitle">{{ subtitle() }}</p>
+        }
+      </div>
       
-      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
+      <button class="modal-close-btn" [class.modal-close-btn-gradient]="headerStyle() === 'gradient'" (click)="onClose()" aria-label="Close modal">
         ✕
       </button>
     </div>

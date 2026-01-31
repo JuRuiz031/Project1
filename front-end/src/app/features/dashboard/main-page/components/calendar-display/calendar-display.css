@@ -1,17 +1,16 @@
 /* =====================================================
-   Layout wrapper (Bootstrap card/container pattern)
+   Layout wrapper
    ===================================================== */
 
-.calendar-display-card {
-  max-width: 900px;
-  margin: 0 auto;
+.calendar-display-wrapper {
+  width: 100%;
 }
 
 /* Keep component layout simple; Bootstrap handles most structure */
 .calendar-display {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
 
 /* =====================================================
@@ -24,12 +23,45 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 }
 
 .calendar-display__title {
   font-size: 16px;
   font-weight: 700;
+}
+
+/* Calendar display filter tabs */
+.calendar-filter-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.calendar-filter-tab {
+  padding: 6px 12px;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all 0.2s;
+  min-width: 60px;
+  text-align: center;
+}
+
+.calendar-filter-tab:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-background-primary);
+  border-color: var(--color-accent-secondary);
+}
+
+.calendar-filter-tab.active {
+  color: white;
+  background-color: var(--color-accent-primary);
+  border-color: var(--color-accent-primary);
+  font-weight: 600;
 }
 
 .calendar-display__view-btn {
@@ -47,8 +79,7 @@
   border: 1px solid var(--color-border-default);
   border-radius: 12px;
   background: #fff;
-  display: grid;
-  place-items: center;
+  padding: 8px;
 }
 
 .calendar-display__placeholder {

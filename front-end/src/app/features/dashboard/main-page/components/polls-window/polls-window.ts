@@ -2,6 +2,7 @@ import { Component, inject, signal, output, input, computed } from '@angular/cor
 import { PollDTO } from '../../../../../shared/models/polls/poll.dto';
 import { CommonModule } from '@angular/common';
 
+type PollStatus = 'all' | 'in-progress' | 'completed';
 
 @Component({
   selector: 'app-polls-window',
@@ -20,6 +21,41 @@ export class PollsWindow {
   viewPolls = output<void>();
   viewPoll = output<string>();
 
+  // Filter state
+  selectedStatus = signal<PollStatus>('all');
+
+  // Computed: filter and sort polls
+  filteredPolls = computed(() => {
+    const now = new Date();
+    let filtered = this.polls();
+
+    // Filter by status
+    const status = this.selectedStatus();
+    if (status === 'in-progress') {
+      filtered = filtered.filter(p => new Date(p.end_time) > now);
+    } else if (status === 'completed') {
+      filtered = filtered.filter(p => new Date(p.end_time) <= now);
+    }
+
+    // Sort by end_time (soonest to end first)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.end_time).getTime();
+      const dateB = new Date(b.end_time).getTime();
+      return dateA - dateB; // Ascending order - soonest first
+    });
+  });
+
+  // Computed: count polls by status
+  inProgressCount = computed(() => {
+    const now = new Date();
+    return this.polls().filter(p => new Date(p.end_time) > now).length;
+  });
+
+  completedCount = computed(() => {
+    const now = new Date();
+    return this.polls().filter(p => new Date(p.end_time) <= now).length;
+  });
+
   onCreatePoll(): void {
     this.createPoll.emit();
   }
@@ -30,6 +66,10 @@ export class PollsWindow {
 
   onViewPoll(p: PollDTO): void {
     this.viewPoll.emit(p.poll_id);
+  }
+
+  setStatusFilter(status: PollStatus): void {
+    this.selectedStatus.set(status);
   }
 
   formatPollTime(iso: string): string {

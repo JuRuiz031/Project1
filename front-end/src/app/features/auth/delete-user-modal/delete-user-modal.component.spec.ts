@@ -2,13 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
 
-import { DeleteUser } from './delete-user';
+import { DeleteUserModalComponent } from './delete-user-modal.component';
 import { UserApiService } from '../../../shared/services/api/user-api.service';
 import { NavigationService } from '../../../shared/services/navigation.service';
 
-describe('DeleteUser', () => {
-  let fixture: ComponentFixture<DeleteUser>;
-  let component: DeleteUser;
+describe('DeleteUserModalComponent', () => {
+  let fixture: ComponentFixture<DeleteUserModalComponent>;
+  let component: DeleteUserModalComponent;
 
   const navigationMock = {
     goToLogin: jasmine.createSpy('goToLogin'),
@@ -26,7 +26,7 @@ describe('DeleteUser', () => {
     userApiMock.deleteUser.calls.reset();
 
     await TestBed.configureTestingModule({
-      imports: [DeleteUser],
+      imports: [DeleteUserModalComponent],
       providers: [
         { provide: NavigationService, useValue: navigationMock },
         { provide: UserApiService, useValue: userApiMock },
@@ -36,7 +36,7 @@ describe('DeleteUser', () => {
 
   function createComponentWithUser(user: any) {
     localStorage.setItem('user', JSON.stringify(user));
-    fixture = TestBed.createComponent(DeleteUser);
+    fixture = TestBed.createComponent(DeleteUserModalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }

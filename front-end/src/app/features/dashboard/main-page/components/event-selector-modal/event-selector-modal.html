@@ -1,9 +1,43 @@
 <div class="modal-overlay" (click)="onClose()">
   <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Success Message -->
+    @if (showSuccessMessage()) {
+      <div class="alert alert-success success-banner">
+        <span class="success-icon">✓</span>
+        {{ successMessageText() }}
+      </div>
+    }
+
     <!-- Header -->
-    <div class="modal-header">
+    <div class="modal-header modal-header-gradient">
       <h2 class="modal-title">Select Event</h2>
-      <button class="modal-close-btn" (click)="onClose()" aria-label="Close modal">
+      
+      <!-- Status Filter Tabs -->
+      <div class="status-tabs">
+        <button
+          class="status-tab"
+          [class.active]="selectedStatus() === 'all'"
+          (click)="setStatusFilter('all')"
+        >
+          All ({{ events().length }})
+        </button>
+        <button
+          class="status-tab"
+          [class.active]="selectedStatus() === 'upcoming'"
+          (click)="setStatusFilter('upcoming')"
+        >
+          Upcoming ({{ upcomingCount() }})
+        </button>
+        <button
+          class="status-tab"
+          [class.active]="selectedStatus() === 'past'"
+          (click)="setStatusFilter('past')"
+        >
+          Past ({{ pastCount() }})
+        </button>
+      </div>
+      
+      <button class="modal-close-btn modal-close-btn-gradient" (click)="onClose()" aria-label="Close modal">
         ✕
       </button>
     </div>

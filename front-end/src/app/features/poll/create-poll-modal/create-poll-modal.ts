@@ -75,7 +75,21 @@ export class CreatePollModal implements OnInit {
   });
 
   ngOnInit(): void {
+    this.setDefaultDateTime();
     this.loadCalendars();
+  }
+
+  private setDefaultDateTime(): void {
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const currentTime = now.toTimeString().split(':').slice(0, 2).join(':'); // HH:mm
+    
+    this.form.patchValue({
+      startDate: currentDate,
+      startTime: currentTime,
+      endDate: currentDate,
+      endTime: currentTime,
+    }, { emitEvent: false });
   }
 
   // ---- FormArray getters ----

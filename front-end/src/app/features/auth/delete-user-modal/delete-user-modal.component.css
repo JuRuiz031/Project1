@@ -1,0 +1,177 @@
+/* =====================================================
+   Delete User Modal - Modern Auth Styling
+   Using global color palette and clean structure
+   ===================================================== */
+
+/* Warning Header */
+.delete-warning-header {
+  text-align: center;
+}
+
+.header-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: white;
+}
+
+.header-icon--danger {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+}
+
+.modal-subtitle {
+  color: var(--color-feedback-error);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Warning Message */
+.warning-message p {
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--color-background-secondary);
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+  margin-top: 1rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.user-info svg {
+  color: var(--color-accent-primary);
+}
+
+/* Consequences Section */
+.consequences-section {
+  text-align: left;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.consequences-title {
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.consequences-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.consequences-list li {
+  padding: 0.4rem 0;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.consequences-list li::before {
+  content: '×';
+  position: absolute;
+  left: 0;
+  top: 0.4rem;
+  color: var(--color-feedback-error);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Buttons */
+.btn-cancel {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid var(--color-border-default);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  border-color: var(--color-text-secondary);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.btn-delete {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  
+  /* Danger styling */
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+}
+
+.btn-delete:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
+.btn-delete:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+.btn-delete.btn-deleting {
+  background: #6b7280;
+  box-shadow: none;
+}
+
+.btn-delete.btn-deleting svg,
+.btn-deleting {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alert styling */
+.alert-danger {
+  background: var(--color-feedback-error-bg);
+  border: 1px solid rgba(185, 28, 28, 0.2);
+  color: var(--color-feedback-error);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
+}

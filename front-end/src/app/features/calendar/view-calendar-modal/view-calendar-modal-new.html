@@ -1,7 +1,6 @@
 <app-base-modal
   [title]="'View Calendar'"
   [showBackButton]="true"
-  [headerStyle]="'gradient'"
   (back)="onBack()"
   (close)="onClose()"
 >
@@ -83,11 +82,8 @@
       } @else {
         <ul class="list-group">
           @for (u of users(); track u.user_id) {
-            <li class="list-group-item user-row d-flex justify-content-between align-items-center">
+            <li class="list-group-item user-row">
               <span class="user-name">{{ u.username }}</span>
-              @if (u.is_admin) {
-                <span class="admin-badge text-muted fst-italic">Admin</span>
-              }
             </li>
           }
         </ul>
@@ -119,10 +115,11 @@
                 class="form-control app-input"
                 [value]="shareLink()"
                 readonly
+                #linkInput
               />
               <button
                 class="btn btn-outline-primary btn-copy"
-                (click)="copyShareLink()"
+                (click)="copyLink(linkInput)"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>

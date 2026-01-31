@@ -6,11 +6,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { UserApiService, UpdateUserDTO } from '../../../shared/services/api/user-api.service';
 import { NavigationService } from '../../../shared/services/navigation.service';
+import { DeleteUserModalComponent } from '../delete-user-modal/delete-user-modal.component';
 
 @Component({
   selector: 'app-edit-user',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DeleteUserModalComponent],
   templateUrl: './edit-user.html',
   styleUrl: './edit-user.css',
 })
@@ -25,6 +26,7 @@ export class EditUser {
   userId = signal('');
   originalUsername = signal('');
   originalEmail = signal('');
+  showDeleteModal = signal(false);
 
   // Convert form value changes to a signal (initialized after form)
   formValues = signal<any>({});
@@ -181,6 +183,15 @@ export class EditUser {
   }
 
   deleteProfile(): void {
-    this.navigation.goToDeleteUser();
+    this.showDeleteModal.set(true);
+  }
+
+  onDeleteCancelled(): void {
+    this.showDeleteModal.set(false);
+  }
+
+  onDeleteConfirmed(): void {
+    this.showDeleteModal.set(false);
+    // Navigation to login happens in the modal component
   }
 }

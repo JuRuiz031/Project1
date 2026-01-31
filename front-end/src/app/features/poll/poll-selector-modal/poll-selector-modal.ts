@@ -5,6 +5,7 @@ import { getCalendarColor } from '../../../config/calendar-colors';
 import { PollDTO } from '../../../shared/models/polls/poll.dto';
 
 type CalendarOption = { calendar_id: string; name: string };
+type PollStatus = 'all' | 'in-progress' | 'completed';
 
 @Component({
   selector: 'app-poll-selector-modal',
@@ -17,6 +18,8 @@ export class PollSelectorModal implements OnDestroy {
   // Inputs & Outputs
   polls = input<PollDTO[]>([]);
   calendars = input<CalendarOption[]>([]);
+  showSuccessMessage = input<boolean>(false);
+  successMessageText = input<string>('');
   pollSelected = output<string>();  // Emit poll ID
   closeModal = output<void>();
 
@@ -24,6 +27,7 @@ export class PollSelectorModal implements OnDestroy {
   searchQuery = signal('');
   selectedTags = signal<string[]>([]);
   selectedCalendarIds = signal<string[]>([]);
+  selectedStatus = signal<PollStatus>('all');
 
   // Computed: extract all unique tags from polls
   allTags = computed(() => {
@@ -34,9 +38,18 @@ export class PollSelectorModal implements OnDestroy {
     return Array.from(tagSet).sort();
   });
 
-  // Computed: filter polls by search query, tags, and calendars
+  // Computed: filter polls by search query, tags, calendars, and status
   filteredPolls = computed(() => {
+    const now = new Date();
     let filtered = this.polls();
+    
+    // Filter by status
+    const status = this.selectedStatus();
+    if (status === 'in-progress') {
+      filtered = filtered.filter(p => new Date(p.end_time) > now);
+    } else if (status === 'completed') {
+      filtered = filtered.filter(p => new Date(p.end_time) <= now);
+    }
     
     // Filter by selected calendars
     const selectedCals = this.selectedCalendarIds();
@@ -62,7 +75,23 @@ export class PollSelectorModal implements OnDestroy {
       );
     }
     
-    return filtered;
+    // Sort by end_time (soonest to end first)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.end_time).getTime();
+      const dateB = new Date(b.end_time).getTime();
+      return dateA - dateB; // Ascending order - soonest first
+    });
+  });
+
+  // Computed: count polls by status
+  inProgressCount = computed(() => {
+    const now = new Date();
+    return this.polls().filter(p => new Date(p.end_time) > now).length;
+  });
+
+  completedCount = computed(() => {
+    const now = new Date();
+    return this.polls().filter(p => new Date(p.end_time) <= now).length;
   });
 
   constructor() {
@@ -117,6 +146,10 @@ export class PollSelectorModal implements OnDestroy {
 
   clearCalendarFilters(): void {
     this.selectedCalendarIds.set([]);
+  }
+
+  setStatusFilter(status: PollStatus): void {
+    this.selectedStatus.set(status);
   }
 
   getCalendarColor(calendarId: string): { primary: string; secondary: string } {

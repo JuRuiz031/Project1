@@ -47,9 +47,10 @@ describe('EditUser', () => {
     expect(routerMock.navigate).toHaveBeenCalledWith(['/account']);
   });
 
-  it('deleteProfile() should navigate to /delete-user', () => {
+  it('deleteProfile() should show delete modal', () => {
+    expect(component.showDeleteModal()).toBe(false);
     component.deleteProfile();
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/delete-user']);
+    expect(component.showDeleteModal()).toBe(true);
   });
 
   it('save() should block submit when form invalid, mark touched, and show apiError', () => {

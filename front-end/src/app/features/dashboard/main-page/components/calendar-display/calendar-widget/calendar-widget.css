@@ -22,3 +22,68 @@
 :host ::ng-deep .cal-event {
   user-select: none;
 }
+
+/* =====================================================
+   Month View Styling
+   ===================================================== */
+
+:host ::ng-deep .cal-month-view .cal-days {
+  border: 1px solid #e1e1e1;
+}
+
+:host ::ng-deep .cal-month-view .cal-day-cell {
+  min-height: 80px;
+  padding: 4px;
+}
+
+:host ::ng-deep .cal-month-view .cal-day-number {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+:host ::ng-deep .cal-month-view .cal-day-badge {
+  margin-top: 4px;
+}
+
+:host ::ng-deep .cal-month-view .cal-header {
+  padding: 4px;
+}
+
+:host ::ng-deep .cal-month-view .cal-header .cal-cell {
+  padding: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:host ::ng-deep .cal-month-view .cal-open-day-events {
+  padding: 8px;
+}
+
+/* =====================================================
+   Week/Day View - All-day events section at the top
+   ===================================================== */
+
+:host ::ng-deep .cal-week-view .cal-all-day-events,
+:host ::ng-deep .cal-day-view .cal-all-day-events {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e0e0e0;
+  padding: 8px;
+  min-height: 40px;
+}
+
+:host ::ng-deep .cal-week-view .cal-all-day-events .cal-event,
+:host ::ng-deep .cal-day-view .cal-all-day-events .cal-event {
+  padding: 4px 10px;
+  margin: 2px 4px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+:host ::ng-deep .cal-week-view .cal-all-day-events .cal-event:hover,
+:host ::ng-deep .cal-day-view .cal-all-day-events .cal-event:hover {
+  filter: brightness(1.1);
+}
