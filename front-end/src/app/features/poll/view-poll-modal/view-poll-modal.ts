@@ -1,8 +1,10 @@
 import { Component, OnInit, inject, input, output, signal, computed, effect, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { take } from 'rxjs/operators';
 import { BaseModal } from '../../../shared/components/base-modal/base-modal';
 import { CalendarService } from '../../../shared/services/calendar.service';
 import { PollService } from '../../../shared/services/poll.service';
+import { InviteService } from '../../../shared/services/invite.service';
 import { PollDTO } from '../../../shared/models/polls/poll.dto';
 import { VotePollDTO } from '../../../shared/models/polls/vote-poll.dto';
 import { CalendarHomeDTO } from '../../../shared/models/calendars/calendar-home.dto';
@@ -18,6 +20,7 @@ import { CalendarFilterResponseDTO } from '../../../shared/models/calendars/cale
 export class ViewPollModal implements OnInit, OnDestroy {
   private calendarService = inject(CalendarService);
   private pollService = inject(PollService);
+  private inviteService = inject(InviteService);
 
   constructor() {
     document.body.style.overflow = 'hidden';
@@ -50,6 +53,12 @@ export class ViewPollModal implements OnInit, OnDestroy {
   isLoading = signal(false);
   showNotification = signal(false);
 
+  // Share popup state
+  showSharePopup = signal(false);
+  shareLink = signal<string>('');
+  isGeneratingLink = signal(false);
+  copySuccess = signal(false);
+
   // Admin calendars for permission checking
   private adminCalendarIds = signal<string[]>([]);
   canEdit = computed(() => {
@@ -57,6 +66,7 @@ export class ViewPollModal implements OnInit, OnDestroy {
     if (!p) return false;
     return this.adminCalendarIds().includes(p.calendar_id);
   });
+  canShare = computed(() => this.canEdit()); // Same permissions as edit
 
   // voting state
   voteError = signal('');
@@ -385,6 +395,56 @@ formatLocalTime(iso: string): string {
             'Could not submit vote'
         );
       },
+    });
+  }
+
+  onShare(): void {
+    const p = this.poll();
+    if (!p || !this.canShare()) return;
+
+    // Show popup and start generating link
+    this.showSharePopup.set(true);
+    this.isGeneratingLink.set(true);
+    this.shareLink.set('');
+    this.copySuccess.set(false);
+
+    // Generate expiration date (7 days from now)
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7);
+    const expirationISO = expirationDate.toISOString();
+
+    // Create invite link
+    this.inviteService.createPollInvite(p.poll_id, expirationISO)
+      .pipe(take(1))
+      .subscribe({
+        next: (response) => {
+          this.shareLink.set(response.invite_link);
+          this.isGeneratingLink.set(false);
+        },
+        error: (err) => {
+          console.error('[ViewPollModal] Failed to generate invite link:', err);
+          this.isGeneratingLink.set(false);
+          this.apiError.set('Failed to generate invite link');
+          this.showSharePopup.set(false);
+        }
+      });
+  }
+
+  closeSharePopup(): void {
+    this.showSharePopup.set(false);
+    this.shareLink.set('');
+    this.copySuccess.set(false);
+  }
+
+  copyShareLink(): void {
+    const link = this.shareLink();
+    if (!link) return;
+
+    navigator.clipboard.writeText(link).then(() => {
+      this.copySuccess.set(true);
+      setTimeout(() => this.copySuccess.set(false), 2000);
+    }).catch(err => {
+      console.error('[ViewPollModal] Failed to copy link:', err);
     });
   }
 }

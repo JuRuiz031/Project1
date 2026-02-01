@@ -1,28 +1,30 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { InviteService } from '../../../shared/services/invite.service';
 import { MainFooter } from '../../shared/main-footer/main-footer';
 import { EventDTO } from '../../../shared/models/events/event.dto';
-import { isEventInvite } from '../../../shared/models/invites/invite-details-response.dto';
+import { isEventInvite, isPollInvite } from '../../../shared/models/invites/invite-details-response.dto';
 
 /**
  * Guest-only event viewing component
  * Used when guests click on invite links to view event details
+ * If the invite is for a poll, redirects to the poll view page
  * Authenticated users see events in modals instead
  */
 @Component({
   selector: 'app-view-event',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, MainFooter],
+  imports: [CommonModule, ReactiveFormsModule, MainFooter],
   templateUrl: './view-event.html',
   styleUrls: ['./view-event.css'],
 })
 export class ViewEvent implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private inviteService = inject(InviteService);
 
   apiError = signal('');
@@ -69,13 +71,20 @@ export class ViewEvent implements OnInit {
           this.apiError.set('Event not found');
           return;
         }
-        // Type guard: ensure this is an event invite, not a poll invite
+        // Type guard: check if this is an event or poll invite
         if (isEventInvite(details)) {
           console.log('[ViewEvent] Is event invite, displaying...');
           this.displayEvent(details);
+        } else if (isPollInvite(details)) {
+          console.log('[ViewEvent] Is poll invite, redirecting to poll view...');
+          // Redirect to poll view, passing the already-fetched data
+          this.router.navigate(['/polllink'], { 
+            queryParams: { token },
+            state: { pollData: details }
+          });
         } else {
-          console.log('[ViewEvent] Not an event invite');
-          this.apiError.set('Invalid event invite link');
+          console.log('[ViewEvent] Unknown invite type');
+          this.apiError.set('Invalid invite link');
         }
       },
       error: (err) => {

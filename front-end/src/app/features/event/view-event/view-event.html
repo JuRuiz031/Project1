@@ -14,28 +14,33 @@
 <div class="page-container">
   <div class="content-wrapper">
     <div class="card event-card">
-      <div class="card-header">
-        <h1 class="card-title">Event Details</h1>
-        <p class="card-subtitle">You've been invited to view this event</p>
-      </div>
-
-      <div class="card-body">
-        @if (apiError()) {
-          <div class="alert alert-danger mb-3">
-            {{ apiError() }}
-          </div>
-        }
-
-        @if (isLoading()) {
+      @if (isLoading()) {
+        <div class="card-header">
+          <h1 class="card-title">Loading...</h1>
+          <p class="card-subtitle">Please wait</p>
+        </div>
+        <div class="card-body">
           <div class="loading-state">
             <div class="spinner"></div>
-            <p>Loading event...</p>
+            <p>Loading details...</p>
           </div>
-        }
+        </div>
+      } @else {
+        <div class="card-header">
+          <h1 class="card-title">Event Details</h1>
+          <p class="card-subtitle">You've been invited to view this event</p>
+        </div>
 
-        @if (!isLoading() && !apiError()) {
-          <div class="row g-4">
-            <!-- LEFT COLUMN -->
+        <div class="card-body">
+          @if (apiError()) {
+            <div class="alert alert-danger mb-3">
+              {{ apiError() }}
+            </div>
+          }
+
+          @if (!apiError()) {
+            <div class="row g-4">
+              <!-- LEFT COLUMN -->
             <div class="col-12 col-md-8">
               <!-- Title -->
               <div class="form-group">
@@ -132,8 +137,9 @@
               </div>
             </div>
           </div>
-        }
-      </div>
+          }
+        </div>
+      }
     </div>
   </div>
 </div>
