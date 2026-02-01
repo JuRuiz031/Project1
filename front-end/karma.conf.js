@@ -86,7 +86,7 @@ module.exports = function (config) {
       ]
     },
     reporters: ['progress', 'kjhtml'],
-    browsers: ['ChromeHeadlessNoSandbox'], // Browser Karma will try to launch to run the tests
+    browsers: ['Chrome'], // Browser Karma will try to launch to run the tests
     singleRun: false,
     restartOnFileChange: true,
     browserNoActivityTimeout: 60000,
