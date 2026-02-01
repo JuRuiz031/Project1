@@ -341,6 +341,12 @@ formatLocalTime(iso: string): string {
     const p = this.poll();
     if (!p) return;
 
+    // Check if poll has expired
+    if (this.isPollEnded()) {
+      this.voteError.set('This poll has ended and is no longer accepting votes.');
+      return;
+    }
+
     const userId = this.getUserIdFromStorage();
     if (!userId) {
       this.voteError.set('You must be logged in to vote.');

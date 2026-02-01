@@ -167,20 +167,20 @@
         <div>
           @for (opt of p.options; track opt.option_id) {
             <div class="poll-option" 
-                 [class.selected]="!hasVoted() && isOptionSelected(opt.option_id)"
+                 [class.selected]="!hasVoted() && !isPollEnded() && isOptionSelected(opt.option_id)"
                  [class.voted-option]="hasVoted() && isOptionSelected(opt.option_id)"
                  [class.winning-option]="shouldShowWinningIndicator() && isWinningOption(opt.option_id) && !isOptionSelected(opt.option_id)"
                  [class.voted-and-winning]="hasVoted() && isOptionSelected(opt.option_id) && isWinningOption(opt.option_id)"
-                 [class.clickable]="!hasVoted() && isLoggedIn() && !isVoting()"
-                 (click)="!hasVoted() && isLoggedIn() && !isVoting() && selectSingle(opt.option_id)">
-              @if (!hasVoted()) {
+                 [class.clickable]="!hasVoted() && !isPollEnded() && isLoggedIn() && !isVoting()"
+                 (click)="!hasVoted() && !isPollEnded() && isLoggedIn() && !isVoting() && selectSingle(opt.option_id)">
+              @if (!hasVoted() && !isPollEnded()) {
                 <input
                   class="form-check-input visually-hidden"
                   type="radio"
                   name="singleVote"
                   [checked]="isOptionSelected(opt.option_id)"
                   [attr.checked]="isOptionSelected(opt.option_id) ? 'checked' : null"
-                  [disabled]="!isLoggedIn() || isVoting()"
+                  [disabled]="!isLoggedIn() || isVoting() || isPollEnded()"
                   (change)="selectSingle(opt.option_id)"
                 />
               }
@@ -212,19 +212,19 @@
         <div>
           @for (opt of p.options; track opt.option_id) {
             <div class="poll-option" 
-                 [class.selected]="!hasVoted() && isOptionSelected(opt.option_id)"
+                 [class.selected]="!hasVoted() && !isPollEnded() && isOptionSelected(opt.option_id)"
                  [class.voted-option]="hasVoted() && isOptionSelected(opt.option_id)"
                  [class.winning-option]="shouldShowWinningIndicator() && isWinningOption(opt.option_id) && !isOptionSelected(opt.option_id)"
                  [class.voted-and-winning]="hasVoted() && isOptionSelected(opt.option_id) && isWinningOption(opt.option_id)"
-                 [class.clickable]="!hasVoted() && isLoggedIn() && !isVoting()"
-                 (click)="!hasVoted() && isLoggedIn() && !isVoting() && toggleMulti(opt.option_id)">
-              @if (!hasVoted()) {
+                 [class.clickable]="!hasVoted() && !isPollEnded() && isLoggedIn() && !isVoting()"
+                 (click)="!hasVoted() && !isPollEnded() && isLoggedIn() && !isVoting() && toggleMulti(opt.option_id)">
+              @if (!hasVoted() && !isPollEnded()) {
                 <input
                   class="form-check-input visually-hidden"
                   type="checkbox"
                   [checked]="isOptionSelected(opt.option_id)"
                   [attr.checked]="isOptionSelected(opt.option_id) ? 'checked' : null"
-                  [disabled]="!isLoggedIn() || isVoting()"
+                  [disabled]="!isLoggedIn() || isVoting() || isPollEnded()"
                   (change)="toggleMulti(opt.option_id)"
                 />
               }
@@ -252,6 +252,13 @@
       }
     </div>
 
+    <!-- Poll expired message -->
+    @if (isPollEnded() && !hasVoted()) {
+      <div class="alert alert-warning mb-3">
+        This poll has ended and is no longer accepting votes.
+      </div>
+    }
+
     <!-- Already voted message -->
     @if (hasVoted()) {
       <div class="alert alert-info mb-3">
@@ -265,9 +272,9 @@
         class="btn btn-success"
         type="button"
         (click)="submitVote()"
-        [disabled]="!isLoggedIn() || isVoting() || hasVoted()"
+        [disabled]="!isLoggedIn() || isVoting() || hasVoted() || isPollEnded()"
       >
-        {{ isVoting() ? 'Submitting…' : hasVoted() ? 'Already Voted' : 'Submit Vote' }}
+        {{ isVoting() ? 'Submitting…' : hasVoted() ? 'Already Voted' : isPollEnded() ? 'Poll Ended' : 'Submit Vote' }}
       </button>
     </div>
 
