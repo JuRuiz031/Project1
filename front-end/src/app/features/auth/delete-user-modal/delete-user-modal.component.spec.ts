@@ -55,7 +55,7 @@ describe('DeleteUserModalComponent', () => {
   });
 
   it('should show "No user found in session" when localStorage has no user', () => {
-    fixture = TestBed.createComponent(DeleteUser);
+    fixture = TestBed.createComponent(DeleteUserModalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
 
@@ -128,11 +128,13 @@ describe('DeleteUserModalComponent', () => {
     expect(alertEl.nativeElement.textContent).toContain('Failed to delete profile. Please try again.');
   });
 
-  it('cancelDelete should navigate to edit user', () => {
+  it('cancelDelete should emit cancelled', () => {
     createComponentWithUser({ user_id: 'u-7', username: 'Alice' });
+
+    spyOn(component.cancelled, 'emit');
 
     component.cancelDelete();
 
-    expect(navigationMock.goToEditUser).toHaveBeenCalledTimes(1);
+    expect(component.cancelled.emit).toHaveBeenCalledTimes(1);
   });
 });
