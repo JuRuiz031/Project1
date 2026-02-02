@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { InviteService } from '../../../shared/services/invite.service';
 import { MainFooter } from '../../shared/main-footer/main-footer';
@@ -17,7 +17,7 @@ import { isEventInvite, isPollInvite } from '../../../shared/models/invites/invi
 @Component({
   selector: 'app-view-event',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MainFooter],
+  imports: [CommonModule, ReactiveFormsModule, MainFooter, RouterLink],
   templateUrl: './view-event.html',
   styleUrls: ['./view-event.css'],
 })
